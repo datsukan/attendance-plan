@@ -1,0 +1,8 @@
+{
+  "cSpell.words": ["csvutil", "esapi", "gorm", "heroicons", "interactor", "jinzhu", "jszwec", "signup", "usecase"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "editor.tabSize": 2
+}
