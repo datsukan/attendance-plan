@@ -27,6 +27,22 @@ export function getDates(date: Date, months: number): Date[] {
   return eachDayOfInterval({ start, end });
 }
 
+export function getWeeks(dates: Date[]): Date[][] {
+  const weeks: Date[][] = [];
+  let week: Date[] = [];
+
+  for (let date of dates) {
+    week.push(date);
+
+    if (week.length === 7) {
+      weeks.push(week);
+      week = [];
+    }
+  }
+
+  return weeks;
+}
+
 export function addViewMonths(months: number, setMonths: (months: number) => void): () => void {
   const bodyHeight = document.body.scrollHeight;
   const windowHeight = window.innerHeight;

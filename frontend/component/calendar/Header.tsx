@@ -1,4 +1,5 @@
 import { YearMonthLabel } from './YearMonthLabel';
+import { AddMasterScheduleButton } from './AddMasterScheduleButton';
 import { MoveMonthNav } from './MoveMonthNav';
 import { DayOfWeeks } from './DayOfWeeks';
 
@@ -8,13 +9,17 @@ type Props = {
   prev: () => void;
   next: () => void;
   reset: () => void;
+  create: (name: string, startDate: Date, endDate: Date) => void;
 };
 
-export const Header = ({ year, month, prev, next, reset }: Props) => {
+export const Header = ({ year, month, prev, next, reset, create }: Props) => {
   return (
     <>
       <div className="py-6 flex gap-6 items-center justify-between">
-        <YearMonthLabel year={year} month={month + 1} />
+        <div className="flex gap-6 items-center">
+          <YearMonthLabel year={year} month={month} />
+          <AddMasterScheduleButton create={create} />
+        </div>
         <MoveMonthNav prev={prev} next={next} reset={reset} />
       </div>
       <DayOfWeeks />

@@ -11,7 +11,7 @@ export const MoveMonthNav = ({ prev, next, reset }: Props) => {
   return (
     <div className="flex gap-2">
       <NavButton onClick={() => prev()}>
-        <ChevronLeftIcon className="size-5" />
+        <ChevronLeftIcon className="size-4" />
       </NavButton>
       <NavButton onClick={() => reset()}>
         <div className="flex justify-center">
@@ -19,7 +19,7 @@ export const MoveMonthNav = ({ prev, next, reset }: Props) => {
         </div>
       </NavButton>
       <NavButton onClick={() => next()}>
-        <ChevronRightIcon className="size-5" />
+        <ChevronRightIcon className="size-4" />
       </NavButton>
     </div>
   );
