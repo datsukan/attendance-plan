@@ -7,7 +7,7 @@ type Props = {
 
 export const NavButton = ({ children, onClick }: Props) => {
   return (
-    <button className="px-3 py-1.5 border rounded hover:bg-gray-50" onClick={() => onClick()}>
+    <button className="px-3 py-0.5 border rounded hover:bg-gray-100 active:bg-gray-200" onClick={() => onClick()}>
       {children}
     </button>
   );
