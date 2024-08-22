@@ -3,13 +3,15 @@ import { AddMasterScheduleButton } from './AddMasterScheduleButton';
 import { MoveMonthNav } from './MoveMonthNav';
 import { DayOfWeeks } from './DayOfWeeks';
 
+import { CreateSchedule } from '@/model/create-schedule';
+
 type Props = {
   year: number;
   month: number;
   prev: () => void;
   next: () => void;
   reset: () => void;
-  create: (name: string, startDate: Date, endDate: Date) => void;
+  create: (createSchedule: CreateSchedule) => void;
 };
 
 export const Header = ({ year, month, prev, next, reset, create }: Props) => {

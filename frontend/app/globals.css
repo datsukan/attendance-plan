@@ -7,3 +7,7 @@
     text-wrap: balance;
   }
 }
+
+*:focus {
+  @apply outline-offset-4 outline-blue-500;
+}

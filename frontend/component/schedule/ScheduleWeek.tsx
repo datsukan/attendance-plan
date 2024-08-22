@@ -2,15 +2,19 @@ import { Schedule } from '@/type/schedule';
 
 import { dateKey } from '@/component/calendar/calendar-module';
 import { isShowItem, isDisplaySchedule, getColStartClassName, getColEndClassName } from '@/component/schedule/schedule-module';
+import { EditSchedule } from '@/model/edit-schedule';
 
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 type Props = {
   dates: Date[];
   schedules: Schedule[];
+  removeSchedule: (id: string) => void;
+  saveSchedule: (editSchedule: EditSchedule) => void;
+  changeScheduleColor: (id: string, color: string) => void;
 };
 
-export const ScheduleWeek = ({ dates, schedules }: Props) => {
+export const ScheduleWeek = ({ dates, schedules, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
   if (!dates || dates.length === 0) {
     return;
   }
@@ -43,7 +47,12 @@ export const ScheduleWeek = ({ dates, schedules }: Props) => {
 
             return (
               <div key={dateKey(date) + '-schedules'} className={`${colStartClassName} ${colEndClassName} pr-2`}>
-                <ScheduleItem key={`${schedule.id}-${dateKey(date)}`} schedule={schedule} />
+                <ScheduleItem
+                  schedule={schedule}
+                  removeSchedule={removeSchedule}
+                  saveSchedule={saveSchedule}
+                  changeScheduleColor={changeScheduleColor}
+                />
               </div>
             );
           });

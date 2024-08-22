@@ -3,5 +3,6 @@ export type Schedule = {
   name: string;
   startDate: Date;
   endDate: Date;
-  styleClassName: string;
+  color: string;
+  type: 'master' | 'custom';
 };

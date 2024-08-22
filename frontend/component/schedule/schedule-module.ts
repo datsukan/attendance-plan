@@ -2,56 +2,6 @@ import { isAfter, isBefore, isEqual, differenceInCalendarDays } from 'date-fns';
 
 import type { Schedule } from '@/type/schedule';
 
-export function getMasterSchedules(): Schedule[] {
-  const sample: Schedule[] = [
-    { id: '1', name: '予定1', startDate: new Date(2024, 7, 1), endDate: new Date(2024, 7, 3), styleClassName: 'bg-blue-500 text-white' },
-    { id: '2', name: '予定2', startDate: new Date(2024, 7, 2), endDate: new Date(2024, 7, 3), styleClassName: 'bg-orange-500 text-white' },
-    { id: '8', name: '予定8', startDate: new Date(2024, 7, 4), endDate: new Date(2024, 7, 4), styleClassName: 'bg-pink-500 text-white' },
-    { id: '3', name: '予定3', startDate: new Date(2024, 7, 5), endDate: new Date(2024, 7, 7), styleClassName: 'bg-green-500 text-white' },
-    { id: '4', name: '予定4', startDate: new Date(2024, 7, 1), endDate: new Date(2024, 7, 1), styleClassName: 'bg-red-500 text-white' },
-    { id: '5', name: '予定5', startDate: new Date(2024, 7, 2), endDate: new Date(2024, 7, 2), styleClassName: 'bg-red-500 text-white' },
-    { id: '6', name: '予定6', startDate: new Date(2024, 7, 1), endDate: new Date(2024, 7, 23), styleClassName: 'bg-gray-500 text-white' },
-    { id: '7', name: '予定7', startDate: new Date(2024, 7, 1), endDate: new Date(2024, 7, 10), styleClassName: 'bg-yellow-500 text-white' },
-  ];
-
-  return sample;
-}
-
-export function getCustomSchedules(): Schedule[] {
-  const sample: Schedule[] = [
-    {
-      id: '1',
-      name: 'プログラミング教育B',
-      startDate: new Date(2024, 7, 1),
-      endDate: new Date(2024, 7, 1),
-      styleClassName: 'bg-white border border-gray-400',
-    },
-    {
-      id: '2',
-      name: '経営学入門B',
-      startDate: new Date(2024, 7, 2),
-      endDate: new Date(2024, 7, 2),
-      styleClassName: 'bg-white border border-gray-400',
-    },
-    {
-      id: '3',
-      name: '情報基礎B',
-      startDate: new Date(2024, 7, 3),
-      endDate: new Date(2024, 7, 3),
-      styleClassName: 'bg-white border border-gray-400',
-    },
-    {
-      id: '4',
-      name: '初級プログラミング',
-      startDate: new Date(2024, 7, 3),
-      endDate: new Date(2024, 7, 4),
-      styleClassName: 'bg-white border border-gray-400',
-    },
-  ];
-
-  return sample;
-}
-
 export function isDisplaySchedule(schedule: Schedule, date: Date): boolean {
   if (isEqual(schedule.startDate, date)) {
     return true;
@@ -146,4 +96,29 @@ export function getColEndClassName(index: number, schedule: Schedule, dates: Dat
 export function hasDateLabel(schedule: Schedule): boolean {
   const sub = differenceInCalendarDays(schedule.endDate, schedule.startDate);
   return sub > 0;
+}
+
+export function getMasterScheduleTemplates(): { name: string; color: string }[] {
+  type template = { name: string; color: string };
+  const templates: template[] = [
+    { name: '履修登録', color: 'red' },
+    { name: '第1回 授業配信', color: 'yellow' },
+    { name: '第2回 授業配信', color: 'yellow' },
+    { name: '第3回 授業配信', color: 'yellow' },
+    { name: '第4回 授業配信', color: 'yellow' },
+    { name: '第5回 授業配信', color: 'yellow' },
+    { name: '第6回 授業配信', color: 'yellow' },
+    { name: '第7回 授業配信', color: 'yellow' },
+    { name: '第8回 授業配信', color: 'yellow' },
+    { name: '単位認定試験', color: 'green' },
+    { name: '単位認定試験 追試', color: 'green' },
+    { name: '成績評価', color: 'blue' },
+    { name: '成績発表', color: 'blue' },
+  ];
+
+  return templates;
+}
+
+export function toScheduleTypeName(type: 'master' | 'custom'): string {
+  return type === 'master' ? '学事' : '受講';
 }

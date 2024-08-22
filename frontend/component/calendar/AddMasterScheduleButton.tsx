@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
-import { AddScheduleDialog } from './AddScheduleDialog';
+import { AddScheduleDialog } from '@/component/add-schedule-dialog/AddScheduleDialog';
+
+import { CreateSchedule } from '@/model/create-schedule';
 
 type Props = {
-  create: (name: string, startDate: Date, endDate: Date) => void;
+  create: (createSchedule: CreateSchedule) => void;
 };
 
 export const AddMasterScheduleButton = ({ create }: Props) => {
