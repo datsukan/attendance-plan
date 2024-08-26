@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { getYear, getMonth, startOfMonth, format } from 'date-fns';
+import { getYear, getMonth, startOfMonth } from 'date-fns';
 
 import { Schedule } from '@/type/schedule';
 
 import { Header } from './Header';
-import { CalendarDateItem } from './CalendarDateItem';
-import { ScheduleWeeks } from '@/component/schedule/ScheduleWeeks';
+import { CalenderDates } from './CalenderDates';
 
-import { getDates, getWeeks, addViewMonths, changeYearMonth, changeDatesByMonths, prev, next, reset, dateKey } from './calendar-module';
+import { getDates, getWeeks, addViewMonths, changeYearMonth, changeDatesByMonths, prev, next, reset } from './calendar-module';
 import { CreateSchedule } from '@/model/create-schedule';
 import { EditSchedule } from '@/model/edit-schedule';
 
@@ -23,7 +22,6 @@ export const Calender = () => {
   const [year, setYear] = useState(getYear(now));
   const [month, setMonth] = useState(getMonth(now));
   const [baseDate, setBaseDate] = useState(startOfMonth(now));
-  const [weekHeights, setWeekHeights] = useState<number[]>([]);
 
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -46,20 +44,6 @@ export const Calender = () => {
   useEffect(() => {
     setWeeks(getWeeks(dates));
   }, [dates]);
-
-  const changeWeekHeight = (index: number, height: number) => {
-    if (height === 0) {
-      return;
-    }
-    const newHeights = weekHeights;
-    newHeights[index] = height;
-    setWeekHeights(newHeights);
-  };
-
-  useEffect(() => {
-    setWeekHeights([...weekHeights]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedules]);
 
   const addSchedule = (createSchedule: CreateSchedule) => {
     const afterSchedules: Schedule[] = [...schedules];
@@ -134,36 +118,13 @@ export const Calender = () => {
           create={addSchedule}
         />
       </div>
-      <div className="border-r border-b">
-        {weeks.map((week, i) => {
-          const minHeight = weekHeights[i] ? weekHeights[i] + 50 : 0;
-          return (
-            <div key={dateKey(week[0]) + '-frame-week'} className="relative">
-              <div data-date={dateKey(week[0])} className="grid grid-cols-7 calendar-item" style={{ minHeight: minHeight }}>
-                {week.map((date) => {
-                  return (
-                    <div key={dateKey(date) + '-frame-date'} className="border-t border-l">
-                      <CalendarDateItem date={date} />
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="absolute top-10 bottom-0 left-0 right-0">
-                <ScheduleWeeks
-                  index={i}
-                  week={week}
-                  changeHeight={changeWeekHeight}
-                  masterSchedules={schedules.filter((schedule) => schedule.type === 'master')}
-                  customSchedules={schedules.filter((schedule) => schedule.type === 'custom')}
-                  removeSchedule={removeSchedule}
-                  saveSchedule={saveSchedule}
-                  changeScheduleColor={changeScheduleColor}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <CalenderDates
+        weeks={weeks}
+        schedules={schedules}
+        removeSchedule={removeSchedule}
+        saveSchedule={saveSchedule}
+        changeScheduleColor={changeScheduleColor}
+      />
     </div>
   );
 };
