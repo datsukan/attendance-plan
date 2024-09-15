@@ -3,8 +3,8 @@ import { format } from 'date-fns';
 
 import { Menu } from './Menu';
 import { InfoCard } from './InfoCard';
-import { RemoveConfirmDialog } from '@/component/remove-confirm-dialog/RemoveConfirmDialog';
-import { EditScheduleDialog } from '@/component/edit-schedule-dialog/EditScheduleDialog';
+import { RemoveConfirmDialog } from '@/component/dialog/remove/RemoveConfirmDialog';
+import { EditScheduleDialog } from '@/component/dialog/edit/EditScheduleDialog';
 
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { getColorClassName } from '@/component/calendar/color-module';

@@ -1,4 +1,4 @@
-import { InputDate } from '@/component/schedule-dialog/InputDate';
+import { InputDate } from '@/component/dialog/InputDate';
 
 type Props = {
   from: Date;

@@ -1,9 +1,9 @@
 import { format, isEqual } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-import { BaseDialog } from '@/component/schedule-dialog/BaseDialog';
+import { BaseDialog } from '@/component/dialog/BaseDialog';
 import { RemoveButton } from './RemoveButton';
-import { CancelButton } from '@/component/schedule-dialog/CancelButton';
+import { CancelButton } from '@/component/dialog/CancelButton';
 
 import { Schedule } from '@/type/schedule';
 import { toScheduleTypeName } from '@/component/schedule/schedule-module';

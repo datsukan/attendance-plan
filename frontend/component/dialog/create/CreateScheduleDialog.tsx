@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { isBefore, startOfDay } from 'date-fns';
 
-import { BaseDialog } from '@/component/schedule-dialog/BaseDialog';
-import { ErrorMessage } from '@/component/schedule-dialog/ErrorMessage';
-import { ScheduleTypeButton } from '../schedule-dialog/ScheduleTypeButton';
-import { SelectColor } from '../schedule-dialog/SelectColor';
-import { InputScheduleName } from '@/component/schedule-dialog/InputScheduleName';
+import { BaseDialog } from '@/component/dialog/BaseDialog';
+import { ErrorMessage } from '@/component/dialog/ErrorMessage';
+import { ScheduleTypeButton } from '../ScheduleTypeButton';
+import { SelectColor } from '../SelectColor';
+import { InputScheduleName } from '@/component/dialog/InputScheduleName';
 import { MasterScheduleTemplates } from './MasterScheduleTemplates';
 import { OptionCustomScheduleBulkCreate } from './OptionCustomScheduleBulkCreate';
-import { InputDuration } from '@/component/schedule-dialog/InputDuration';
+import { InputDuration } from '@/component/dialog/InputDuration';
 import { CreateButton } from './CreateButton';
-import { CancelButton } from '../schedule-dialog/CancelButton';
+import { CancelButton } from '../CancelButton';
 
 import { getFirstColorKey } from '@/component/calendar/color-module';
 import { toScheduleTypeName } from '@/component/schedule/schedule-module';
@@ -22,7 +22,7 @@ type Props = {
   close: () => void;
 };
 
-export const AddScheduleDialog = ({ isOpen, close, submit }: Props) => {
+export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
   const [name, setName] = useState('');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { isBefore, startOfDay } from 'date-fns';
 
-import { BaseDialog } from '@/component/schedule-dialog/BaseDialog';
-import { ErrorMessage } from '@/component/schedule-dialog/ErrorMessage';
-import { ScheduleTypeButton } from '@/component/schedule-dialog/ScheduleTypeButton';
-import { SelectColor } from '@/component/schedule-dialog/SelectColor';
-import { InputScheduleName } from '@/component/schedule-dialog/InputScheduleName';
-import { InputDuration } from '@/component/schedule-dialog/InputDuration';
-import { SaveButton } from '@/component/edit-schedule-dialog/SaveButton';
-import { CancelButton } from '@/component/schedule-dialog/CancelButton';
+import { BaseDialog } from '@/component/dialog/BaseDialog';
+import { ErrorMessage } from '@/component/dialog/ErrorMessage';
+import { ScheduleTypeButton } from '@/component/dialog/ScheduleTypeButton';
+import { SelectColor } from '@/component/dialog/SelectColor';
+import { InputScheduleName } from '@/component/dialog/InputScheduleName';
+import { InputDuration } from '@/component/dialog/InputDuration';
+import { SaveButton } from '@/component/dialog/edit/SaveButton';
+import { CancelButton } from '@/component/dialog/CancelButton';
 
 import { toScheduleTypeName } from '@/component/schedule/schedule-module';
 import { EditSchedule } from '@/model/edit-schedule';

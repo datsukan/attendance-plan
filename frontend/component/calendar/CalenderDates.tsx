@@ -1,57 +1,107 @@
-import { parse, differenceInDays, addDays } from 'date-fns';
-import { DndContext, pointerWithin, useDroppable, useSensor, useSensors, MouseSensor } from '@dnd-kit/core';
-import type { DragEndEvent } from '@dnd-kit/core';
+import { useState } from 'react';
+import { parse, differenceInDays, addDays, getTime } from 'date-fns';
+import { DndContext, pointerWithin, useDroppable, useSensor, useSensors, MouseSensor, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 
 import { CalendarDateItem } from './CalendarDateItem';
 import { ScheduleWeekContainer } from '@/component/schedule/ScheduleWeekContainer';
 
 import { Schedule } from '@/type/schedule';
 import { EditSchedule } from '@/model/edit-schedule';
-import { dateKey } from './calendar-module';
+import { dateKey, toDate } from './calendar-module';
 
 type Props = {
   weeks: Date[][];
   schedules: Schedule[];
+  setSchedules: (schedules: Schedule[]) => void;
   removeSchedule: (id: string) => void;
   saveSchedule: (editSchedule: EditSchedule) => void;
   changeScheduleColor: (id: string, color: string) => void;
 };
 
-export const CalenderDates = ({ weeks, schedules, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
-  const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 5 } }));
+export const CalenderDates = ({ weeks, schedules, setSchedules, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
+  const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 0.1 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const id = active.id;
+    const schedule = schedules.find((schedule) => schedule.id === id);
 
-    if (!active || !over) {
-      return;
-    }
-
-    const schedule = schedules.find((schedule) => schedule.id === (active.id as string));
     if (!schedule) {
       return;
     }
 
-    const dateStr = over.data.current?.date;
-    const type = over.data.current?.type;
-    if (!dateStr || !type) {
+    setActiveSchedule(schedule);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
       return;
     }
 
-    const date = parse(dateStr, 'yyyy-MM-dd', new Date());
-    const diff = differenceInDays(date, schedule.startDate);
-    const start = date;
-    const end = addDays(schedule.endDate, diff);
-    const editSchedule = new EditSchedule(schedule);
-    editSchedule.setStartDate(start);
-    editSchedule.setEndDate(end);
-    editSchedule.setType(type);
+    const beforeDate = active.data.current?.date;
+    const afterDate = over.data.current?.date;
+    const afterType = over.data.current?.type;
 
-    saveSchedule(editSchedule);
+    if (!beforeDate || !afterDate || Number.isNaN(getTime(afterDate)) || !afterType) {
+      return;
+    }
+
+    const newSchedules = schedules.map((schedule) => {
+      if (schedule.id === active.id) {
+        const diff = differenceInDays(afterDate, beforeDate);
+        const end = addDays(schedule.endDate, diff);
+        return { ...schedule, startDate: afterDate, endDate: end, type: afterType };
+      }
+
+      return schedule;
+    });
+
+    setSchedules(newSchedules);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveSchedule(null);
+      return;
+    }
+
+    if (active.id === over.id) {
+      setActiveSchedule(null);
+      return;
+    }
+
+    const beforeIndex = schedules.findIndex((schedule) => schedule.id === active.id);
+    const afterIndex = schedules.findIndex((schedule) => schedule.id === over.id);
+    if (beforeIndex === -1 || afterIndex === -1) {
+      setActiveSchedule(null);
+      return;
+    }
+
+    const newSchedules = arrayMove(schedules, beforeIndex, afterIndex);
+    setSchedules(newSchedules);
+    setActiveSchedule(null);
   };
 
   return (
-    <DndContext onDragEnd={handleDragEnd} collisionDetection={pointerWithin} sensors={sensors}>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      collisionDetection={pointerWithin}
+      sensors={sensors}
+    >
       <div className="border-r border-b">
         {weeks.map((week, i) => {
           return (
@@ -70,6 +120,7 @@ export const CalenderDates = ({ weeks, schedules, removeSchedule, saveSchedule, 
                   week={week}
                   masterSchedules={schedules.filter((schedule) => schedule.type === 'master')}
                   customSchedules={schedules.filter((schedule) => schedule.type === 'custom')}
+                  activeSchedule={activeSchedule}
                   removeSchedule={removeSchedule}
                   saveSchedule={saveSchedule}
                   changeScheduleColor={changeScheduleColor}

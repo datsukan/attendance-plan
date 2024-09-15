@@ -12,6 +12,8 @@ import { getDates, getWeeks, addViewMonths, changeYearMonth, changeDatesByMonths
 import { CreateSchedule } from '@/model/create-schedule';
 import { EditSchedule } from '@/model/edit-schedule';
 
+import { useInitPagePosition } from '@/hook/useInitPagePosition';
+
 export const Calender = () => {
   const now = useMemo(() => new Date(), []);
 
@@ -25,9 +27,7 @@ export const Calender = () => {
 
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    scrollTo(0, 0);
-  }, [baseDate]);
+  useInitPagePosition(baseDate);
 
   useEffect(() => {
     return addViewMonths(months, setMonths);
@@ -121,6 +121,7 @@ export const Calender = () => {
       <CalenderDates
         weeks={weeks}
         schedules={schedules}
+        setSchedules={setSchedules}
         removeSchedule={removeSchedule}
         saveSchedule={saveSchedule}
         changeScheduleColor={changeScheduleColor}

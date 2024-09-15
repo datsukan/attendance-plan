@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
-import { AddScheduleDialog } from '@/component/add-schedule-dialog/AddScheduleDialog';
+import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
 
 import { CreateSchedule } from '@/model/create-schedule';
 
@@ -20,7 +20,7 @@ export const AddMasterScheduleButton = ({ create }: Props) => {
           <span className="text-sm">作成</span>
         </div>
       </button>
-      <AddScheduleDialog isOpen={isOpen} close={() => setIsOpen(false)} submit={create} />
+      <CreateScheduleDialog isOpen={isOpen} close={() => setIsOpen(false)} submit={create} />
     </>
   );
 };

@@ -162,3 +162,7 @@ export function reset(
 export function dateKey(date: Date): string {
   return format(date, dateKeyFormat);
 }
+
+export function toDate(key: string): Date {
+  return parse(key, dateKeyFormat, new Date());
+}
