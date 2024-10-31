@@ -5,7 +5,7 @@ import { ScheduleWeekItem } from '@/component/schedule/ScheduleWeekItem';
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 import { Schedule } from '@/type/schedule';
-import { dateKey } from '@/component/calendar/calendar-module';
+import { useDateKey } from '@/component/useDateKey';
 import {
   isShowItem,
   isDisplaySchedule,
@@ -26,6 +26,8 @@ type Props = {
 };
 
 export const ScheduleWeek = ({ type, dates, schedules, activeSchedule, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
+  const { dateToKey } = useDateKey();
+
   if (!dates || dates.length === 0) {
     return;
   }
@@ -38,14 +40,14 @@ export const ScheduleWeek = ({ type, dates, schedules, activeSchedule, removeSch
     <div className="min-h-14 grid">
       <div className="col-start-1 row-start-1 grid grid-cols-7 h-full">
         {dates.map((date) => (
-          <Droppable key={`${type}-${dateKey(date)}`} id={`${type}-${dateKey(date)}`} date={date} type={type} />
+          <Droppable key={`${type}-${dateToKey(date)}`} id={`${type}-${dateToKey(date)}`} date={date} type={type} />
         ))}
       </div>
       <div className="col-start-1 row-start-1 grid grid-cols-7 gap-y-1 grid-flow-col">
         {dates.map((date, index) => {
           const displaySchedules = schedules.filter((schedule) => isDisplaySchedule(schedule, date) && isShowItem(index, schedule, date));
           return (
-            <SortableContext items={displaySchedules} key={`${type}-${dateKey(date)}`}>
+            <SortableContext items={displaySchedules} key={`${type}-${dateToKey(date)}`}>
               {displaySchedules.map((schedule) => {
                 const colStartClassName = getColStartClassName(index);
                 const colEndClassName = getColEndClassName(index, schedule, dates);

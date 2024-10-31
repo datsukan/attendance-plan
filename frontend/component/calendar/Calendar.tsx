@@ -1,122 +1,53 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { getYear, getMonth, startOfMonth } from 'date-fns';
-
-import { Schedule } from '@/type/schedule';
+import { useMemo, useRef, useEffect } from 'react';
 
 import { Header } from './Header';
 import { CalenderDates } from './CalenderDates';
 
-import { getDates, getWeeks, addViewMonths, changeYearMonth, changeDatesByMonths, prev, next, reset } from './calendar-module';
-import { CreateSchedule } from '@/model/create-schedule';
-import { EditSchedule } from '@/model/edit-schedule';
-
-import { useInitPagePosition } from '@/hook/useInitPagePosition';
+import { usePagePosition } from './usePagePosition';
+import { useTargetDate } from './useTargetDate';
+import { useDates } from './useDates';
+import { useSchedule } from './useSchedule';
 
 export const Calender = () => {
   const now = useMemo(() => new Date(), []);
-
-  const [months, setMonths] = useState(1);
-  const [dates, setDates] = useState(getDates(startOfMonth(now), months));
-  const [weeks, setWeeks] = useState(getWeeks(dates));
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [year, setYear] = useState(getYear(now));
-  const [month, setMonth] = useState(getMonth(now));
-  const [baseDate, setBaseDate] = useState(startOfMonth(now));
-
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  useInitPagePosition(baseDate);
+  const { targetDate, targetYear, targetMonth, incrementMonth, decrementMonth, resetMonth } = useTargetDate(now, calendarRef);
+  const { weeks, monthCount, addMonthCount } = useDates(targetDate);
+  const { initPagePosition, execWhenPageBottom } = usePagePosition();
+  const { schedules, setSchedules, addSchedule, removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
 
   useEffect(() => {
-    return addViewMonths(months, setMonths);
-  }, [months]);
+    initPagePosition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    return changeYearMonth(calendarRef, dates[0], baseDate, setYear, setMonth);
-  }, [dates, baseDate]);
+    execWhenPageBottom(addMonthCount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthCount]);
 
-  useEffect(() => {
-    changeDatesByMonths(baseDate, months, setDates, getDates);
-  }, [baseDate, months]);
-
-  useEffect(() => {
-    setWeeks(getWeeks(dates));
-  }, [dates]);
-
-  const addSchedule = (createSchedule: CreateSchedule) => {
-    const afterSchedules: Schedule[] = [...schedules];
-    if (createSchedule.getHasBulk()) {
-      for (let number = createSchedule.getBulkFrom(); number <= createSchedule.getBulkTo(); number++) {
-        afterSchedules.push({
-          id: createSchedule.getId() + '-' + number,
-          name: `第${number}回 ${createSchedule.getName()}`,
-          startDate: createSchedule.getStartDate(),
-          endDate: createSchedule.getEndDate(),
-          color: createSchedule.getColor(),
-          type: createSchedule.getType(),
-        });
-      }
-    } else {
-      afterSchedules.push({
-        id: createSchedule.getId(),
-        name: createSchedule.getName(),
-        startDate: createSchedule.getStartDate(),
-        endDate: createSchedule.getEndDate(),
-        color: createSchedule.getColor(),
-        type: createSchedule.getType(),
-      });
-    }
-
-    setSchedules(afterSchedules);
+  const prev = () => {
+    decrementMonth();
+    initPagePosition();
   };
 
-  const removeSchedule = (id: string) => {
-    setSchedules(schedules.filter((schedule) => schedule.id !== id));
+  const next = () => {
+    incrementMonth();
+    initPagePosition();
   };
 
-  const saveSchedule = (editSchedule: EditSchedule) => {
-    const set = (schedule: Schedule) => {
-      if (schedule.id !== editSchedule.getId()) {
-        return schedule;
-      }
-
-      schedule.name = editSchedule.getName();
-      schedule.startDate = editSchedule.getStartDate();
-      schedule.endDate = editSchedule.getEndDate();
-      schedule.color = editSchedule.getColor();
-      schedule.type = editSchedule.getType();
-      return schedule;
-    };
-
-    setSchedules(schedules.map(set));
-  };
-
-  const changeScheduleColor = (id: string, color: string) => {
-    const set = (schedule: Schedule) => {
-      if (schedule.id !== id) {
-        return schedule;
-      }
-
-      schedule.color = color;
-      return schedule;
-    };
-
-    setSchedules(schedules.map(set));
+  const reset = () => {
+    resetMonth();
+    initPagePosition();
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={calendarRef}>
       <div className="sticky top-0 bg-white z-10">
-        <Header
-          year={year}
-          month={month + 1}
-          prev={() => prev(baseDate, setDates, setYear, setMonth, setBaseDate, setMonths)}
-          next={() => next(baseDate, setDates, setYear, setMonth, setBaseDate, setMonths)}
-          reset={() => reset(setDates, setYear, setMonth, setBaseDate, setMonths)}
-          create={addSchedule}
-        />
+        <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
       </div>
       <CalenderDates
         weeks={weeks}

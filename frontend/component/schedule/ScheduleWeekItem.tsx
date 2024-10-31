@@ -5,7 +5,6 @@ import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 import { EditSchedule } from '@/model/edit-schedule';
 import type { Schedule } from '@/type/schedule';
-import { dateKey } from '../calendar/calendar-module';
 
 type Props = {
   schedule: Schedule;

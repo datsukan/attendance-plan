@@ -9,7 +9,7 @@ import { ScheduleWeekContainer } from '@/component/schedule/ScheduleWeekContaine
 
 import { Schedule } from '@/type/schedule';
 import { EditSchedule } from '@/model/edit-schedule';
-import { dateKey, toDate } from './calendar-module';
+import { useDateKey } from '@/component/useDateKey';
 
 type Props = {
   weeks: Date[][];
@@ -21,6 +21,8 @@ type Props = {
 };
 
 export const CalenderDates = ({ weeks, schedules, setSchedules, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
+  const { dateToKey } = useDateKey();
+
   const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 0.1 } }),
@@ -105,11 +107,11 @@ export const CalenderDates = ({ weeks, schedules, setSchedules, removeSchedule, 
       <div className="border-r border-b">
         {weeks.map((week, i) => {
           return (
-            <div key={dateKey(week[0]) + '-frame-week'} className="grid">
-              <div data-date={dateKey(week[0])} className=" col-start-1 row-start-1 grid grid-cols-7 calendar-item">
+            <div key={dateToKey(week[0]) + '-frame-week'} className="grid">
+              <div data-date={dateToKey(week[0])} className=" col-start-1 row-start-1 grid grid-cols-7 calendar-item">
                 {week.map((date) => {
                   return (
-                    <div key={dateKey(date) + '-frame-date'} className="border-t border-l">
+                    <div key={dateToKey(date) + '-frame-date'} className="border-t border-l">
                       <CalendarDateItem date={date} />
                     </div>
                   );
