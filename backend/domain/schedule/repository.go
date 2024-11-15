@@ -6,12 +6,12 @@ import (
 
 // ScheduleRepository はスケジュールの repository を表すインターフェースです。
 type ScheduleRepository interface {
-	ByUserID(userID string) ([]*Schedule, error)
-	Read(ID string) (*Schedule, error)
+	ReadByUserID(userID string) ([]*Schedule, error)
+	Read(id string) (*Schedule, error)
 	Create(schedule *Schedule) error
 	Update(schedule *Schedule) error
-	Delete(ID string) error
-	Exists(ID string) (bool, error)
+	Delete(id string) error
+	Exists(id string) (bool, error)
 }
 
 // ScheduleRepositoryImpl はスケジュールの repository の実装を表す構造体です。
@@ -25,10 +25,10 @@ func NewScheduleRepository(db dynamo.DB) ScheduleRepository {
 	return &ScheduleRepositoryImpl{DB: db, Table: db.Table("schedule")}
 }
 
-// ByUserID は指定されたユーザー ID に紐づくスケジュールのリストを取得します。
-func (r *ScheduleRepositoryImpl) ByUserID(userID string) ([]*Schedule, error) {
+// ReadByUserID は指定されたユーザー ID に紐づくスケジュールのリストを取得します。
+func (r *ScheduleRepositoryImpl) ReadByUserID(userID string) ([]*Schedule, error) {
 	var schedules []*Schedule
-	err := r.Table.Get("user_id", userID).All(&schedules)
+	err := r.Table.Get("UserID", userID).Index("UserID-index").Order(dynamo.Ascending).All(&schedules)
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +36,13 @@ func (r *ScheduleRepositoryImpl) ByUserID(userID string) ([]*Schedule, error) {
 }
 
 // Read は指定された ID のスケジュールを取得します。
-func (r *ScheduleRepositoryImpl) Read(ID string) (*Schedule, error) {
-	var schedule Schedule
-	err := r.Table.Get("id", ID).One(&schedule)
+func (r *ScheduleRepositoryImpl) Read(id string) (*Schedule, error) {
+	var schedule *Schedule
+	err := r.Table.Get("ID", id).One(&schedule)
 	if err != nil {
 		return nil, err
 	}
-	return &schedule, nil
+	return schedule, nil
 }
 
 // Create はスケジュールを保存します。
@@ -64,8 +64,8 @@ func (r *ScheduleRepositoryImpl) Update(schedule *Schedule) error {
 }
 
 // Delete はスケジュールを削除します。
-func (r *ScheduleRepositoryImpl) Delete(ID string) error {
-	err := r.Table.Delete("id", ID).Run()
+func (r *ScheduleRepositoryImpl) Delete(id string) error {
+	err := r.Table.Delete("ID", id).Run()
 	if err != nil {
 		return err
 	}
@@ -73,9 +73,9 @@ func (r *ScheduleRepositoryImpl) Delete(ID string) error {
 }
 
 // Exists は指定された ID のスケジュールが存在するかどうかを返します。
-func (r *ScheduleRepositoryImpl) Exists(ID string) (bool, error) {
-	var schedule Schedule
-	err := r.Table.Get("id", ID).One(&schedule)
+func (r *ScheduleRepositoryImpl) Exists(id string) (bool, error) {
+	var schedule *Schedule
+	err := r.Table.Get("ID", id).One(&schedule)
 	if err != nil {
 		if err == dynamo.ErrNotFound {
 			return false, nil

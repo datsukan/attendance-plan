@@ -13,6 +13,7 @@ const (
 // Schedule はスケジュールの model を表す構造体です。
 type Schedule struct {
 	ID        string
+	UserID    string
 	Name      string
 	StartsAt  time.Time
 	EndsAt    time.Time
@@ -22,6 +23,7 @@ type Schedule struct {
 	UpdatedAt time.Time
 }
 
+// String は ScheduleType を文字列に変換します。
 func (s ScheduleType) String() string {
 	switch s {
 	case ScheduleTypeMaster, ScheduleTypeCustom:
@@ -31,6 +33,7 @@ func (s ScheduleType) String() string {
 	}
 }
 
+// ToScheduleType は文字列を ScheduleType に変換します。
 func ToScheduleType(s string) ScheduleType {
 	return ScheduleType(s)
 }

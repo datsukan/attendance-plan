@@ -8,14 +8,17 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
+// GetScheduleListRequest はスケジュールリスト取得のリクエストを表す構造体です。
 type GetScheduleListRequest struct {
 	UserID string
 }
 
+// GetScheduleRequest はスケジュール取得のリクエストを表す構造体です。
 type GetScheduleRequest struct {
 	ScheduleID string
 }
 
+// PostScheduleRequest はスケジュール登録のリクエストを表す構造体です。
 type PostScheduleRequest struct {
 	Name     string `json:"name"`
 	StartsAt string `json:"starts_at"`
@@ -24,6 +27,7 @@ type PostScheduleRequest struct {
 	Type     string `json:"type"`
 }
 
+// PutScheduleRequest はスケジュール更新のリクエストを表す構造体です。
 type PutScheduleRequest struct {
 	ScheduleID string `json:"id"`
 	Name       string `json:"name"`
@@ -33,10 +37,17 @@ type PutScheduleRequest struct {
 	Type       string `json:"type"`
 }
 
+// DeleteScheduleRequest はスケジュール削除のリクエストを表す構造体です。
+type DeleteScheduleRequest struct {
+	ScheduleID string
+}
+
+// ToGetScheduleListRequest は APIGatewayProxyRequest から GetScheduleListRequest に変換します。
 func ToGetScheduleListRequest(r events.APIGatewayProxyRequest) *GetScheduleListRequest {
 	return &GetScheduleListRequest{UserID: r.PathParameters["user_id"]}
 }
 
+// ValidateGetScheduleListRequest は GetScheduleListRequest のバリデーションを行います。
 func ValidateGetScheduleListRequest(req *GetScheduleListRequest) error {
 	if req.UserID == "" {
 		return fmt.Errorf("user_id is empty")
@@ -44,10 +55,12 @@ func ValidateGetScheduleListRequest(req *GetScheduleListRequest) error {
 	return nil
 }
 
+// ToGetScheduleRequest は APIGatewayProxyRequest から GetScheduleRequest に変換します。
 func ToGetScheduleRequest(r events.APIGatewayProxyRequest) *GetScheduleRequest {
 	return &GetScheduleRequest{ScheduleID: r.PathParameters["schedule_id"]}
 }
 
+// ValidateGetScheduleRequest は GetScheduleRequest のバリデーションを行います。
 func ValidateGetScheduleRequest(req *GetScheduleRequest) error {
 	if req.ScheduleID == "" {
 		return fmt.Errorf("schedule_id is empty")
@@ -55,6 +68,7 @@ func ValidateGetScheduleRequest(req *GetScheduleRequest) error {
 	return nil
 }
 
+// ToPostScheduleRequest は APIGatewayProxyRequest から PostScheduleRequest に変換します。
 func ToPostScheduleRequest(r events.APIGatewayProxyRequest) (*PostScheduleRequest, error) {
 	var req PostScheduleRequest
 	if err := json.Unmarshal([]byte(r.Body), &req); err != nil {
@@ -63,13 +77,14 @@ func ToPostScheduleRequest(r events.APIGatewayProxyRequest) (*PostScheduleReques
 	return &req, nil
 }
 
+// ValidateInputScheduleRequest はスケジュールの入力に対するバリデーションを行います。
 func ValidateInputScheduleRequest(name, startsAt, endsAt, color, sType string) error {
 	// name が空文字
 	if name == "" {
 		return fmt.Errorf("name is empty")
 	}
 
-	// name が50文字より大きい
+	// name が50文字より多い
 	const upperNameLength = 50
 	if len(name) > upperNameLength {
 		return fmt.Errorf("name must be %d characters or less", upperNameLength)
@@ -120,10 +135,12 @@ func ValidateInputScheduleRequest(name, startsAt, endsAt, color, sType string) e
 	return nil
 }
 
+// ValidatePostScheduleRequest は PostScheduleRequest のバリデーションを行います。
 func ValidatePostScheduleRequest(req *PostScheduleRequest) error {
 	return ValidateInputScheduleRequest(req.Name, req.StartsAt, req.EndsAt, req.Color, req.Type)
 }
 
+// ToPutScheduleRequest は APIGatewayProxyRequest から PutScheduleRequest に変換します。
 func ToPutScheduleRequest(r events.APIGatewayProxyRequest) (*PutScheduleRequest, error) {
 	var req PutScheduleRequest
 	if err := json.Unmarshal([]byte(r.Body), &req); err != nil {
@@ -135,6 +152,7 @@ func ToPutScheduleRequest(r events.APIGatewayProxyRequest) (*PutScheduleRequest,
 	return &req, nil
 }
 
+// ValidatePutScheduleRequest は PutScheduleRequest のバリデーションを行います。
 func ValidatePutScheduleRequest(req *PutScheduleRequest) error {
 	// ID が空文字
 	if req.ScheduleID == "" {
@@ -144,11 +162,13 @@ func ValidatePutScheduleRequest(req *PutScheduleRequest) error {
 	return ValidateInputScheduleRequest(req.Name, req.StartsAt, req.EndsAt, req.Color, req.Type)
 }
 
-func ToDeleteScheduleRequest(r events.APIGatewayProxyRequest) *GetScheduleRequest {
-	return &GetScheduleRequest{ScheduleID: r.PathParameters["schedule_id"]}
+// ToDeleteScheduleRequest は APIGatewayProxyRequest から DeleteScheduleRequest に変換します。
+func ToDeleteScheduleRequest(r events.APIGatewayProxyRequest) *DeleteScheduleRequest {
+	return &DeleteScheduleRequest{ScheduleID: r.PathParameters["schedule_id"]}
 }
 
-func ValidateDeleteScheduleRequest(req *GetScheduleRequest) error {
+// ValidateDeleteScheduleRequest は DeleteScheduleRequest のバリデーションを行います。
+func ValidateDeleteScheduleRequest(req *DeleteScheduleRequest) error {
 	if req.ScheduleID == "" {
 		return fmt.Errorf("schedule_id is empty")
 	}

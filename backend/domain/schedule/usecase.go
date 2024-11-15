@@ -10,6 +10,7 @@ import (
 // BaseScheduleData はスケジュールの基本データを表す構造体です。
 type BaseScheduleData struct {
 	ID        string
+	UserID    string
 	Name      string
 	StartsAt  string
 	EndsAt    string
@@ -118,7 +119,7 @@ func NewScheduleInteractor(scheduleRepository ScheduleRepository, outputPort Sch
 
 // GetScheduleList はスケジュールリストを取得します。
 func (i *ScheduleInteractor) GetScheduleList(input GetScheduleListInputData) {
-	schedules, err := i.ScheduleRepository.ByUserID(input.UserID)
+	schedules, err := i.ScheduleRepository.ReadByUserID(input.UserID)
 	if err != nil {
 		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
 		i.OutputPort.ResponseGetScheduleList(nil, r)
@@ -129,13 +130,14 @@ func (i *ScheduleInteractor) GetScheduleList(input GetScheduleListInputData) {
 	for _, schedule := range schedules {
 		s := BaseScheduleData{
 			ID:        schedule.ID,
+			UserID:    schedule.UserID,
 			Name:      schedule.Name,
-			StartsAt:  schedule.StartsAt.String(),
-			EndsAt:    schedule.EndsAt.String(),
+			StartsAt:  schedule.StartsAt.Format(time.DateTime),
+			EndsAt:    schedule.EndsAt.Format(time.DateTime),
 			Color:     schedule.Color,
 			Type:      schedule.Type.String(),
-			CreatedAt: schedule.CreatedAt.String(),
-			UpdatedAt: schedule.UpdatedAt.String(),
+			CreatedAt: schedule.CreatedAt.Format(time.DateTime),
+			UpdatedAt: schedule.UpdatedAt.Format(time.DateTime),
 		}
 		outputSchedules = append(outputSchedules, s)
 	}
@@ -156,13 +158,14 @@ func (i *ScheduleInteractor) GetSchedule(input GetScheduleInputData) {
 
 	s := BaseScheduleData{
 		ID:        schedule.ID,
+		UserID:    schedule.UserID,
 		Name:      schedule.Name,
-		StartsAt:  schedule.StartsAt.String(),
-		EndsAt:    schedule.EndsAt.String(),
+		StartsAt:  schedule.StartsAt.Format(time.DateTime),
+		EndsAt:    schedule.EndsAt.Format(time.DateTime),
 		Color:     schedule.Color,
 		Type:      schedule.Type.String(),
-		CreatedAt: schedule.CreatedAt.String(),
-		UpdatedAt: schedule.UpdatedAt.String(),
+		CreatedAt: schedule.CreatedAt.Format(time.DateTime),
+		UpdatedAt: schedule.UpdatedAt.Format(time.DateTime),
 	}
 
 	o := &GetScheduleOutputData{Schedule: s}
@@ -247,13 +250,14 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 	o := &UpdateScheduleOutputData{
 		Schedule: BaseScheduleData{
 			ID:        s.ID,
+			UserID:    s.UserID,
 			Name:      s.Name,
-			StartsAt:  s.StartsAt.String(),
-			EndsAt:    s.EndsAt.String(),
+			StartsAt:  s.StartsAt.Format(time.DateTime),
+			EndsAt:    s.EndsAt.Format(time.DateTime),
 			Color:     s.Color,
 			Type:      s.Type.String(),
-			CreatedAt: s.CreatedAt.String(),
-			UpdatedAt: s.UpdatedAt.String(),
+			CreatedAt: s.CreatedAt.Format(time.DateTime),
+			UpdatedAt: s.UpdatedAt.Format(time.DateTime),
 		},
 	}
 	r := Result{StatusCode: http.StatusNoContent, Message: "Success"}
