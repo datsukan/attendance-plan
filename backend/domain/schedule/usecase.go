@@ -42,6 +42,7 @@ type GetScheduleOutputData struct {
 
 // CreateScheduleData はスケジュール作成のスケジュールデータを表す構造体です。
 type CreateScheduleData struct {
+	UserID   string
 	Name     string
 	StartsAt string
 	EndsAt   string
@@ -55,7 +56,9 @@ type CreateScheduleInputData struct {
 }
 
 // CreateScheduleOutputData はスケジュール作成の出力データを表す構造体です。
-type CreateScheduleOutputData struct{}
+type CreateScheduleOutputData struct {
+	Schedule
+}
 
 // UpdateScheduleData はスケジュール更新のスケジュールデータを表す構造体です。
 type UpdateScheduleData struct {
@@ -193,6 +196,7 @@ func (i *ScheduleInteractor) CreateSchedule(input CreateScheduleInputData) {
 
 	s := Schedule{
 		ID:        ulid.Make().String(),
+		UserID:    input.Schedule.UserID,
 		Name:      input.Schedule.Name,
 		StartsAt:  startsAt,
 		EndsAt:    endsAt,
@@ -208,8 +212,10 @@ func (i *ScheduleInteractor) CreateSchedule(input CreateScheduleInputData) {
 		return
 	}
 
-	o := &CreateScheduleOutputData{}
-	r := Result{StatusCode: http.StatusCreated, Message: "Success"}
+	o := &CreateScheduleOutputData{
+		Schedule: s,
+	}
+	r := Result{StatusCode: http.StatusCreated}
 	i.OutputPort.ResponseCreateSchedule(o, r)
 }
 

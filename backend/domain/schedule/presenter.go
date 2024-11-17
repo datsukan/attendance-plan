@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -33,14 +34,14 @@ func (p *SchedulePresenter) ResponseGetScheduleList(output *GetScheduleListOutpu
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = result.Message
+		p.Body = toErrorBody(result.Message)
 		return
 	}
 
 	b, err := json.Marshal(output)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = err.Error()
+		p.Body = toErrorBody(err.Error())
 		return
 	}
 
@@ -52,14 +53,14 @@ func (p *SchedulePresenter) ResponseGetSchedule(output *GetScheduleOutputData, r
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = result.Message
+		p.Body = toErrorBody(result.Message)
 		return
 	}
 
 	b, err := json.Marshal(output)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = err.Error()
+		p.Body = toErrorBody(err.Error())
 		return
 	}
 
@@ -71,14 +72,14 @@ func (p *SchedulePresenter) ResponseCreateSchedule(output *CreateScheduleOutputD
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = result.Message
+		p.Body = toErrorBody(result.Message)
 		return
 	}
 
 	b, err := json.Marshal(output)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = err.Error()
+		p.Body = toErrorBody(err.Error())
 		return
 	}
 
@@ -90,14 +91,14 @@ func (p *SchedulePresenter) ResponseUpdateSchedule(output *UpdateScheduleOutputD
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = result.Message
+		p.Body = toErrorBody(result.Message)
 		return
 	}
 
 	b, err := json.Marshal(output)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = err.Error()
+		p.Body = toErrorBody(err.Error())
 		return
 	}
 
@@ -109,16 +110,20 @@ func (p *SchedulePresenter) ResponseDeleteSchedule(output *DeleteScheduleOutputD
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = result.Message
+		p.Body = toErrorBody(result.Message)
 		return
 	}
 
 	b, err := json.Marshal(output)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = err.Error()
+		p.Body = toErrorBody(err.Error())
 		return
 	}
 
 	p.Body = string(b)
+}
+
+func toErrorBody(message string) string {
+	return fmt.Sprintf(`{"message": "%s"}`, message)
 }

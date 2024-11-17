@@ -71,6 +71,7 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 
 	input := CreateScheduleInputData{
 		Schedule: CreateScheduleData{
+			UserID:   "1",
 			Name:     req.Name,
 			StartsAt: req.StartsAt,
 			EndsAt:   req.EndsAt,

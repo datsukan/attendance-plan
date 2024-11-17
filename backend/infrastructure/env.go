@@ -1,6 +1,10 @@
 package infrastructure
 
-import "github.com/joho/godotenv"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 func init() {
 	if err := loadEnv(); err != nil {
@@ -9,6 +13,10 @@ func init() {
 }
 
 func loadEnv() error {
+	if os.Getenv("ENV") == "prd" {
+		return nil
+	}
+
 	err := godotenv.Load("../../.env")
 	if err != nil {
 		return err
