@@ -1,0 +1,2 @@
+### スケジュールを削除する
+DELETE http://localhost:3000/schedules/01JD4VDZRBCWG115K7T3T7FY8M

@@ -4,6 +4,16 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+type NotFoundError struct{}
+
+func NewNotFoundError() *NotFoundError {
+	return &NotFoundError{}
+}
+
+func (e *NotFoundError) Error() string {
+	return "not found"
+}
+
 // ScheduleRepository はスケジュールの repository を表すインターフェースです。
 type ScheduleRepository interface {
 	ReadByUserID(userID string) ([]*Schedule, error)
@@ -40,6 +50,10 @@ func (r *ScheduleRepositoryImpl) Read(id string) (*Schedule, error) {
 	var schedule *Schedule
 	err := r.Table.Get("ID", id).One(&schedule)
 	if err != nil {
+		if err == dynamo.ErrNotFound {
+			return nil, NewNotFoundError()
+		}
+
 		return nil, err
 	}
 	return schedule, nil

@@ -24,6 +24,22 @@ Resources:
                 type: aws_proxy
                 uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleListFunction.Arn}/invocations
               responses: {}
+          /schedules/{schedule_id}:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: GET
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleFunction.Arn}/invocations
+            put:
+              x-amazon-apigateway-integration:
+                httpMethod: PUT
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutScheduleFunction.Arn}/invocations
+            delete:
+              x-amazon-apigateway-integration:
+                httpMethod: DELETE
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteScheduleFunction.Arn}/invocations
           /schedules:
             post:
               x-amazon-apigateway-integration:
@@ -79,6 +95,39 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       LogGroupName: !Sub /aws/lambda/${GetScheduleListFunction}
+  GetScheduleFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      Description: !Sub
+        - Stack ${AWS::StackName} Function ${ResourceName}
+        - ResourceName: GetScheduleFunction
+      CodeUri: cmd/schedule/get
+      Handler: bootstrap
+      Runtime: provided.al2023
+      MemorySize: 128
+      Timeout: 30
+      Tracing: Active
+      Events:
+        ApiListGET:
+          Type: Api
+          Properties:
+            Path: /schedules/{schedule_id}
+            Method: GET
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          SCHEDULE_TABLE_NAME: !Ref Schedule
+          SCHEDULE_TABLE_ARN: !GetAtt Schedule.Arn
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Schedule
+  GetScheduleFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GetScheduleFunction}
   PostScheduleFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -112,11 +161,89 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       LogGroupName: !Sub /aws/lambda/${PostScheduleFunction}
+  PutScheduleFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      Description: !Sub
+        - Stack ${AWS::StackName} Function ${ResourceName}
+        - ResourceName: PutScheduleFunction
+      CodeUri: cmd/schedule/put
+      Handler: bootstrap
+      Runtime: provided.al2023
+      MemorySize: 128
+      Timeout: 30
+      Tracing: Active
+      Events:
+        ApiListGET:
+          Type: Api
+          Properties:
+            Path: /schedules/{schedule_id}
+            Method: PUT
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          SCHEDULE_TABLE_NAME: !Ref Schedule
+          SCHEDULE_TABLE_ARN: !GetAtt Schedule.Arn
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Schedule
+  PutScheduleFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${PutScheduleFunction}
+  DeleteGetScheduleFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      Description: !Sub
+        - Stack ${AWS::StackName} Function ${ResourceName}
+        - ResourceName: DeleteScheduleFunction
+      CodeUri: cmd/schedule/delete
+      Handler: bootstrap
+      Runtime: provided.al2023
+      MemorySize: 128
+      Timeout: 30
+      Tracing: Active
+      Events:
+        ApiListGET:
+          Type: Api
+          Properties:
+            Path: /schedules/{schedule_id}
+            Method: DELETE
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          SCHEDULE_TABLE_NAME: !Ref Schedule
+          SCHEDULE_TABLE_ARN: !GetAtt Schedule.Arn
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Schedule
+  DeleteScheduleFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DeleteScheduleFunction}
 
 Outputs:
   GetScheduleListFunction:
     Description: "GetScheduleListFunction Name"
     Value: !Ref GetScheduleListFunction
+  GetScheduleFunction:
+    Description: "GetScheduleFunction Name"
+    Value: !Ref GetScheduleFunction
+  PostScheduleFunction:
+    Description: "PostScheduleFunction Name"
+    Value: !Ref PostScheduleFunction
+  PutScheduleFunction:
+    Description: "PutScheduleFunction Name"
+    Value: !Ref PutScheduleFunction
+  DeleteScheduleFunction:
+    Description: "DeleteScheduleFunction Name"
+    Value: !Ref DeleteScheduleFunction
   API:
     Description: "API Gateway endpoint URL for the API"
     Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prd"

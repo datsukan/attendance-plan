@@ -38,7 +38,8 @@ func (p *SchedulePresenter) ResponseGetScheduleList(output *GetScheduleListOutpu
 		return
 	}
 
-	b, err := json.Marshal(output)
+	res := ToGetScheduleListResponse(output)
+	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
 		p.Body = toErrorBody(err.Error())
@@ -57,7 +58,8 @@ func (p *SchedulePresenter) ResponseGetSchedule(output *GetScheduleOutputData, r
 		return
 	}
 
-	b, err := json.Marshal(output)
+	res := ToGetScheduleResponse(output)
+	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
 		p.Body = toErrorBody(err.Error())
@@ -76,7 +78,8 @@ func (p *SchedulePresenter) ResponseCreateSchedule(output *CreateScheduleOutputD
 		return
 	}
 
-	b, err := json.Marshal(output)
+	res := ToPostScheduleResponse(output)
+	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
 		p.Body = toErrorBody(err.Error())
@@ -95,7 +98,8 @@ func (p *SchedulePresenter) ResponseUpdateSchedule(output *UpdateScheduleOutputD
 		return
 	}
 
-	b, err := json.Marshal(output)
+	res := ToPutScheduleResponse(output)
+	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
 		p.Body = toErrorBody(err.Error())
@@ -114,14 +118,7 @@ func (p *SchedulePresenter) ResponseDeleteSchedule(output *DeleteScheduleOutputD
 		return
 	}
 
-	b, err := json.Marshal(output)
-	if err != nil {
-		p.StatusCode = http.StatusInternalServerError
-		p.Body = toErrorBody(err.Error())
-		return
-	}
-
-	p.Body = string(b)
+	// 削除成功時はレスポンスボディを空にする
 }
 
 func toErrorBody(message string) string {

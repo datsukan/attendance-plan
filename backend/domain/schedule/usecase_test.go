@@ -52,6 +52,32 @@ func (r *stubScheduleRepository) Exists(id string) (bool, error) {
 	return true, nil
 }
 
+type stubNotFoundScheduleRepository struct{}
+
+func (r *stubNotFoundScheduleRepository) ReadByUserID(userID string) ([]*Schedule, error) {
+	return nil, nil
+}
+
+func (r *stubNotFoundScheduleRepository) Read(id string) (*Schedule, error) {
+	return nil, NewNotFoundError()
+}
+
+func (r *stubNotFoundScheduleRepository) Create(schedule *Schedule) error {
+	return nil
+}
+
+func (r *stubNotFoundScheduleRepository) Update(schedule *Schedule) error {
+	return NewNotFoundError()
+}
+
+func (r *stubNotFoundScheduleRepository) Delete(id string) error {
+	return NewNotFoundError()
+}
+
+func (r *stubNotFoundScheduleRepository) Exists(id string) (bool, error) {
+	return false, nil
+}
+
 type stubScheduleOutputPort struct {
 	Output interface{}
 	Result Result
@@ -190,6 +216,21 @@ func TestGetSchedule(t *testing.T) {
 		assert.Equal("Success", p.Result.Message)
 		assert.False(p.Result.HasError)
 	})
+
+	t.Run("スケジュールが存在しない場合はエラーを返す", func(t *testing.T) {
+		assert := assert.New(t)
+
+		r := &stubNotFoundScheduleRepository{}
+		p := &stubScheduleOutputPort{}
+		i := NewScheduleInteractor(r, p)
+
+		input := GetScheduleInputData{ScheduleID: "not-found-id"}
+		i.GetSchedule(input)
+
+		assert.Equal(http.StatusNotFound, p.Result.StatusCode)
+		assert.Equal("not found", p.Result.Message)
+		assert.True(p.Result.HasError)
+	})
 }
 
 func TestCreateSchedule(t *testing.T) {
@@ -237,9 +278,33 @@ func TestUpdateSchedule(t *testing.T) {
 		}
 		i.UpdateSchedule(input)
 
-		assert.Equal(http.StatusNoContent, p.Result.StatusCode)
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
 		assert.Equal("Success", p.Result.Message)
 		assert.False(p.Result.HasError)
+	})
+
+	t.Run("スケジュールが存在しない場合はエラーを返す", func(t *testing.T) {
+		assert := assert.New(t)
+
+		r := &stubNotFoundScheduleRepository{}
+		p := &stubScheduleOutputPort{}
+		i := NewScheduleInteractor(r, p)
+
+		input := UpdateScheduleInputData{
+			Schedule: UpdateScheduleData{
+				ID:       "not-found-id",
+				Name:     "test-name",
+				StartsAt: "2021-01-01 00:00:00",
+				EndsAt:   "2021-01-01 00:00:00",
+				Color:    "white",
+				Type:     ScheduleTypeMaster.String(),
+			},
+		}
+		i.UpdateSchedule(input)
+
+		assert.Equal(http.StatusNotFound, p.Result.StatusCode)
+		assert.Equal("not found", p.Result.Message)
+		assert.True(p.Result.HasError)
 	})
 }
 

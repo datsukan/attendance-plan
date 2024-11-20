@@ -1,6 +1,7 @@
 package schedule
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -154,6 +155,12 @@ func (i *ScheduleInteractor) GetScheduleList(input GetScheduleListInputData) {
 func (i *ScheduleInteractor) GetSchedule(input GetScheduleInputData) {
 	schedule, err := i.ScheduleRepository.Read(input.ScheduleID)
 	if err != nil {
+		if errors.Is(err, NewNotFoundError()) {
+			r := Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.OutputPort.ResponseGetSchedule(nil, r)
+			return
+		}
+
 		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
 		i.OutputPort.ResponseGetSchedule(nil, r)
 		return
@@ -215,7 +222,7 @@ func (i *ScheduleInteractor) CreateSchedule(input CreateScheduleInputData) {
 	o := &CreateScheduleOutputData{
 		Schedule: s,
 	}
-	r := Result{StatusCode: http.StatusCreated}
+	r := Result{StatusCode: http.StatusCreated, Message: "Success"}
 	i.OutputPort.ResponseCreateSchedule(o, r)
 }
 
@@ -237,13 +244,28 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 
 	sType := ToScheduleType(input.Schedule.Type)
 
+	bs, err := i.ScheduleRepository.Read(input.Schedule.ID)
+	if err != nil {
+		if errors.Is(err, NewNotFoundError()) {
+			r := Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.OutputPort.ResponseUpdateSchedule(nil, r)
+			return
+		}
+
+		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		return
+	}
+
 	s := Schedule{
 		ID:        input.Schedule.ID,
+		UserID:    bs.UserID,
 		Name:      input.Schedule.Name,
 		StartsAt:  startsAt,
 		EndsAt:    endsAt,
 		Color:     input.Schedule.Color,
 		Type:      sType,
+		CreatedAt: bs.CreatedAt,
 		UpdatedAt: time.Now(),
 	}
 
@@ -253,20 +275,27 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 		return
 	}
 
+	as, err := i.ScheduleRepository.Read(s.ID)
+	if err != nil {
+		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		return
+	}
+
 	o := &UpdateScheduleOutputData{
 		Schedule: BaseScheduleData{
-			ID:        s.ID,
-			UserID:    s.UserID,
-			Name:      s.Name,
-			StartsAt:  s.StartsAt.Format(time.DateTime),
-			EndsAt:    s.EndsAt.Format(time.DateTime),
-			Color:     s.Color,
-			Type:      s.Type.String(),
-			CreatedAt: s.CreatedAt.Format(time.DateTime),
-			UpdatedAt: s.UpdatedAt.Format(time.DateTime),
+			ID:        as.ID,
+			UserID:    as.UserID,
+			Name:      as.Name,
+			StartsAt:  as.StartsAt.Format(time.DateTime),
+			EndsAt:    as.EndsAt.Format(time.DateTime),
+			Color:     as.Color,
+			Type:      as.Type.String(),
+			CreatedAt: as.CreatedAt.Format(time.DateTime),
+			UpdatedAt: as.UpdatedAt.Format(time.DateTime),
 		},
 	}
-	r := Result{StatusCode: http.StatusNoContent, Message: "Success"}
+	r := Result{StatusCode: http.StatusOK, Message: "Success"}
 	i.OutputPort.ResponseUpdateSchedule(o, r)
 }
 
