@@ -194,7 +194,7 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       LogGroupName: !Sub /aws/lambda/${PutScheduleFunction}
-  DeleteGetScheduleFunction:
+  DeleteScheduleFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: go1.x
