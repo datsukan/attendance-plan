@@ -4,7 +4,7 @@ test:
 	export MODE_UT=TRUE; \
 	go clean -testcache; \
 	export Env=test; \
-	go test -v ./domain/...
+	go test -v ./app/...
 
 .PHONY: up
 up:

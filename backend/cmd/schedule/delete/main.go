@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"github.com/datsukan/attendance-plan/backend/domain/schedule"
+	"github.com/datsukan/attendance-plan/backend/app/schedule"
 )
 
 func main() {
