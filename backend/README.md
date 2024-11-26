@@ -14,10 +14,42 @@ export GOPRIVATE=github.com/datsukan
 export GOPRIVATE=github.com/datsukan/attendance-plan
 ```
 
+### DB
+
+#### Up
+
+```sh
+make up
+```
+
+#### Down
+
+```sh
+make down
+```
+
+### Test
+
+```sh
+make test
+```
+
 ### SAM
+
+#### 形式チェック
 
 ```sh
 sam validate
-sam build
-sam local start-api --env-vars env.json --docker-network backend_default
+```
+
+#### ローカルサーバーの起動
+
+```sh
+make dev
+```
+
+#### 本番デプロイ
+
+```sh
+make ~~deploy~~
 ```

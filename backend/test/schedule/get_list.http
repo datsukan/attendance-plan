@@ -1,2 +1,0 @@
-### スケジュール一覧を取得
-GET http://localhost:3000/users/1/schedules

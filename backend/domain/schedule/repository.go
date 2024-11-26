@@ -4,6 +4,8 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+const scheduleTableName = "AttendancePlan_Schedule"
+
 type NotFoundError struct{}
 
 func NewNotFoundError() *NotFoundError {
@@ -32,7 +34,7 @@ type ScheduleRepositoryImpl struct {
 
 // NewScheduleRepository は ScheduleRepository を生成します。
 func NewScheduleRepository(db dynamo.DB) ScheduleRepository {
-	return &ScheduleRepositoryImpl{DB: db, Table: db.Table("schedule")}
+	return &ScheduleRepositoryImpl{DB: db, Table: db.Table(scheduleTableName)}
 }
 
 // ReadByUserID は指定されたユーザー ID に紐づくスケジュールのリストを取得します。

@@ -1,0 +1,40 @@
+### 新規作成
+# @name create
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "master"
+}
+
+### 一覧取得
+# @name get_list
+GET {{base_url}}/users/1/schedules
+
+### 個別取得
+
+@schedule_id = {{create.response.body.id}}
+
+# @name get
+GET {{base_url}}/schedules/{{schedule_id}}
+
+### 更新
+# @name update
+PUT {{base_url}}/schedules/{{schedule_id}}
+Content-Type: application/json
+
+{
+    "name": "変更後テストスケジュール",
+    "starts_at": "2024-06-02 00:00:00",
+    "ends_at": "2024-08-16 00:00:00",
+    "color": "black",
+    "type": "custom"
+}
+
+### 削除
+# @name delete
+DELETE {{base_url}}/schedules/{{schedule_id}}

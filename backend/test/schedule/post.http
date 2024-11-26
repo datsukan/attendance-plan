@@ -1,11 +1,99 @@
-### スケジュールを作成する
-POST http://localhost:3000/schedules
+### 入力不正 name が空
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": ""
+}
+
+### 入力不正 starts_at が空
+POST {{base_url}}/schedules
 Content-Type: application/json
 
 {
     "name": "テストスケジュール",
-    "starts_at": "2021-01-01 00:00:00",
-    "ends_at": "2021-01-02 00:00:00",
+    "starts_at": ""
+}
+
+### 入力不正 ends_at が空
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": ""
+}
+
+### 入力不正 color が空
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": ""
+}
+
+### 入力不正 type が空
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
     "color": "white",
-    "type": "custom"
+    "type": ""
+}
+
+### 入力不正 type が master, custom 以外
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "dummy"
+}
+
+### 入力不正 name が51文字以上
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "123456789012345678901234567890123456789012345678901"
+}
+
+### 入力不正 starts_at が正しい日付でない
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-31 00:00:00",
+    "ends_at": "2024-08-15 00:00:00"
+}
+
+### 入力不正 ends_at が正しい日付でない
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-32 00:00:00"
+}
+
+### 入力不正 starts_at が ends_at より後
+POST {{base_url}}/schedules
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-08-15 00:00:00",
+    "ends_at": "2024-06-01 00:00:00"
 }

@@ -14,28 +14,21 @@ import (
 func testSetup(t *testing.T) (*dynamo.DB, *dynamo.Table, error) {
 	t.Helper()
 
-	type TestSchedule struct {
-		ID        string       `dynamo:"ID,hash"`
-		UserID    string       `dynamo:"UserID" index:"UserID-index,hash"`
-		Name      string       `dynamo:"Name"`
-		StartsAt  time.Time    `dynamo:"StartsAt" index:"UserID-index,range"`
-		EndsAt    time.Time    `dynamo:"EndsAt"`
-		Color     string       `dynamo:"Color"`
-		Type      ScheduleType `dynamo:"Type"`
-		CreatedAt time.Time    `dynamo:"CreatedAt"`
-		UpdatedAt time.Time    `dynamo:"UpdatedAt"`
-	}
+	require := require.New(t)
 
 	db := infrastructure.NewDB()
-	require.NotNil(t, db)
+	require.NotNil(db)
 
-	db.Table("schedule").DeleteTable().Run()
-	err := db.CreateTable("schedule", TestSchedule{}).Run()
-	if err != nil {
-		return nil, nil, err
+	table := db.Table(scheduleTableName)
+
+	var schedules []Schedule
+	err := table.Scan().All(&schedules)
+	require.NoError(err)
+
+	for _, s := range schedules {
+		err := table.Delete("ID", s.ID).Run()
+		require.NoError(err)
 	}
-
-	table := db.Table("schedule")
 
 	return db, &table, nil
 }

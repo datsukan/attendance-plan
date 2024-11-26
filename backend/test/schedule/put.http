@@ -1,11 +1,11 @@
-### スケジュールを更新する
-PUT http://localhost:3000/schedules/01JD4VDZRBCWG115K7T3T7FY8M
+### 入力不正 IDが不正
+PUT {{base_url}}/schedules/dummy-id
 Content-Type: application/json
 
 {
-    "name": "変更後テストスケジュール5",
-    "starts_at": "2023-08-01 00:00:00",
-    "ends_at": "2024-03-12 00:00:00",
-    "color": "red",
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
     "type": "master"
 }

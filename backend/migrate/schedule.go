@@ -6,7 +6,7 @@ import (
 	"github.com/guregu/dynamo"
 )
 
-const TableNameSchedule = "schedule"
+const TableNameSchedule = "AttendancePlan_Schedule"
 
 type Schedule struct {
 	ID        string    `dynamo:"ID,hash"`
