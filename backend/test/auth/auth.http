@@ -1,0 +1,18 @@
+### サインアップ
+POST {{base_url}}/signup
+Content-Type: application/json
+
+{
+    "email": "sample@example.com",
+    "password": "sample-password",
+    "name": "サンプルユーザー"
+}
+
+### サインイン
+POST {{base_url}}/signin
+Content-Type: application/json
+
+{
+    "email": "sample@example.com",
+    "password": "sample-password"
+}

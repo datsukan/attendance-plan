@@ -2,16 +2,10 @@ package schedule
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-)
 
-// Result は処理結果を表す構造体です。
-type Result struct {
-	StatusCode int
-	HasError   bool
-	Message    string
-}
+	"github.com/datsukan/attendance-plan/backend/component"
+)
 
 // SchedulePresenter はスケジュールの presenter を表す構造体です。
 type SchedulePresenter struct {
@@ -29,12 +23,12 @@ func (p *SchedulePresenter) GetResponse() (int, string) {
 	return p.StatusCode, p.Body
 }
 
-// ResponseGetScheduleList はスケジュールリストを取得するレスポンスを生成します。
-func (p *SchedulePresenter) ResponseGetScheduleList(output *GetScheduleListOutputData, result Result) {
+// SetResponseGetScheduleList はスケジュールリストを取得するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseGetScheduleList(output *GetScheduleListOutputData, result component.ResponseResult) {
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = toErrorBody(result.Message)
+		p.Body = component.ToErrorBody(result.Message)
 		return
 	}
 
@@ -42,19 +36,19 @@ func (p *SchedulePresenter) ResponseGetScheduleList(output *GetScheduleListOutpu
 	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = toErrorBody(err.Error())
+		p.Body = component.ToErrorBody(err.Error())
 		return
 	}
 
 	p.Body = string(b)
 }
 
-// ResponseGetSchedule はスケジュールを取得するレスポンスを生成します。
-func (p *SchedulePresenter) ResponseGetSchedule(output *GetScheduleOutputData, result Result) {
+// SetResponseGetSchedule はスケジュールを取得するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseGetSchedule(output *GetScheduleOutputData, result component.ResponseResult) {
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = toErrorBody(result.Message)
+		p.Body = component.ToErrorBody(result.Message)
 		return
 	}
 
@@ -62,19 +56,19 @@ func (p *SchedulePresenter) ResponseGetSchedule(output *GetScheduleOutputData, r
 	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = toErrorBody(err.Error())
+		p.Body = component.ToErrorBody(err.Error())
 		return
 	}
 
 	p.Body = string(b)
 }
 
-// ResponseCreateSchedule はスケジュールを作成するレスポンスを生成します。
-func (p *SchedulePresenter) ResponseCreateSchedule(output *CreateScheduleOutputData, result Result) {
+// SetResponseCreateSchedule はスケジュールを作成するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseCreateSchedule(output *CreateScheduleOutputData, result component.ResponseResult) {
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = toErrorBody(result.Message)
+		p.Body = component.ToErrorBody(result.Message)
 		return
 	}
 
@@ -82,19 +76,19 @@ func (p *SchedulePresenter) ResponseCreateSchedule(output *CreateScheduleOutputD
 	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = toErrorBody(err.Error())
+		p.Body = component.ToErrorBody(err.Error())
 		return
 	}
 
 	p.Body = string(b)
 }
 
-// ResponseUpdateSchedule はスケジュールを更新するレスポンスを生成します。
-func (p *SchedulePresenter) ResponseUpdateSchedule(output *UpdateScheduleOutputData, result Result) {
+// SetResponseUpdateSchedule はスケジュールを更新するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseUpdateSchedule(output *UpdateScheduleOutputData, result component.ResponseResult) {
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = toErrorBody(result.Message)
+		p.Body = component.ToErrorBody(result.Message)
 		return
 	}
 
@@ -102,25 +96,21 @@ func (p *SchedulePresenter) ResponseUpdateSchedule(output *UpdateScheduleOutputD
 	b, err := json.Marshal(res)
 	if err != nil {
 		p.StatusCode = http.StatusInternalServerError
-		p.Body = toErrorBody(err.Error())
+		p.Body = component.ToErrorBody(err.Error())
 		return
 	}
 
 	p.Body = string(b)
 }
 
-// ResponseDeleteSchedule はスケジュールを削除するレスポンスを生成します。
-func (p *SchedulePresenter) ResponseDeleteSchedule(output *DeleteScheduleOutputData, result Result) {
+// SetResponseDeleteSchedule はスケジュールを削除するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseDeleteSchedule(output *DeleteScheduleOutputData, result component.ResponseResult) {
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = toErrorBody(result.Message)
+		p.Body = component.ToErrorBody(result.Message)
 		return
 	}
 
 	// 削除成功時はレスポンスボディを空にする
-}
-
-func toErrorBody(message string) string {
-	return fmt.Sprintf(`{"message": "%s"}`, message)
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/datsukan/attendance-plan/backend/component"
 	"github.com/datsukan/attendance-plan/backend/infrastructure"
 )
 
@@ -11,7 +12,7 @@ import (
 func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	req := ToGetScheduleListRequest(r)
 	if err := ValidateGetScheduleListRequest(req); err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
@@ -34,7 +35,7 @@ func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	req := ToGetScheduleRequest(r)
 	if err := ValidateGetScheduleRequest(req); err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
@@ -57,11 +58,11 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	req, err := ToPostScheduleRequest(r)
 	if err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	if err := ValidatePostScheduleRequest(req); err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
@@ -93,11 +94,11 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	req, err := ToPutScheduleRequest(r)
 	if err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	if err := ValidatePutScheduleRequest(req); err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
@@ -129,7 +130,7 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	req := ToDeleteScheduleRequest(r)
 	if err := ValidateDeleteScheduleRequest(req); err != nil {
-		return NewResponseError(http.StatusBadRequest, err.Error())
+		return component.NewResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()

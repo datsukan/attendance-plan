@@ -1,20 +1,11 @@
 package schedule
 
 import (
+	"github.com/datsukan/attendance-plan/backend/component"
 	"github.com/guregu/dynamo"
 )
 
 const scheduleTableName = "AttendancePlan_Schedule"
-
-type NotFoundError struct{}
-
-func NewNotFoundError() *NotFoundError {
-	return &NotFoundError{}
-}
-
-func (e *NotFoundError) Error() string {
-	return "not found"
-}
 
 // ScheduleRepository はスケジュールの repository を表すインターフェースです。
 type ScheduleRepository interface {
@@ -53,7 +44,7 @@ func (r *ScheduleRepositoryImpl) Read(id string) (*Schedule, error) {
 	err := r.Table.Get("ID", id).One(&schedule)
 	if err != nil {
 		if err == dynamo.ErrNotFound {
-			return nil, NewNotFoundError()
+			return nil, component.NewNotFoundError()
 		}
 
 		return nil, err
@@ -63,29 +54,17 @@ func (r *ScheduleRepositoryImpl) Read(id string) (*Schedule, error) {
 
 // Create はスケジュールを保存します。
 func (r *ScheduleRepositoryImpl) Create(schedule *Schedule) error {
-	err := r.Table.Put(schedule).Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	return r.Table.Put(schedule).Run()
 }
 
 // Update はスケジュールを更新します。
 func (r *ScheduleRepositoryImpl) Update(schedule *Schedule) error {
-	err := r.Table.Put(schedule).Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	return r.Table.Put(schedule).Run()
 }
 
 // Delete はスケジュールを削除します。
 func (r *ScheduleRepositoryImpl) Delete(id string) error {
-	err := r.Table.Delete("ID", id).Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	return r.Table.Delete("ID", id).Run()
 }
 
 // Exists は指定された ID のスケジュールが存在するかどうかを返します。
@@ -98,5 +77,6 @@ func (r *ScheduleRepositoryImpl) Exists(id string) (bool, error) {
 		}
 		return false, err
 	}
-	return true, nil
+
+	return schedule != nil, nil
 }

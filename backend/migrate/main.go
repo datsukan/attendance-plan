@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/guregu/dynamo"
 )
 
 func main() {
@@ -14,20 +16,56 @@ func main() {
 
 	db := NewDB()
 
-	s := Schedule{}
-
 	switch execType {
 	case ExecTypeUp:
-		if err := s.Up(db); err != nil {
+		if err := up(db); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	case ExecTypeDown:
-		if err := s.Down(db); err != nil {
+		if err := down(db); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	}
 
 	fmt.Println("successful")
+}
+
+func up(db *dynamo.DB) error {
+	schedule := Schedule{}
+	if err := schedule.Up(db); err != nil {
+		return err
+	}
+
+	user := User{}
+	if err := user.Up(db); err != nil {
+		return err
+	}
+
+	session := Session{}
+	if err := session.Up(db); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func down(db *dynamo.DB) error {
+	schedule := Schedule{}
+	if err := schedule.Down(db); err != nil {
+		return err
+	}
+
+	user := User{}
+	if err := user.Down(db); err != nil {
+		return err
+	}
+
+	session := Session{}
+	if err := session.Down(db); err != nil {
+		return err
+	}
+
+	return nil
 }

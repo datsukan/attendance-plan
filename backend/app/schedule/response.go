@@ -1,10 +1,7 @@
 package schedule
 
 import (
-	"fmt"
 	"time"
-
-	"github.com/aws/aws-lambda-go/events"
 )
 
 // ScheduleResponse はスケジュールのレスポンスを表す構造体です。
@@ -33,14 +30,6 @@ type PostScheduleResponse ScheduleResponse
 
 // PutScheduleResponse はスケジュール更新のレスポンスを表す構造体です。
 type PutScheduleResponse ScheduleResponse
-
-// ResponseError はエラーレスポンスを生成します。
-func NewResponseError(statusCode int, message string) (events.APIGatewayProxyResponse, error) {
-	return events.APIGatewayProxyResponse{
-		StatusCode: statusCode,
-		Body:       fmt.Sprintf(`{"message": "%s"}`, message),
-	}, nil
-}
 
 // ToGetScheduleListResponse はスケジュールリスト取得のレスポンスに変換します。
 func ToGetScheduleListResponse(output *GetScheduleListOutputData) GetScheduleListResponse {

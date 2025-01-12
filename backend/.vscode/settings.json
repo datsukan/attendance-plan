@@ -1,5 +1,8 @@
 {
-  "cSpell.words": ["Interactor"],
+  "cSpell.words": [
+    "Interactor",
+    "signup"
+  ],
   "rest-client.environmentVariables": {
     "dev": {
       "base_url": "http://localhost:3000"

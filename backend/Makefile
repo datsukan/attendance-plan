@@ -1,6 +1,7 @@
 .PHONY: test
 test:
 	docker-compose up -d; \
+	go run ./migrate/. up; \
 	export MODE_UT=TRUE; \
 	go clean -testcache; \
 	export Env=test; \

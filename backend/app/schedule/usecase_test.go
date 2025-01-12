@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/datsukan/attendance-plan/backend/component"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -59,7 +60,7 @@ func (r *stubNotFoundScheduleRepository) ReadByUserID(userID string) ([]*Schedul
 }
 
 func (r *stubNotFoundScheduleRepository) Read(id string) (*Schedule, error) {
-	return nil, NewNotFoundError()
+	return nil, component.NewNotFoundError()
 }
 
 func (r *stubNotFoundScheduleRepository) Create(schedule *Schedule) error {
@@ -67,11 +68,11 @@ func (r *stubNotFoundScheduleRepository) Create(schedule *Schedule) error {
 }
 
 func (r *stubNotFoundScheduleRepository) Update(schedule *Schedule) error {
-	return NewNotFoundError()
+	return component.NewNotFoundError()
 }
 
 func (r *stubNotFoundScheduleRepository) Delete(id string) error {
-	return NewNotFoundError()
+	return component.NewNotFoundError()
 }
 
 func (r *stubNotFoundScheduleRepository) Exists(id string) (bool, error) {
@@ -80,34 +81,34 @@ func (r *stubNotFoundScheduleRepository) Exists(id string) (bool, error) {
 
 type stubScheduleOutputPort struct {
 	Output interface{}
-	Result Result
+	Result component.ResponseResult
 }
 
 func (p *stubScheduleOutputPort) GetResponse() (int, string) {
 	return p.Result.StatusCode, p.Result.Message
 }
 
-func (p *stubScheduleOutputPort) ResponseGetScheduleList(output *GetScheduleListOutputData, result Result) {
+func (p *stubScheduleOutputPort) SetResponseGetScheduleList(output *GetScheduleListOutputData, result component.ResponseResult) {
 	p.Output = output
 	p.Result = result
 }
 
-func (p *stubScheduleOutputPort) ResponseGetSchedule(output *GetScheduleOutputData, result Result) {
+func (p *stubScheduleOutputPort) SetResponseGetSchedule(output *GetScheduleOutputData, result component.ResponseResult) {
 	p.Output = output
 	p.Result = result
 }
 
-func (p *stubScheduleOutputPort) ResponseCreateSchedule(output *CreateScheduleOutputData, result Result) {
+func (p *stubScheduleOutputPort) SetResponseCreateSchedule(output *CreateScheduleOutputData, result component.ResponseResult) {
 	p.Output = output
 	p.Result = result
 }
 
-func (p *stubScheduleOutputPort) ResponseUpdateSchedule(output *UpdateScheduleOutputData, result Result) {
+func (p *stubScheduleOutputPort) SetResponseUpdateSchedule(output *UpdateScheduleOutputData, result component.ResponseResult) {
 	p.Output = output
 	p.Result = result
 }
 
-func (p *stubScheduleOutputPort) ResponseDeleteSchedule(output *DeleteScheduleOutputData, result Result) {
+func (p *stubScheduleOutputPort) SetResponseDeleteSchedule(output *DeleteScheduleOutputData, result component.ResponseResult) {
 	p.Output = output
 	p.Result = result
 }

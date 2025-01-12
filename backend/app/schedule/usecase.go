@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/datsukan/attendance-plan/backend/component"
 	ulid "github.com/oklog/ulid/v2"
 )
 
@@ -100,17 +101,17 @@ type ScheduleInputPort interface {
 	DeleteSchedule(input DeleteScheduleInputData)
 }
 
-// ScheduleOutputPort はスケジュールの外部出力を表すインターフェースです。
+// ScheduleOutputPort はスケジュールのユースケースの外部出力を表すインターフェースです。
 type ScheduleOutputPort interface {
 	GetResponse() (int, string)
-	ResponseGetScheduleList(output *GetScheduleListOutputData, result Result)
-	ResponseGetSchedule(output *GetScheduleOutputData, result Result)
-	ResponseCreateSchedule(output *CreateScheduleOutputData, result Result)
-	ResponseUpdateSchedule(output *UpdateScheduleOutputData, result Result)
-	ResponseDeleteSchedule(output *DeleteScheduleOutputData, result Result)
+	SetResponseGetScheduleList(output *GetScheduleListOutputData, result component.ResponseResult)
+	SetResponseGetSchedule(output *GetScheduleOutputData, result component.ResponseResult)
+	SetResponseCreateSchedule(output *CreateScheduleOutputData, result component.ResponseResult)
+	SetResponseUpdateSchedule(output *UpdateScheduleOutputData, result component.ResponseResult)
+	SetResponseDeleteSchedule(output *DeleteScheduleOutputData, result component.ResponseResult)
 }
 
-// ScheduleInteractor はスケジュールのユースケースの構造体です。
+// ScheduleInteractor はスケジュールのユースケースの実装を表す構造体です。
 type ScheduleInteractor struct {
 	ScheduleRepository ScheduleRepository
 	OutputPort         ScheduleOutputPort
@@ -125,8 +126,8 @@ func NewScheduleInteractor(scheduleRepository ScheduleRepository, outputPort Sch
 func (i *ScheduleInteractor) GetScheduleList(input GetScheduleListInputData) {
 	schedules, err := i.ScheduleRepository.ReadByUserID(input.UserID)
 	if err != nil {
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseGetScheduleList(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseGetScheduleList(nil, r)
 		return
 	}
 
@@ -147,22 +148,22 @@ func (i *ScheduleInteractor) GetScheduleList(input GetScheduleListInputData) {
 	}
 
 	o := &GetScheduleListOutputData{Schedules: outputSchedules}
-	r := Result{StatusCode: http.StatusOK, Message: "Success"}
-	i.OutputPort.ResponseGetScheduleList(o, r)
+	r := component.ResponseResult{StatusCode: http.StatusOK, Message: "Success"}
+	i.OutputPort.SetResponseGetScheduleList(o, r)
 }
 
 // GetSchedule はスケジュールを取得します。
 func (i *ScheduleInteractor) GetSchedule(input GetScheduleInputData) {
 	schedule, err := i.ScheduleRepository.Read(input.ScheduleID)
 	if err != nil {
-		if errors.Is(err, NewNotFoundError()) {
-			r := Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
-			i.OutputPort.ResponseGetSchedule(nil, r)
+		if errors.Is(err, component.NewNotFoundError()) {
+			r := component.ResponseResult{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseGetSchedule(nil, r)
 			return
 		}
 
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseGetSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseGetSchedule(nil, r)
 		return
 	}
 
@@ -179,23 +180,23 @@ func (i *ScheduleInteractor) GetSchedule(input GetScheduleInputData) {
 	}
 
 	o := &GetScheduleOutputData{Schedule: s}
-	r := Result{StatusCode: http.StatusOK, Message: "Success"}
-	i.OutputPort.ResponseGetSchedule(o, r)
+	r := component.ResponseResult{StatusCode: http.StatusOK, Message: "Success"}
+	i.OutputPort.SetResponseGetSchedule(o, r)
 }
 
 // CreateSchedule はスケジュールを作成します。
 func (i *ScheduleInteractor) CreateSchedule(input CreateScheduleInputData) {
 	startsAt, err := time.Parse(time.DateTime, input.Schedule.StartsAt)
 	if err != nil {
-		r := Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseCreateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
 
 	endsAt, err := time.Parse(time.DateTime, input.Schedule.EndsAt)
 	if err != nil {
-		r := Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseCreateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
 
@@ -214,31 +215,31 @@ func (i *ScheduleInteractor) CreateSchedule(input CreateScheduleInputData) {
 	}
 
 	if err := i.ScheduleRepository.Create(&s); err != nil {
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseCreateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
 
 	o := &CreateScheduleOutputData{
 		Schedule: s,
 	}
-	r := Result{StatusCode: http.StatusCreated, Message: "Success"}
-	i.OutputPort.ResponseCreateSchedule(o, r)
+	r := component.ResponseResult{StatusCode: http.StatusCreated, Message: "Success"}
+	i.OutputPort.SetResponseCreateSchedule(o, r)
 }
 
 // UpdateSchedule はスケジュールを更新します。
 func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 	startsAt, err := time.Parse(time.DateTime, input.Schedule.StartsAt)
 	if err != nil {
-		r := Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
 	endsAt, err := time.Parse(time.DateTime, input.Schedule.EndsAt)
 	if err != nil {
-		r := Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
@@ -246,14 +247,14 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 
 	bs, err := i.ScheduleRepository.Read(input.Schedule.ID)
 	if err != nil {
-		if errors.Is(err, NewNotFoundError()) {
-			r := Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
-			i.OutputPort.ResponseUpdateSchedule(nil, r)
+		if component.IsNotFoundError(err) {
+			r := component.ResponseResult{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateSchedule(nil, r)
 			return
 		}
 
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
@@ -270,15 +271,15 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 	}
 
 	if err := i.ScheduleRepository.Update(&s); err != nil {
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
 	as, err := i.ScheduleRepository.Read(s.ID)
 	if err != nil {
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseUpdateSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
@@ -295,19 +296,19 @@ func (i *ScheduleInteractor) UpdateSchedule(input UpdateScheduleInputData) {
 			UpdatedAt: as.UpdatedAt.Format(time.DateTime),
 		},
 	}
-	r := Result{StatusCode: http.StatusOK, Message: "Success"}
-	i.OutputPort.ResponseUpdateSchedule(o, r)
+	r := component.ResponseResult{StatusCode: http.StatusOK, Message: "Success"}
+	i.OutputPort.SetResponseUpdateSchedule(o, r)
 }
 
 // DeleteSchedule はスケジュールを削除します。
 func (i *ScheduleInteractor) DeleteSchedule(input DeleteScheduleInputData) {
 	if err := i.ScheduleRepository.Delete(input.ScheduleID); err != nil {
-		r := Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
-		i.OutputPort.ResponseDeleteSchedule(nil, r)
+		r := component.ResponseResult{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.OutputPort.SetResponseDeleteSchedule(nil, r)
 		return
 	}
 
 	o := &DeleteScheduleOutputData{ScheduleID: input.ScheduleID}
-	r := Result{StatusCode: http.StatusNoContent, Message: "Success"}
-	i.OutputPort.ResponseDeleteSchedule(o, r)
+	r := component.ResponseResult{StatusCode: http.StatusNoContent, Message: "Success"}
+	i.OutputPort.SetResponseDeleteSchedule(o, r)
 }

@@ -217,8 +217,7 @@ func TestCreate(t *testing.T) {
 		err = table.Get("ID", "test-id").One(&s)
 		assert.NoError(err)
 
-		assert.NotNil(s)
-		if s == nil {
+		if !assert.NotNil(s) {
 			return
 		}
 
@@ -275,8 +274,7 @@ func TestUpdate(t *testing.T) {
 		err = table.Get("ID", "test-id").One(&s)
 		assert.NoError(err)
 
-		assert.NotNil(s)
-		if s == nil {
+		if !assert.NotNil(s) {
 			return
 		}
 
@@ -371,12 +369,12 @@ func TestExists(t *testing.T) {
 			require.NotNil(db)
 			require.NotNil(table)
 
-			repo := NewScheduleRepository(*db)
-
 			for _, s := range tt.data {
 				err := table.Put(s).Run()
 				require.NoError(err)
 			}
+
+			repo := NewScheduleRepository(*db)
 
 			got, err := repo.Exists("test-id-0")
 			assert.NoError(err)
