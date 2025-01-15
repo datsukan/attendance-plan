@@ -1,7 +1,8 @@
 {
   "cSpell.words": [
     "Interactor",
-    "signup"
+    "signup",
+    "usecase"
   ],
   "rest-client.environmentVariables": {
     "dev": {
