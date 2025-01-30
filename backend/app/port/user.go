@@ -16,7 +16,10 @@ type SignInInputData struct {
 }
 
 // SignInOutputData はサインインの出力データを表す構造体です。
-type SignInOutputData BaseUserData
+type SignInOutputData struct {
+	BaseUserData
+	SessionToken string
+}
 
 // SignUpInputData はサインアップの入力データを表す構造体です。
 type SignUpInputData struct {
@@ -26,7 +29,10 @@ type SignUpInputData struct {
 }
 
 // SignUpOutputData はサインアップの出力データを表す構造体です。
-type SignUpOutputData BaseUserData
+type SignUpOutputData struct {
+	BaseUserData
+	SessionToken string
+}
 
 // UserInputPort はユーザーのユースケースを表すインターフェースです。
 type UserInputPort interface {
@@ -36,7 +42,7 @@ type UserInputPort interface {
 
 // UserOutputPort はユーザーのユースケースの外部出力を表すインターフェースです。
 type UserOutputPort interface {
-	GetResponse() (int, string)
+	GetResponse() (statusCode int, body string)
 	SetResponseSignIn(output *SignInOutputData, result Result)
 	SetResponseSignUp(output *SignUpOutputData, result Result)
 }

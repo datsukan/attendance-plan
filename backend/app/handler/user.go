@@ -20,16 +20,17 @@ func SignIn(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
+	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(*db)
-	op := presenter.NewUserPresenter()
-	interactor := usecase.NewUserInteractor(ur, sr, op)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	up := presenter.NewUserPresenter()
+	interactor := usecase.NewUserInteractor(ur, sr, up)
 
 	input := port.SignInInputData{Email: req.Email, Password: req.Password}
 	interactor.SignIn(input)
 
-	statusCode, body := op.GetResponse()
+	statusCode, body := up.GetResponse()
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
@@ -44,16 +45,17 @@ func SignUp(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
+	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(*db)
-	op := presenter.NewUserPresenter()
-	interactor := usecase.NewUserInteractor(ur, sr, op)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	up := presenter.NewUserPresenter()
+	interactor := usecase.NewUserInteractor(ur, sr, up)
 
 	input := port.SignUpInputData{Email: req.Email, Password: req.Password, Name: req.Name}
 	interactor.SignUp(input)
 
-	statusCode, body := op.GetResponse()
+	statusCode, body := up.GetResponse()
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,

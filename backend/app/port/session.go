@@ -33,6 +33,7 @@ type SessionInputPort interface {
 
 // SessionOutputPort はセッションのユースケースの外部出力を表すインターフェースです。
 type SessionOutputPort interface {
+	GetReturn() (id string, userID string, expiresAt time.Time, err error)
 	SetReturnStartSession(output *StartSessionOutputData)
 	SetReturnEndSession(output *EndSessionOutputData)
 }

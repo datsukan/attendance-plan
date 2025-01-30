@@ -213,30 +213,10 @@ func (p *stubUserOutputPort) SetResponseSignUp(output *port.SignUpOutputData, re
 
 type stubSessionRepository struct{}
 
-func (r *stubSessionRepository) ReadByUserID(userID string) (*model.Session, error) {
-	return &model.Session{
-		ID:        "test-id",
-		UserID:    "test-user-id",
-		ExpiresAt: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-	}, nil
+func (r *stubSessionRepository) GenerateToken(userID string) (string, error) {
+	return "test-token", nil
 }
 
-func (r *stubSessionRepository) Read(id string) (*model.Session, error) {
-	return &model.Session{
-		ID:        "test-id",
-		UserID:    "test-user-id",
-		ExpiresAt: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-	}, nil
-}
-
-func (r *stubSessionRepository) Create(session *model.Session) error {
-	return nil
-}
-
-func (r *stubSessionRepository) Update(session *model.Session) error {
-	return nil
-}
-
-func (r *stubSessionRepository) Delete(id string) error {
-	return nil
+func (r *stubSessionRepository) IsValidToken(token string) (bool, string) {
+	return true, "test-user-id"
 }

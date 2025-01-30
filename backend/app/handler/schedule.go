@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/datsukan/attendance-plan/backend/app/middleware"
 	"github.com/datsukan/attendance-plan/backend/app/port"
 	"github.com/datsukan/attendance-plan/backend/app/presenter"
 	"github.com/datsukan/attendance-plan/backend/app/repository"
@@ -15,9 +17,21 @@ import (
 
 // GetScheduleList はスケジュールリストを取得します。
 func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
 	req := request.ToGetScheduleListRequest(r)
 	if err := request.ValidateGetScheduleListRequest(req); err != nil {
 		return response.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	if req.UserID != userID {
+		return response.NewError(http.StatusForbidden, "forbidden")
 	}
 
 	db := infrastructure.NewDB()
@@ -38,6 +52,14 @@ func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 
 // GetSchedule はスケジュールを取得します。
 func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
 	req := request.ToGetScheduleRequest(r)
 	if err := request.ValidateGetScheduleRequest(req); err != nil {
 		return response.NewError(http.StatusBadRequest, err.Error())
@@ -45,6 +67,19 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 
 	db := infrastructure.NewDB()
 	sr := repository.NewScheduleRepository(*db)
+
+	schedule, err := sr.Read(req.ScheduleID)
+	if err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			return response.NewError(http.StatusNotFound, err.Error())
+		}
+		return response.NewError(http.StatusInternalServerError, err.Error())
+	}
+
+	if schedule.UserID != userID {
+		return response.NewError(http.StatusForbidden, "forbidden")
+	}
+
 	op := presenter.NewSchedulePresenter()
 	interactor := usecase.NewScheduleInteractor(sr, op)
 
@@ -61,6 +96,14 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 
 // PostSchedule はスケジュールを登録します。
 func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
 	req, err := request.ToPostScheduleRequest(r)
 	if err != nil {
 		return response.NewError(http.StatusBadRequest, err.Error())
@@ -77,7 +120,7 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 
 	input := port.CreateScheduleInputData{
 		Schedule: port.CreateScheduleData{
-			UserID:   "1",
+			UserID:   userID,
 			Name:     req.Name,
 			StartsAt: req.StartsAt,
 			EndsAt:   req.EndsAt,
@@ -97,6 +140,14 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 
 // PutSchedule はスケジュールを更新します。
 func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
 	req, err := request.ToPutScheduleRequest(r)
 	if err != nil {
 		return response.NewError(http.StatusBadRequest, err.Error())
@@ -108,6 +159,19 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 
 	db := infrastructure.NewDB()
 	sr := repository.NewScheduleRepository(*db)
+
+	schedule, err := sr.Read(req.ScheduleID)
+	if err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			return response.NewError(http.StatusNotFound, err.Error())
+		}
+		return response.NewError(http.StatusInternalServerError, err.Error())
+	}
+
+	if schedule.UserID != userID {
+		return response.NewError(http.StatusForbidden, "forbidden")
+	}
+
 	op := presenter.NewSchedulePresenter()
 	interactor := usecase.NewScheduleInteractor(sr, op)
 
@@ -133,6 +197,14 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 
 // DeleteSchedule はスケジュールを削除します。
 func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
 	req := request.ToDeleteScheduleRequest(r)
 	if err := request.ValidateDeleteScheduleRequest(req); err != nil {
 		return response.NewError(http.StatusBadRequest, err.Error())
@@ -140,6 +212,19 @@ func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResp
 
 	db := infrastructure.NewDB()
 	sr := repository.NewScheduleRepository(*db)
+
+	schedule, err := sr.Read(req.ScheduleID)
+	if err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			return response.NewError(http.StatusNotFound, err.Error())
+		}
+		return response.NewError(http.StatusInternalServerError, err.Error())
+	}
+
+	if schedule.UserID != userID {
+		return response.NewError(http.StatusForbidden, "forbidden")
+	}
+
 	op := presenter.NewSchedulePresenter()
 	interactor := usecase.NewScheduleInteractor(sr, op)
 

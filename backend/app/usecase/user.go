@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/datsukan/attendance-plan/backend/app/component"
+	"github.com/datsukan/attendance-plan/backend/app/component/id"
 	"github.com/datsukan/attendance-plan/backend/app/model"
 	"github.com/datsukan/attendance-plan/backend/app/port"
 	"github.com/datsukan/attendance-plan/backend/app/repository"
@@ -48,14 +48,22 @@ func (i *UserInteractor) SignIn(input port.SignInInputData) {
 		return
 	}
 
-	// TODO セッションの保存とクッキーの設定
+	sessionToken, err := i.SessionRepository.GenerateToken(user.ID)
+	if err != nil {
+		r := port.NewResult(http.StatusInternalServerError, true, "Failed to start session")
+		i.OutputPort.SetResponseSignIn(nil, r)
+		return
+	}
 
 	o := &port.SignInOutputData{
-		ID:        user.ID,
-		Email:     user.Email,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt.Format(time.DateTime),
-		UpdatedAt: user.UpdatedAt.Format(time.DateTime),
+		BaseUserData: port.BaseUserData{
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt.Format(time.DateTime),
+			UpdatedAt: user.UpdatedAt.Format(time.DateTime),
+		},
+		SessionToken: sessionToken,
 	}
 	r := port.NewResult(http.StatusOK, false, "Success")
 	i.OutputPort.SetResponseSignIn(o, r)
@@ -83,7 +91,7 @@ func (i *UserInteractor) SignUp(input port.SignUpInputData) {
 	}
 
 	user := &model.User{
-		ID:        component.NewID(),
+		ID:        id.NewID(),
 		Email:     input.Email,
 		Password:  string(hashedPassword),
 		Name:      input.Name,
@@ -96,14 +104,22 @@ func (i *UserInteractor) SignUp(input port.SignUpInputData) {
 		return
 	}
 
-	// TODO セッションの保存とクッキーの設定
+	sessionToken, err := i.SessionRepository.GenerateToken(user.ID)
+	if err != nil {
+		r := port.NewResult(http.StatusInternalServerError, true, "Failed to start session")
+		i.OutputPort.SetResponseSignUp(nil, r)
+		return
+	}
 
 	o := &port.SignUpOutputData{
-		ID:        user.ID,
-		Email:     user.Email,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt.Format(time.DateTime),
-		UpdatedAt: user.UpdatedAt.Format(time.DateTime),
+		BaseUserData: port.BaseUserData{
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt.Format(time.DateTime),
+			UpdatedAt: user.UpdatedAt.Format(time.DateTime),
+		},
+		SessionToken: sessionToken,
 	}
 	r := port.NewResult(http.StatusOK, false, "Success")
 	i.OutputPort.SetResponseSignUp(o, r)

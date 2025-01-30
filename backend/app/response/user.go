@@ -4,11 +4,12 @@ import "github.com/datsukan/attendance-plan/backend/app/port"
 
 // UserResponse はユーザーのレスポンスを表す構造体です。
 type UserResponse struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID           string `json:"id"`
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	SessionToken string `json:"session_token"`
 }
 
 // SignInResponse はサインインのレスポンスを表す構造体です。
@@ -23,7 +24,16 @@ func ToSignInResponse(output *port.SignInOutputData) SignInResponse {
 		return SignInResponse{}
 	}
 
-	return SignInResponse(*output)
+	res := SignInResponse{
+		ID:           output.ID,
+		Email:        output.Email,
+		Name:         output.Name,
+		CreatedAt:    output.CreatedAt,
+		UpdatedAt:    output.UpdatedAt,
+		SessionToken: output.SessionToken,
+	}
+
+	return SignInResponse(res)
 }
 
 // ToSignUpResponse はサインアップのレスポンスに変換します。
@@ -32,5 +42,14 @@ func ToSignUpResponse(output *port.SignUpOutputData) SignUpResponse {
 		return SignUpResponse{}
 	}
 
-	return SignUpResponse(*output)
+	res := SignUpResponse{
+		ID:           output.ID,
+		Email:        output.Email,
+		Name:         output.Name,
+		CreatedAt:    output.CreatedAt,
+		UpdatedAt:    output.UpdatedAt,
+		SessionToken: output.SessionToken,
+	}
+
+	return SignUpResponse(res)
 }

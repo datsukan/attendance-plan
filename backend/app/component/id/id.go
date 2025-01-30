@@ -1,4 +1,4 @@
-package component
+package id
 
 import ulid "github.com/oklog/ulid/v2"
 
