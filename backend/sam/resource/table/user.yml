@@ -1,0 +1,22 @@
+UserTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: AttendancePlan_User
+    AttributeDefinitions:
+      - AttributeName: ID
+        AttributeType: S
+      - AttributeName: Email
+        AttributeType: S
+    BillingMode: PAY_PER_REQUEST
+    KeySchema:
+      - AttributeName: ID
+        KeyType: HASH
+    GlobalSecondaryIndexes:
+      - IndexName: Email-index
+        KeySchema:
+          - AttributeName: Email
+            KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+    StreamSpecification:
+      StreamViewType: NEW_AND_OLD_IMAGES

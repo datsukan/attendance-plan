@@ -1,0 +1,24 @@
+SignInFunction:
+  Description: "SignInFunction Name"
+  Value: !Ref SignInFunction
+SignUpFunction:
+  Description: "SignUpFunction Name"
+  Value: !Ref SignUpFunction
+GetScheduleListFunction:
+  Description: "GetScheduleListFunction Name"
+  Value: !Ref GetScheduleListFunction
+GetScheduleFunction:
+  Description: "GetScheduleFunction Name"
+  Value: !Ref GetScheduleFunction
+PostScheduleFunction:
+  Description: "PostScheduleFunction Name"
+  Value: !Ref PostScheduleFunction
+PutScheduleFunction:
+  Description: "PutScheduleFunction Name"
+  Value: !Ref PutScheduleFunction
+DeleteScheduleFunction:
+  Description: "DeleteScheduleFunction Name"
+  Value: !Ref DeleteScheduleFunction
+API:
+  Description: "API Gateway endpoint URL for the API"
+  Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prd"

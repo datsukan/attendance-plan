@@ -1,0 +1,62 @@
+Api:
+  Type: AWS::Serverless::Api
+  Properties:
+    Name: !Sub
+      - ${ResourceName} From Stack ${AWS::StackName}
+      - ResourceName: Api
+    StageName: prd
+    DefinitionBody:
+      openapi: "3.0"
+      info: {}
+      paths:
+        /signin:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignInFunction.Arn}/invocations
+            responses: {}
+        /signup:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignUpFunction.Arn}/invocations
+            responses: {}
+        /users/{user_id}/schedules:
+          get:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleListFunction.Arn}/invocations
+            responses: {}
+        /schedules/{schedule_id}:
+          get:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleFunction.Arn}/invocations
+            responses: {}
+          put:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutScheduleFunction.Arn}/invocations
+            responses: {}
+          delete:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteScheduleFunction.Arn}/invocations
+            responses: {}
+        /schedules:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostScheduleFunction.Arn}/invocations
+            responses: {}
+    EndpointConfiguration: REGIONAL
+    TracingEnabled: true
+    Cors:
+      MaxAge: 5

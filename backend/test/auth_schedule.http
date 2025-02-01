@@ -4,13 +4,14 @@ POST {{base_url}}/signup
 Content-Type: application/json
 
 {
-    "email": "sample+2@example.com",
+    "email": "sample@example.com",
     "password": "sample-password",
     "name": "サンプルユーザー"
 }
 
 ###
 
+@user_id = {{signup.response.body.id}}
 @session_token = {{signup.response.body.session_token}}
 
 ### サインイン

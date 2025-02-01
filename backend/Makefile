@@ -18,11 +18,10 @@ down:
 
 .PHONY: dev
 dev:
-	sam build; \
-	sam local start-api --env-vars env.json --docker-network backend_default
+	make up; \
+	sh ./dev.sh
 
 .PHONY: deploy
 deploy:
-	sam build; \
-	sam deploy --parameter-overrides $(cat .prd.env)
+	sh ./deploy.sh
 

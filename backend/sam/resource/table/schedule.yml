@@ -1,0 +1,26 @@
+ScheduleTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: AttendancePlan_Schedule
+    AttributeDefinitions:
+      - AttributeName: ID
+        AttributeType: S
+      - AttributeName: UserID
+        AttributeType: S
+      - AttributeName: StartsAt
+        AttributeType: S
+    BillingMode: PAY_PER_REQUEST
+    KeySchema:
+      - AttributeName: ID
+        KeyType: HASH
+    GlobalSecondaryIndexes:
+      - IndexName: UserID-index
+        KeySchema:
+          - AttributeName: UserID
+            KeyType: HASH
+          - AttributeName: StartsAt
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+    StreamSpecification:
+      StreamViewType: NEW_AND_OLD_IMAGES

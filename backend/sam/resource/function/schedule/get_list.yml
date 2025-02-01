@@ -1,0 +1,48 @@
+GetScheduleListFunction:
+  Type: AWS::Serverless::Function
+  Metadata:
+    BuildMethod: go1.x
+  Properties:
+    FunctionName: GetScheduleListFunction
+    Description: !Sub
+      - Stack ${AWS::StackName} Function ${ResourceName}
+      - ResourceName: GetScheduleListFunction
+    CodeUri: cmd/schedule/get_list
+    Handler: bootstrap
+    Runtime: provided.al2023
+    MemorySize: 128
+    Timeout: 30
+    Tracing: Active
+    Events:
+      ApiGetScheduleList:
+        Type: Api
+        Properties:
+          Path: /users/{user_id}/schedules
+          Method: GET
+          RestApiId: !Ref Api
+    Environment:
+      Variables:
+        SCHEDULE_TABLE_NAME: !Ref ScheduleTable
+        SCHEDULE_TABLE_ARN: !GetAtt ScheduleTable.Arn
+        USER_TABLE_NAME: !Ref UserTable
+        USER_TABLE_ARN: !GetAtt UserTable.Arn
+        SESSION_TABLE_NAME: !Ref SessionTable
+        SESSION_TABLE_ARN: !GetAtt SessionTable.Arn
+    Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ScheduleTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref SessionTable
+GetScheduleListFunctionPermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !GetAtt GetScheduleListFunction.Arn
+    Action: lambda:InvokeFunction
+    Principal: apigateway.amazonaws.com
+GetScheduleListFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  DeletionPolicy: Retain
+  Properties:
+    LogGroupName: !Sub /aws/lambda/${GetScheduleListFunction}
