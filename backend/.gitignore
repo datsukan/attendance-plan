@@ -1,3 +1,4 @@
 .env
+.prd.env
 .aws-sam
 temp.yml

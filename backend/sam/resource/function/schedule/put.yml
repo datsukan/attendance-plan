@@ -26,15 +26,11 @@ PutScheduleFunction:
         SCHEDULE_TABLE_ARN: !GetAtt ScheduleTable.Arn
         USER_TABLE_NAME: !Ref UserTable
         USER_TABLE_ARN: !GetAtt UserTable.Arn
-        SESSION_TABLE_NAME: !Ref SessionTable
-        SESSION_TABLE_ARN: !GetAtt SessionTable.Arn
     Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref ScheduleTable
       - DynamoDBCrudPolicy:
           TableName: !Ref UserTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SessionTable
 PutScheduleFunctionPermission:
   Type: AWS::Lambda::Permission
   Properties:

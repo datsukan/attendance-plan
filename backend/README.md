@@ -51,5 +51,7 @@ make dev
 #### 本番デプロイ
 
 ```sh
-make ~~deploy~~
+make deploy
 ```
+
+初回はデプロイ後にAPI Gateway のエンドポイントとカスタムドメインのマッピングとしてDNSにCNAMEレコードの追加が必要

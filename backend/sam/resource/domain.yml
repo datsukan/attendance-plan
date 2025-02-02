@@ -1,0 +1,14 @@
+CustomDomain:
+  Type: AWS::ApiGateway::DomainName
+  Properties:
+    DomainName: !Ref DomainName
+    RegionalCertificateArn: !Ref CertificateArn
+    EndpointConfiguration:
+      Types:
+        - REGIONAL
+BasePathMapping:
+  Type: AWS::ApiGateway::BasePathMapping
+  Properties:
+    DomainName: !Ref CustomDomain
+    RestApiId: !Ref Api
+    Stage: !Ref Api.Stage

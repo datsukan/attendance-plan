@@ -1,0 +1,5 @@
+Function:
+  Environment:
+    Variables:
+      Env: ""
+      DynamoEndpoint: ""

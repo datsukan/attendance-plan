@@ -21,4 +21,5 @@ DeleteScheduleFunction:
   Value: !Ref DeleteScheduleFunction
 API:
   Description: "API Gateway endpoint URL for the API"
-  Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prd"
+  # Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prd"
+  Value: !Sub "https://${DomainName}"

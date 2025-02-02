@@ -1,14 +1,12 @@
 Transform: AWS::Serverless-2016-10-31
 Globals:
-  Function:
-    Environment:
-      Variables:
-        $variables: sam/variables.yml
+  $globals: sam/globals.yml
+Parameters:
+  $parameters: sam/parameter.yml
 Resources:
   - $resources: sam/resource/api.yml
   - $resources: sam/resource/table/schedule.yml
   - $resources: sam/resource/table/user.yml
-  - $resources: sam/resource/table/session.yml
   - $resources: sam/resource/function/auth/signin.yml
   - $resources: sam/resource/function/auth/signup.yml
   - $resources: sam/resource/function/schedule/get_list.yml
@@ -16,5 +14,6 @@ Resources:
   - $resources: sam/resource/function/schedule/post.yml
   - $resources: sam/resource/function/schedule/put.yml
   - $resources: sam/resource/function/schedule/delete.yml
+  - $resources: sam/resource/domain.yml
 Outputs:
   $outputs: sam/output.yml
