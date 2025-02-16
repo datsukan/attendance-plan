@@ -1,5 +1,10 @@
 Function:
   Environment:
     Variables:
-      Env: ""
-      DynamoEndpoint: ""
+      ENV: !Ref Env
+      DYNAMO_ENDPOINT: ""
+      SERVICE_NAME: !Ref ServiceName
+      BASE_URL: !Ref BaseUrl
+      SES_REGION: "ap-northeast-1"
+      SENDER_EMAIL: !Ref SenderEmail
+      SENDER_NAME: !Ref SenderName

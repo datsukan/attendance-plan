@@ -3,15 +3,15 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
-import { EditSchedule } from '@/model/edit-schedule';
-import type { Schedule } from '@/type/schedule';
+import { Model } from '@/model';
+import { Type } from '@/type';
 
 type Props = {
-  schedule: Schedule;
+  schedule: Type.Schedule;
   isActive: boolean;
-  removeSchedule: (id: string) => void;
-  saveSchedule: (editSchedule: EditSchedule) => void;
-  changeScheduleColor: (id: string, color: string) => void;
+  removeSchedule: (id: string, type: Type.ScheduleType) => void;
+  saveSchedule: (editSchedule: Model.EditSchedule) => void;
+  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
 export const ScheduleWeekItem = ({ schedule, isActive, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {

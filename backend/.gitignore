@@ -1,4 +1,7 @@
 .env
 .prd.env
+env.json
+samconfig.toml
 .aws-sam
 temp.yml
+todo.md

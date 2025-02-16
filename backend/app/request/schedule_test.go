@@ -327,6 +327,57 @@ func TestValidatePutScheduleRequest(t *testing.T) {
 	}
 }
 
+func TestToPutBulkScheduleRequest(t *testing.T) {
+	r := events.APIGatewayProxyRequest{
+		Body: `{"schedules":[{"id":"test-schedule-id","name":"test-name","starts_at":"2021-01-01 00:00:00","ends_at":"2021-01-01 00:00:00","color":"test-color","type":"master","order":0}]}`,
+	}
+	req, err := ToPutBulkScheduleRequest(r)
+	assert.Nil(t, err)
+	assert.Len(t, req.Schedules, 1)
+	assert.Equal(t, "test-schedule-id", req.Schedules[0].ScheduleID)
+	assert.Equal(t, "test-name", req.Schedules[0].Name)
+	assert.Equal(t, "2021-01-01 00:00:00", req.Schedules[0].StartsAt)
+	assert.Equal(t, "2021-01-01 00:00:00", req.Schedules[0].EndsAt)
+	assert.Equal(t, "test-color", req.Schedules[0].Color)
+	assert.Equal(t, "master", req.Schedules[0].Type)
+	assert.Equal(t, 0, req.Schedules[0].Order)
+}
+
+func TestValidatePutBulkScheduleRequest(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *PutBulkScheduleRequest
+		want error
+	}{
+		{
+			name: "異常系: schedules が未指定の場合はエラー",
+			req:  &PutBulkScheduleRequest{},
+			want: errors.New("schedules is empty"),
+		},
+		{
+			name: "異常系: schedules が空の場合はエラー",
+			req:  &PutBulkScheduleRequest{Schedules: []PutScheduleRequest{}},
+			want: errors.New("schedules is empty"),
+		},
+		{
+			name: "正常系",
+			req: &PutBulkScheduleRequest{
+				Schedules: []PutScheduleRequest{
+					{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color", Type: model.ScheduleTypeMaster.String()},
+				},
+			},
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidatePutBulkScheduleRequest(tt.req)
+			assert.Equal(t, tt.want, err)
+		})
+	}
+}
+
 func TestToDeleteScheduleRequest(t *testing.T) {
 	r := events.APIGatewayProxyRequest{
 		PathParameters: map[string]string{

@@ -52,13 +52,29 @@ func (p *UserPresenter) SetResponseSignUp(output *port.SignUpOutputData, result 
 		return
 	}
 
-	res := response.ToSignUpResponse(output)
-	b, err := json.Marshal(res)
-	if err != nil {
-		p.StatusCode = http.StatusInternalServerError
-		p.Body = response.ToErrorBody(err.Error())
+	// 成功時はレスポンスボディを空にする
+}
+
+// SetResponsePasswordReset はパスワードリセットのレスポンスをセットします。
+func (p *UserPresenter) SetResponsePasswordReset(output *port.PasswordResetOutputData, result port.Result) {
+	p.StatusCode = result.StatusCode
+
+	if result.HasError {
+		p.Body = response.ToErrorBody(result.Message)
 		return
 	}
 
-	p.Body = string(b)
+	// 成功時はレスポンスボディを空にする
+}
+
+// SetResponsePasswordSet はパスワード設定のレスポンスをセットします。
+func (p *UserPresenter) SetResponsePasswordSet(output *port.PasswordSetOutputData, result port.Result) {
+	p.StatusCode = result.StatusCode
+
+	if result.HasError {
+		p.Body = response.ToErrorBody(result.Message)
+		return
+	}
+
+	// 成功時はレスポンスボディを空にする
 }

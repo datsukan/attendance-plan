@@ -3,7 +3,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 
 import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
 
-import { CreateSchedule } from '@/model/create-schedule';
+import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
   create: (createSchedule: CreateSchedule) => void;

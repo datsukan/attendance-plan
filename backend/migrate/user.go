@@ -13,6 +13,7 @@ type User struct {
 	Email     string    `dynamo:"Email" index:"Email-index,hash"`
 	Password  string    `dynamo:"Password"`
 	Name      string    `dynamo:"Name"`
+	Enabled   bool      `dynamo:"Enabled"`
 	CreatedAt time.Time `dynamo:"CreatedAt"`
 	UpdatedAt time.Time `dynamo:"UpdatedAt"`
 }

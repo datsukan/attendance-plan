@@ -6,4 +6,4 @@ TMP_FILE='temp.yml'
 sh ./build_temp.sh
 
 sam build -t ${TMP_FILE}
-sam deploy --parameter-overrides $(cat .prd.env)
+sam deploy

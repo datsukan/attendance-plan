@@ -11,13 +11,13 @@ const userTableName = "AttendancePlan_User"
 
 // UserRepository はユーザーの repository を表すインターフェースです。
 type UserRepository interface {
-	ReadByEmail(email string) (*model.User, error)
-	Read(id string) (*model.User, error)
+	ReadByEmail(email string, enabledOnly bool) (*model.User, error)
+	Read(id string, enabledOnly bool) (*model.User, error)
 	Create(user *model.User) error
 	Update(user *model.User) error
 	Delete(id string) error
-	Exists(id string) (bool, error)
-	ExistsByEmail(email string) (bool, error)
+	Exists(id string, enabledOnly bool) (bool, error)
+	ExistsByEmail(email string, enabledOnly bool) (bool, error)
 }
 
 // UserRepositoryImpl はユーザーの repository の実装を表す構造体です。
@@ -32,7 +32,7 @@ func NewUserRepository(db dynamo.DB) UserRepository {
 }
 
 // ReadByEmail は指定されたメールアドレスのユーザーを取得します。
-func (r *UserRepositoryImpl) ReadByEmail(email string) (*model.User, error) {
+func (r *UserRepositoryImpl) ReadByEmail(email string, enabledOnly bool) (*model.User, error) {
 	var user *model.User
 	err := r.Table.Get("Email", email).Index("Email-index").One(&user)
 	if err != nil {
@@ -42,11 +42,16 @@ func (r *UserRepositoryImpl) ReadByEmail(email string) (*model.User, error) {
 
 		return nil, err
 	}
+
+	if enabledOnly && (user == nil || !user.Enabled) {
+		return nil, NewNotFoundError()
+	}
+
 	return user, nil
 }
 
 // Read は指定された ID のユーザーを取得します。
-func (r *UserRepositoryImpl) Read(id string) (*model.User, error) {
+func (r *UserRepositoryImpl) Read(id string, enabledOnly bool) (*model.User, error) {
 	var user *model.User
 	err := r.Table.Get("ID", id).One(&user)
 	if err != nil {
@@ -56,6 +61,11 @@ func (r *UserRepositoryImpl) Read(id string) (*model.User, error) {
 
 		return nil, err
 	}
+
+	if enabledOnly && (user == nil || !user.Enabled) {
+		return nil, NewNotFoundError()
+	}
+
 	return user, nil
 }
 
@@ -75,7 +85,7 @@ func (r *UserRepositoryImpl) Delete(id string) error {
 }
 
 // Exists は指定された ID のユーザーが存在するかどうかを返します。
-func (r *UserRepositoryImpl) Exists(id string) (bool, error) {
+func (r *UserRepositoryImpl) Exists(id string, enabledOnly bool) (bool, error) {
 	var user *model.User
 	err := r.Table.Get("ID", id).One(&user)
 	if err != nil {
@@ -86,11 +96,15 @@ func (r *UserRepositoryImpl) Exists(id string) (bool, error) {
 		return false, err
 	}
 
-	return user != nil, nil
+	if enabledOnly && (user == nil || !user.Enabled) {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 // ExistsByEmail は指定されたメールアドレスのユーザーが存在するかどうかを返します。
-func (r *UserRepositoryImpl) ExistsByEmail(email string) (bool, error) {
+func (r *UserRepositoryImpl) ExistsByEmail(email string, enabledOnly bool) (bool, error) {
 	var user *model.User
 	err := r.Table.Get("Email", email).Index("Email-index").One(&user)
 	if err != nil {
@@ -101,5 +115,9 @@ func (r *UserRepositoryImpl) ExistsByEmail(email string) (bool, error) {
 		return false, err
 	}
 
-	return user != nil, nil
+	if enabledOnly && (user == nil || !user.Enabled) {
+		return false, nil
+	}
+
+	return true, nil
 }

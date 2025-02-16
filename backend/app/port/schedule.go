@@ -13,8 +13,15 @@ type BaseScheduleData struct {
 	EndsAt    string
 	Color     string
 	Type      string
+	Order     int
 	CreatedAt string
 	UpdatedAt string
+}
+
+type BaseDateItemData struct {
+	Date      string
+	Type      string
+	Schedules []BaseScheduleData
 }
 
 // GetScheduleListInputData はスケジュールリスト取得の入力データを表す構造体です。
@@ -24,7 +31,8 @@ type GetScheduleListInputData struct {
 
 // GetScheduleListOutputData はスケジュールリスト取得の出力データを表す構造体です。
 type GetScheduleListOutputData struct {
-	Schedules []BaseScheduleData
+	MasterSchedules []BaseDateItemData
+	CustomSchedules []BaseDateItemData
 }
 
 // GetScheduleInputData はスケジュール取得の入力データを表す構造体です。
@@ -45,6 +53,7 @@ type CreateScheduleData struct {
 	EndsAt   string
 	Color    string
 	Type     string
+	Order    int
 }
 
 // CreateScheduleData はスケジュール作成のデータを表す構造体です。
@@ -65,6 +74,7 @@ type UpdateScheduleData struct {
 	EndsAt   string
 	Color    string
 	Type     string
+	Order    int
 }
 
 // UpdateScheduleInputData はスケジュール更新の入力データを表す構造体です。
@@ -75,6 +85,16 @@ type UpdateScheduleInputData struct {
 // UpdateScheduleOutputData はスケジュール更新の出力データを表す構造体です。
 type UpdateScheduleOutputData struct {
 	Schedule BaseScheduleData
+}
+
+// UpdateBulkScheduleInputData はスケジュール一括更新の入力データを表す構造体です。
+type UpdateBulkScheduleInputData struct {
+	Schedules []UpdateScheduleData
+}
+
+// UpdateBulkScheduleOutputData はスケジュール一括更新の出力データを表す構造体です。
+type UpdateBulkScheduleOutputData struct {
+	Schedules []BaseScheduleData
 }
 
 // DeleteScheduleInputData はスケジュール削除の入力データを表す構造体です。
@@ -93,6 +113,7 @@ type ScheduleInputPort interface {
 	GetSchedule(input GetScheduleInputData)
 	CreateSchedule(input CreateScheduleInputData)
 	UpdateSchedule(input UpdateScheduleInputData)
+	UpdateBulkSchedule(input UpdateBulkScheduleInputData)
 	DeleteSchedule(input DeleteScheduleInputData)
 }
 
@@ -103,5 +124,6 @@ type ScheduleOutputPort interface {
 	SetResponseGetSchedule(output *GetScheduleOutputData, result Result)
 	SetResponseCreateSchedule(output *CreateScheduleOutputData, result Result)
 	SetResponseUpdateSchedule(output *UpdateScheduleOutputData, result Result)
+	SetResponseUpdateBulkSchedule(output *UpdateBulkScheduleOutputData, result Result)
 	SetResponseDeleteSchedule(output *DeleteScheduleOutputData, result Result)
 }

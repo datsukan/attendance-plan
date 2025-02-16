@@ -11,11 +11,11 @@ import { SaveButton } from '@/component/dialog/edit/SaveButton';
 import { CancelButton } from '@/component/dialog/CancelButton';
 
 import { toScheduleTypeName } from '@/component/schedule/schedule-module';
-import { EditSchedule } from '@/model/edit-schedule';
-import { Schedule } from '@/type/schedule';
+import { EditSchedule } from '@/model/editSchedule';
+import { Type } from '@/type';
 
 type Props = {
-  schedule: Schedule;
+  schedule: Type.Schedule;
   isOpen: boolean;
   submit: (editSchedule: EditSchedule) => void;
   close: () => void;
@@ -81,7 +81,7 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
       </div>
       <InputScheduleName value={name} onChange={setName} />
       <InputDuration from={startDate} to={endDate} onChangeFrom={setStartDate} onChangeTo={setEndDate} />
-      <div className="flex gap-2 justify-end">
+      <div className="flex justify-end gap-2">
         <SaveButton onClick={save} />
         <CancelButton onClick={close} />
       </div>

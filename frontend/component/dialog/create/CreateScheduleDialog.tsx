@@ -14,7 +14,7 @@ import { CancelButton } from '../CancelButton';
 
 import { getFirstColorKey } from '@/component/calendar/color-module';
 import { toScheduleTypeName } from '@/component/schedule/schedule-module';
-import { CreateSchedule } from '@/model/create-schedule';
+import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
   isOpen: boolean;
@@ -104,7 +104,7 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
         />
       )}
       <InputDuration from={startDate} to={endDate} onChangeFrom={setStartDate} onChangeTo={setEndDate} />
-      <div className="flex gap-2 justify-end">
+      <div className="flex justify-end gap-2">
         <CreateButton onClick={create} />
         <CancelButton onClick={close} />
       </div>

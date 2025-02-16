@@ -1,0 +1,67 @@
+### サインアップ
+# @name signup
+POST {{base_url}}/signup
+Content-Type: application/json
+
+{
+    "email": "sample@example.com",
+    "password": "sample-password",
+    "name": "サンプルユーザー"
+}
+
+###
+
+@user_id = {{signup.response.body.id}}
+@session_token = {{signup.response.body.session_token}}
+
+### サインイン
+# @name signin
+POST {{base_url}}/signin
+Content-Type: application/json
+
+{
+    "email": "sample@example.com",
+    "password": "sample-password"
+}
+
+###
+
+@user_id = {{signin.response.body.id}}
+@session_token = {{signin.response.body.session_token}}
+
+### 新規作成（前の要素なし）
+# @name create
+POST {{base_url}}/schedules
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "master"
+}
+
+###
+
+@schedule_id = {{create.response.body.id}}
+
+### 一括更新
+# @name update
+PUT {{base_url}}/schedules/bulk
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "schedules": [
+        {
+            "id": "{{schedule_id}}",
+            "name": "更新済みテストスケジュール",
+            "starts_at": "2024-07-01 00:00:00",
+            "ends_at": "2024-09-15 00:00:00",
+            "color": "red",
+            "type": "custom"
+        }
+    ]
+}

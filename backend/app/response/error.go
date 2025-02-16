@@ -11,6 +11,7 @@ func NewError(statusCode int, message string) (events.APIGatewayProxyResponse, e
 	return events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       ToErrorBody(message),
+		Headers:    CORSHeaders,
 	}, nil
 }
 

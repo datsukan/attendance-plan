@@ -4,15 +4,8 @@ POST {{base_url}}/signup
 Content-Type: application/json
 
 {
-    "email": "sample@example.com",
-    "password": "sample-password",
-    "name": "サンプルユーザー"
+    "email": "s.datsukan@gmail.com"
 }
-
-###
-
-@user_id = {{signup.response.body.id}}
-@session_token = {{signup.response.body.session_token}}
 
 ### サインイン
 # @name signin
@@ -29,7 +22,17 @@ Content-Type: application/json
 @user_id = {{signin.response.body.id}}
 @session_token = {{signin.response.body.session_token}}
 
-### 新規作成
+### パスワード変更
+# @name change_password
+POST {{base_url}}/password/reset
+Content-Type: application/json
+
+{
+    "token": "sample-token",
+    "password": "sample-password"
+}
+
+### 学事の新規作成（前の要素なし）
 # @name create
 POST {{base_url}}/schedules
 Authorization: Bearer {{session_token}}
@@ -41,6 +44,50 @@ Content-Type: application/json
     "ends_at": "2024-08-15 00:00:00",
     "color": "white",
     "type": "master"
+}
+
+### 受講の新規作成（前の要素なし）
+# @name create
+POST {{base_url}}/schedules
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "custom"
+}
+
+### 学事の新規作成（前の要素あり）
+# @name create
+POST {{base_url}}/schedules
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "master",
+    "order": 1
+}
+
+### 受講の新規作成（前の要素あり）
+# @name create
+POST {{base_url}}/schedules
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テストスケジュール",
+    "starts_at": "2024-06-01 00:00:00",
+    "ends_at": "2024-08-15 00:00:00",
+    "color": "white",
+    "type": "custom",
+    "order": 1
 }
 
 ### 一覧取得

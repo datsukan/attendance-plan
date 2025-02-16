@@ -4,6 +4,12 @@ SignInFunction:
 SignUpFunction:
   Description: "SignUpFunction Name"
   Value: !Ref SignUpFunction
+PasswordResetFunction:
+  Description: "PasswordResetFunction Name"
+  Value: !Ref PasswordResetFunction
+PasswordSetFunction:
+  Description: "PasswordSetFunction Name"
+  Value: !Ref PasswordSetFunction
 GetScheduleListFunction:
   Description: "GetScheduleListFunction Name"
   Value: !Ref GetScheduleListFunction
@@ -16,10 +22,12 @@ PostScheduleFunction:
 PutScheduleFunction:
   Description: "PutScheduleFunction Name"
   Value: !Ref PutScheduleFunction
+PutBulkScheduleFunction:
+  Description: "PutBulkScheduleFunction Name"
+  Value: !Ref PutBulkScheduleFunction
 DeleteScheduleFunction:
   Description: "DeleteScheduleFunction Name"
   Value: !Ref DeleteScheduleFunction
 API:
   Description: "API Gateway endpoint URL for the API"
-  # Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prd"
   Value: !Sub "https://${DomainName}"

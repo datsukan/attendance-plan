@@ -23,6 +23,20 @@ Api:
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignUpFunction.Arn}/invocations
             responses: {}
+        /password/reset:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PasswordResetFunction.Arn}/invocations
+            responses: {}
+        /password/set:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PasswordSetFunction.Arn}/invocations
+            responses: {}
         /users/{user_id}/schedules:
           get:
             x-amazon-apigateway-integration:
@@ -49,6 +63,13 @@ Api:
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteScheduleFunction.Arn}/invocations
             responses: {}
+        /schedules/bulk:
+          put:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutBulkScheduleFunction.Arn}/invocations
+            responses: {}
         /schedules:
           post:
             x-amazon-apigateway-integration:
@@ -59,4 +80,6 @@ Api:
     EndpointConfiguration: REGIONAL
     TracingEnabled: true
     Cors:
-      MaxAge: 5
+      AllowOrigin: "'*'"
+      AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
+      AllowHeaders: "'Content-Type,Authorization'"

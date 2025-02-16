@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/datsukan/attendance-plan/backend/app/model"
 	"github.com/guregu/dynamo"
 )
@@ -9,8 +11,9 @@ const scheduleTableName = "AttendancePlan_Schedule"
 
 // ScheduleRepository はスケジュールの repository を表すインターフェースです。
 type ScheduleRepository interface {
-	ReadByUserID(userID string) ([]*model.Schedule, error)
 	Read(id string) (*model.Schedule, error)
+	ReadByUserID(userID string) ([]model.Schedule, error)
+	ReadByUserIDStartsAt(userID string, startsAt time.Time) ([]model.Schedule, error)
 	Create(schedule *model.Schedule) error
 	Update(schedule *model.Schedule) error
 	Delete(id string) error
@@ -28,16 +31,6 @@ func NewScheduleRepository(db dynamo.DB) ScheduleRepository {
 	return &ScheduleRepositoryImpl{DB: db, Table: db.Table(scheduleTableName)}
 }
 
-// ReadByUserID は指定されたユーザー ID に紐づくスケジュールのリストを取得します。
-func (r *ScheduleRepositoryImpl) ReadByUserID(userID string) ([]*model.Schedule, error) {
-	var schedules []*model.Schedule
-	err := r.Table.Get("UserID", userID).Index("UserID-index").Order(dynamo.Ascending).All(&schedules)
-	if err != nil {
-		return nil, err
-	}
-	return schedules, nil
-}
-
 // Read は指定された ID のスケジュールを取得します。
 func (r *ScheduleRepositoryImpl) Read(id string) (*model.Schedule, error) {
 	var schedule *model.Schedule
@@ -50,6 +43,26 @@ func (r *ScheduleRepositoryImpl) Read(id string) (*model.Schedule, error) {
 		return nil, err
 	}
 	return schedule, nil
+}
+
+// ReadByUserID は指定されたユーザー ID に紐づくスケジュールのリストを取得します。
+func (r *ScheduleRepositoryImpl) ReadByUserID(userID string) ([]model.Schedule, error) {
+	var schedules []model.Schedule
+	err := r.Table.Get("UserID", userID).Index("UserID-index").Order(dynamo.Ascending).All(&schedules)
+	if err != nil {
+		return nil, err
+	}
+	return schedules, nil
+}
+
+// ReadByUserIDStartsAt は指定されたユーザー ID と開始日時に紐づくスケジュールを取得します。
+func (r *ScheduleRepositoryImpl) ReadByUserIDStartsAt(userID string, startsAt time.Time) ([]model.Schedule, error) {
+	var schedules []model.Schedule
+	err := r.Table.Get("UserID", userID).Range("StartsAt", dynamo.Equal, startsAt).Index("UserID-index").Order(dynamo.Ascending).All(&schedules)
+	if err != nil {
+		return nil, err
+	}
+	return schedules, nil
 }
 
 // Create はスケジュールを保存します。

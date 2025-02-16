@@ -4,5 +4,6 @@
   "[go]": {
     "editor.defaultFormatter": "golang.go"
   },
+  "editor.codeActionsOnSave": ["source.fixAll.eslint"],
   "editor.tabSize": 2
 }

@@ -8,14 +8,14 @@ import { EditScheduleDialog } from '@/component/dialog/edit/EditScheduleDialog';
 
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { getColorClassName } from '@/component/calendar/color-module';
-import { EditSchedule } from '@/model/edit-schedule';
-import type { Schedule } from '@/type/schedule';
+import { Model } from '@/model';
+import type { Type } from '@/type';
 
 type Props = {
-  schedule: Schedule;
-  removeSchedule: (id: string) => void;
-  saveSchedule: (editSchedule: EditSchedule) => void;
-  changeScheduleColor: (id: string, color: string) => void;
+  schedule: Type.Schedule;
+  removeSchedule: (id: string, type: Type.ScheduleType) => void;
+  saveSchedule: (editSchedule: Model.EditSchedule) => void;
+  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
 export const ScheduleItem = ({ schedule, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
@@ -98,17 +98,17 @@ export const ScheduleItem = ({ schedule, removeSchedule, saveSchedule, changeSch
   return (
     <div className="relative">
       <div
-        className={`px-2 h-6 flex items-center rounded hover:cursor-pointer ${getColorClassName(schedule.color)}`}
+        className={`flex h-6 items-center rounded px-2 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
         onContextMenu={onRightClick}
         onClick={onLeftClick}
         ref={ref}
       >
-        <span className="text-xs truncate">{generateLabel()}</span>
+        <span className="truncate text-xs">{generateLabel()}</span>
       </div>
       {isOpenMenu && (
         <div className="absolute z-10 min-w-max" style={{ top: menuPosition.y, left: menuPosition.x }}>
           <Menu
-            onSelectColor={(color) => changeScheduleColor(schedule.id, color)}
+            onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
             openRemoveConfirmDialog={() => setIsOpenRemoveConfirmDialog(true)}
             openEditDialog={() => setIsOpenEditDialog(true)}
           />
@@ -123,7 +123,7 @@ export const ScheduleItem = ({ schedule, removeSchedule, saveSchedule, changeSch
         schedule={schedule}
         isOpen={isOpenRemoveConfirmDialog}
         close={() => setIsOpenRemoveConfirmDialog(false)}
-        remove={() => removeSchedule(schedule.id)}
+        remove={() => removeSchedule(schedule.id, schedule.type)}
       />
       <EditScheduleDialog schedule={schedule} isOpen={isOpenEditDialog} close={() => setIsOpenEditDialog(false)} submit={saveSchedule} />
     </div>

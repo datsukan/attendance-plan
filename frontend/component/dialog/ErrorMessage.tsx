@@ -6,7 +6,7 @@ type Props = {
 
 export const ErrorMessage = ({ message }: Props) => {
   return (
-    <div className="text-red-500 bg-red-100 rounded-lg p-2 flex gap-2 items-center">
+    <div className="flex items-center gap-2 rounded-lg bg-red-100 p-2 text-red-500">
       <ExclamationCircleIcon className="size-5" />
       <span className="text-sm">{message}</span>
     </div>

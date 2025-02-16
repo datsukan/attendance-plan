@@ -1,8 +1,8 @@
-import { isAfter, isBefore, isEqual, differenceInCalendarDays } from 'date-fns';
+import { isAfter, isBefore, isEqual, differenceInCalendarDays, format } from 'date-fns';
 
-import type { Schedule } from '@/type/schedule';
+import { Type } from '@/type';
 
-export function isDisplaySchedule(schedule: Schedule, date: Date): boolean {
+export function isDisplaySchedule(schedule: Type.Schedule, date: Date): boolean {
   if (isEqual(schedule.startDate, date)) {
     return true;
   }
@@ -14,7 +14,7 @@ export function isDisplaySchedule(schedule: Schedule, date: Date): boolean {
   return isBefore(schedule.startDate, date) && isAfter(schedule.endDate, date);
 }
 
-export function isShowItem(index: number, schedule: Schedule, date: Date): boolean {
+export function isShowItem(index: number, schedule: Type.Schedule, date: Date): boolean {
   if (date < schedule.startDate || date > schedule.endDate) {
     return false;
   }
@@ -55,7 +55,7 @@ export function getColStartClassName(index: number): string {
   return className;
 }
 
-export function getColEndClassName(index: number, schedule: Schedule, dates: Date[]): string {
+export function getColEndClassName(index: number, schedule: Type.Schedule, dates: Date[]): string {
   let range = 0;
   if (isBefore(dates[0], schedule.startDate)) {
     const sub = differenceInCalendarDays(schedule.endDate, schedule.startDate);
@@ -93,7 +93,7 @@ export function getColEndClassName(index: number, schedule: Schedule, dates: Dat
   return className;
 }
 
-export function hasDateLabel(schedule: Schedule): boolean {
+export function hasDateLabel(schedule: Type.Schedule): boolean {
   const sub = differenceInCalendarDays(schedule.endDate, schedule.startDate);
   return sub > 0;
 }

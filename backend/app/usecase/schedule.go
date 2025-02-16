@@ -31,23 +31,42 @@ func (i *ScheduleInteractor) GetScheduleList(input port.GetScheduleListInputData
 		return
 	}
 
-	var outputSchedules []port.BaseScheduleData
-	for _, schedule := range schedules {
-		s := port.BaseScheduleData{
-			ID:        schedule.ID,
-			UserID:    schedule.UserID,
-			Name:      schedule.Name,
-			StartsAt:  schedule.StartsAt.Format(time.DateTime),
-			EndsAt:    schedule.EndsAt.Format(time.DateTime),
-			Color:     schedule.Color,
-			Type:      schedule.Type.String(),
-			CreatedAt: schedule.CreatedAt.Format(time.DateTime),
-			UpdatedAt: schedule.UpdatedAt.Format(time.DateTime),
+	dil := model.ScheduleList(schedules).ToDateItemList()
+	dilMap := dil.ToTypeMap()
+	masterDateItems := dilMap[model.ScheduleTypeMaster]
+	customDateItems := dilMap[model.ScheduleTypeCustom]
+
+	appendSchedules := func(dis model.DateItemList) []port.BaseDateItemData {
+		res := make([]port.BaseDateItemData, 0, len(dis))
+		for _, di := range dis {
+			schedules := make([]port.BaseScheduleData, 0, len(di.Schedules))
+			for _, s := range di.Schedules {
+				schedules = append(schedules, port.BaseScheduleData{
+					ID:        s.ID,
+					UserID:    s.UserID,
+					Name:      s.Name,
+					StartsAt:  s.StartsAt.Format(time.DateTime),
+					EndsAt:    s.EndsAt.Format(time.DateTime),
+					Color:     s.Color,
+					Type:      s.Type.String(),
+					Order:     s.Order.Int(),
+					CreatedAt: s.CreatedAt.Format(time.DateTime),
+					UpdatedAt: s.UpdatedAt.Format(time.DateTime),
+				})
+			}
+			res = append(res, port.BaseDateItemData{
+				Date:      di.Date.Format(model.DateFormat),
+				Type:      di.Type.String(),
+				Schedules: schedules,
+			})
 		}
-		outputSchedules = append(outputSchedules, s)
+		return res
 	}
 
-	o := &port.GetScheduleListOutputData{Schedules: outputSchedules}
+	masterSchedules := appendSchedules(masterDateItems)
+	customSchedules := appendSchedules(customDateItems)
+
+	o := &port.GetScheduleListOutputData{MasterSchedules: masterSchedules, CustomSchedules: customSchedules}
 	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
 	i.OutputPort.SetResponseGetScheduleList(o, r)
 }
@@ -75,6 +94,7 @@ func (i *ScheduleInteractor) GetSchedule(input port.GetScheduleInputData) {
 		EndsAt:    schedule.EndsAt.Format(time.DateTime),
 		Color:     schedule.Color,
 		Type:      schedule.Type.String(),
+		Order:     schedule.Order.Int(),
 		CreatedAt: schedule.CreatedAt.Format(time.DateTime),
 		UpdatedAt: schedule.UpdatedAt.Format(time.DateTime),
 	}
@@ -102,6 +122,19 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 
 	sType := model.ToScheduleType(input.Schedule.Type)
 
+	order := model.Order(input.Schedule.Order)
+	if order.Empty() {
+		someStartsAtSchedules, err := i.ScheduleRepository.ReadByUserIDStartsAt(input.Schedule.UserID, startsAt)
+		if err != nil {
+			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseCreateSchedule(nil, r)
+			return
+		}
+
+		filteredSchedules := model.ScheduleList(someStartsAtSchedules).FilterByType(sType)
+		order = filteredSchedules.NextOrder()
+	}
+
 	s := model.Schedule{
 		ID:        ulid.Make().String(),
 		UserID:    input.Schedule.UserID,
@@ -110,6 +143,7 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 		EndsAt:    endsAt,
 		Color:     input.Schedule.Color,
 		Type:      sType,
+		Order:     order,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -166,6 +200,7 @@ func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) 
 		EndsAt:    endsAt,
 		Color:     input.Schedule.Color,
 		Type:      sType,
+		Order:     model.Order(input.Schedule.Order),
 		CreatedAt: bs.CreatedAt,
 		UpdatedAt: time.Now(),
 	}
@@ -192,12 +227,94 @@ func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) 
 			EndsAt:    as.EndsAt.Format(time.DateTime),
 			Color:     as.Color,
 			Type:      as.Type.String(),
+			Order:     as.Order.Int(),
 			CreatedAt: as.CreatedAt.Format(time.DateTime),
 			UpdatedAt: as.UpdatedAt.Format(time.DateTime),
 		},
 	}
 	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
 	i.OutputPort.SetResponseUpdateSchedule(o, r)
+}
+
+// UpdateBulkSchedule はスケジュールを一括更新します。
+func (i *ScheduleInteractor) UpdateBulkSchedule(input port.UpdateBulkScheduleInputData) {
+	responseSchedules := make([]port.BaseScheduleData, 0, len(input.Schedules))
+
+	for _, s := range input.Schedules {
+		startsAt, err := time.Parse(time.DateTime, s.StartsAt)
+		if err != nil {
+			r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+			return
+		}
+
+		endsAt, err := time.Parse(time.DateTime, s.EndsAt)
+		if err != nil {
+			r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+			return
+		}
+
+		sType := model.ToScheduleType(s.Type)
+
+		bs, err := i.ScheduleRepository.Read(s.ID)
+		if err != nil {
+			if repository.IsNotFoundError(err) {
+				r := port.Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+				i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+				return
+			}
+
+			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+			return
+		}
+
+		s := model.Schedule{
+			ID:        s.ID,
+			UserID:    bs.UserID,
+			Name:      s.Name,
+			StartsAt:  startsAt,
+			EndsAt:    endsAt,
+			Color:     s.Color,
+			Type:      sType,
+			Order:     model.Order(s.Order),
+			CreatedAt: bs.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+
+		if err := i.ScheduleRepository.Update(&s); err != nil {
+			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+			return
+		}
+
+		as, err := i.ScheduleRepository.Read(s.ID)
+		if err != nil {
+			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
+			return
+		}
+
+		o := port.BaseScheduleData{
+			ID:        as.ID,
+			UserID:    as.UserID,
+			Name:      as.Name,
+			StartsAt:  as.StartsAt.Format(time.DateTime),
+			EndsAt:    as.EndsAt.Format(time.DateTime),
+			Color:     as.Color,
+			Type:      as.Type.String(),
+			Order:     as.Order.Int(),
+			CreatedAt: as.CreatedAt.Format(time.DateTime),
+			UpdatedAt: as.UpdatedAt.Format(time.DateTime),
+		}
+
+		responseSchedules = append(responseSchedules, o)
+	}
+
+	o := &port.UpdateBulkScheduleOutputData{Schedules: responseSchedules}
+	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
+	i.OutputPort.SetResponseUpdateBulkSchedule(o, r)
 }
 
 // DeleteSchedule はスケジュールを削除します。

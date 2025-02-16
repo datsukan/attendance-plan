@@ -1,7 +1,10 @@
 package usecase
 
 import (
+	"context"
+	"log/slog"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -15,10 +18,11 @@ func TestSignIn(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubUserRepository{}
 		sr := &stubSessionRepository{}
 		p := &stubUserOutputPort{}
-		i := NewUserInteractor(r, sr, p)
+		i := NewUserInteractor(l, r, sr, nil, p)
 
 		input := port.SignInInputData{
 			Email:    "test-email@example.com",
@@ -52,10 +56,11 @@ func TestSignIn(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubUserRepository{}
 		sr := &stubSessionRepository{}
 		p := &stubUserOutputPort{}
-		i := NewUserInteractor(r, sr, p)
+		i := NewUserInteractor(l, r, sr, nil, p)
 
 		input := port.SignInInputData{
 			Email:    "test-not-found-email@example.com",
@@ -75,35 +80,66 @@ func TestSignIn(t *testing.T) {
 
 func TestSignUp(t *testing.T) {
 	t.Run("サインアップする", func(t *testing.T) {
-		require := require.New(t)
 		assert := assert.New(t)
 
-		r := &stubUserRepository{}
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
 		sr := &stubSessionRepository{}
+		mr := &stubEmailRepository{}
 		p := &stubUserOutputPort{}
-		i := NewUserInteractor(r, sr, p)
+		i := NewUserInteractor(l, ur, sr, mr, p)
 
+		ctx := context.Background()
 		input := port.SignUpInputData{
-			Email:    "test-email@example.com",
+			Email: "test-email@example.com",
+		}
+		i.SignUp(ctx, input)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Equal("Success", p.Result.Message)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestPasswordReset(t *testing.T) {
+	t.Run("パスワードリセットする", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		mr := &stubEmailRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, mr, p)
+
+		ctx := context.Background()
+		input := port.PasswordResetInputData{
+			Email: "test-email@example.com",
+		}
+		i.PasswordReset(ctx, input)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Equal("Success", p.Result.Message)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestPasswordSet(t *testing.T) {
+	t.Run("パスワードリセットする", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		mr := &stubEmailRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, mr, p)
+
+		input := port.PasswordSetInputData{
+			Token:    "test-token",
 			Password: "test-password",
-			Name:     "test name",
 		}
-		i.SignUp(input)
-
-		output, ok := p.Output.(*port.SignUpOutputData)
-		require.True(ok)
-
-		if !assert.NotNil(output) {
-			return
-		}
-
-		assert.NotEmpty(output.ID)
-		assert.Equal("test-email@example.com", output.Email)
-		assert.Equal("test name", output.Name)
-		assert.NotEqual(time.Time{}, output.CreatedAt)
-		assert.NotEqual(time.Time{}, output.UpdatedAt)
-
-		assert.Equal("test-token", output.SessionToken)
+		i.PasswordSet(input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
 		assert.Equal("Success", p.Result.Message)

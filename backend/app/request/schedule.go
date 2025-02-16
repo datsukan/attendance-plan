@@ -26,6 +26,7 @@ type PostScheduleRequest struct {
 	EndsAt   string `json:"ends_at"`
 	Color    string `json:"color"`
 	Type     string `json:"type"`
+	Order    int    `json:"order"`
 }
 
 // PutScheduleRequest はスケジュール更新のリクエストを表す構造体です。
@@ -36,6 +37,11 @@ type PutScheduleRequest struct {
 	EndsAt     string `json:"ends_at"`
 	Color      string `json:"color"`
 	Type       string `json:"type"`
+	Order      int    `json:"order"`
+}
+
+type PutBulkScheduleRequest struct {
+	Schedules []PutScheduleRequest `json:"schedules"`
 }
 
 // DeleteScheduleRequest はスケジュール削除のリクエストを表す構造体です。
@@ -161,6 +167,35 @@ func ValidatePutScheduleRequest(req *PutScheduleRequest) error {
 	}
 
 	return ValidateInputScheduleRequest(req.Name, req.StartsAt, req.EndsAt, req.Color, req.Type)
+}
+
+// ToPutBulkScheduleRequest は APIGatewayProxyRequest から PutBulkScheduleRequest に変換します。
+func ToPutBulkScheduleRequest(r events.APIGatewayProxyRequest) (*PutBulkScheduleRequest, error) {
+	var req PutBulkScheduleRequest
+	if err := json.Unmarshal([]byte(r.Body), &req); err != nil {
+		return nil, err
+	}
+
+	return &req, nil
+}
+
+// ValidatePutBulkScheduleRequest は PutBulkScheduleRequest のバリデーションを行います。
+func ValidatePutBulkScheduleRequest(req *PutBulkScheduleRequest) error {
+	if len(req.Schedules) == 0 {
+		return fmt.Errorf("schedules is empty")
+	}
+
+	for i, schedule := range req.Schedules {
+		// ID が空文字
+		if schedule.ScheduleID == "" {
+			return fmt.Errorf("schedule_id is empty. index: %d", i)
+		}
+
+		if err := ValidateInputScheduleRequest(schedule.Name, schedule.StartsAt, schedule.EndsAt, schedule.Color, schedule.Type); err != nil {
+			return fmt.Errorf("%s. index: %d", err.Error(), i)
+		}
+	}
+	return nil
 }
 
 // ToDeleteScheduleRequest は APIGatewayProxyRequest から DeleteScheduleRequest に変換します。

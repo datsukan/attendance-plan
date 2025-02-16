@@ -35,21 +35,3 @@ func ToSignInResponse(output *port.SignInOutputData) SignInResponse {
 
 	return SignInResponse(res)
 }
-
-// ToSignUpResponse はサインアップのレスポンスに変換します。
-func ToSignUpResponse(output *port.SignUpOutputData) SignUpResponse {
-	if output == nil {
-		return SignUpResponse{}
-	}
-
-	res := SignUpResponse{
-		ID:           output.ID,
-		Email:        output.Email,
-		Name:         output.Name,
-		CreatedAt:    output.CreatedAt,
-		UpdatedAt:    output.UpdatedAt,
-		SessionToken: output.SessionToken,
-	}
-
-	return SignUpResponse(res)
-}

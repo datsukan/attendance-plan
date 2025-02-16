@@ -1,16 +1,17 @@
-import { Schedule } from '@/type/schedule';
-import { EditSchedule } from '@/model/edit-schedule';
+import { Type } from '@/type';
+import { Model } from '@/model';
 
 import { ScheduleWeek } from '@/component/schedule/ScheduleWeek';
+import { ScheduleTypeMaster, ScheduleTypeCustom } from '@/const/schedule';
 
 type Props = {
   week: Date[];
-  masterSchedules: Schedule[];
-  customSchedules: Schedule[];
-  activeSchedule: Schedule | null;
-  removeSchedule: (id: string) => void;
-  saveSchedule: (editSchedule: EditSchedule) => void;
-  changeScheduleColor: (id: string, color: string) => void;
+  masterSchedules: Type.ScheduleDateItem[];
+  customSchedules: Type.ScheduleDateItem[];
+  activeSchedule: Type.Schedule | null;
+  removeSchedule: (id: string, type: Type.ScheduleType) => void;
+  saveSchedule: (editSchedule: Model.EditSchedule) => void;
+  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
 export const ScheduleWeekContainer = ({
@@ -23,9 +24,9 @@ export const ScheduleWeekContainer = ({
   changeScheduleColor,
 }: Props) => {
   return (
-    <div className="flex gap-3 flex-col min-h-full">
+    <div className="flex min-h-full flex-col">
       <ScheduleWeek
-        type="master"
+        type={ScheduleTypeMaster}
         dates={week}
         schedules={masterSchedules}
         activeSchedule={activeSchedule}
@@ -34,7 +35,7 @@ export const ScheduleWeekContainer = ({
         changeScheduleColor={changeScheduleColor}
       />
       <ScheduleWeek
-        type="custom"
+        type={ScheduleTypeCustom}
         dates={week}
         schedules={customSchedules}
         activeSchedule={activeSchedule}

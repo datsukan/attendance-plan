@@ -13,7 +13,7 @@ func init() {
 }
 
 func loadEnv() error {
-	env := os.Getenv("Env")
+	env := os.Getenv("ENV")
 	if env != "test" {
 		return nil
 	}

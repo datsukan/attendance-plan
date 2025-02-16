@@ -1,4 +1,4 @@
-import { Schedule } from '@/type/schedule';
+import { Type } from '@/type';
 
 export class EditSchedule {
   private id: string;
@@ -7,14 +7,16 @@ export class EditSchedule {
   private endDate: Date;
   private color: string;
   private type: 'master' | 'custom';
+  private order: number;
 
-  constructor(schedule: Schedule) {
+  constructor(schedule: Type.Schedule) {
     this.id = schedule.id;
     this.name = schedule.name;
     this.startDate = schedule.startDate;
     this.endDate = schedule.endDate;
     this.color = schedule.color;
     this.type = schedule.type;
+    this.order = schedule.order;
   }
 
   public getId(): string {
@@ -41,6 +43,10 @@ export class EditSchedule {
     return this.type;
   }
 
+  public getOrder(): number {
+    return this.order;
+  }
+
   public setName(name: string): void {
     this.name = name;
   }
@@ -59,5 +65,9 @@ export class EditSchedule {
 
   public setType(type: 'master' | 'custom'): void {
     this.type = type;
+  }
+
+  public setOrder(order: number): void {
+    this.order = order;
   }
 }

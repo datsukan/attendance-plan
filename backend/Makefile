@@ -1,10 +1,10 @@
 .PHONY: test
 test:
-	docker-compose up -d; \
-	go run ./migrate/. up; \
-	export MODE_UT=TRUE; \
-	go clean -testcache; \
-	export Env=test; \
+	docker-compose up -d
+	go run ./migrate/. up
+	export MODE_UT=TRUE
+	go clean -testcache
+	export ENV=test
 	go test -v ./app/...
 
 .PHONY: up
@@ -18,7 +18,7 @@ down:
 
 .PHONY: dev
 dev:
-	make up; \
+	make up
 	sh ./dev.sh
 
 .PHONY: deploy

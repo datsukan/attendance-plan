@@ -16,6 +16,7 @@ type Schedule struct {
 	EndsAt    time.Time `dynamo:"EndsAt"`
 	Color     string    `dynamo:"Color"`
 	Type      string    `dynamo:"Type"`
+	Order     int       `dynamo:"Order"`
 	CreatedAt time.Time `dynamo:"CreatedAt"`
 	UpdatedAt time.Time `dynamo:"UpdatedAt"`
 }

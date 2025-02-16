@@ -3,7 +3,7 @@ import { AddMasterScheduleButton } from './AddMasterScheduleButton';
 import { MoveMonthNav } from './MoveMonthNav';
 import { DayOfWeeks } from './DayOfWeeks';
 
-import { CreateSchedule } from '@/model/create-schedule';
+import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
   year: number;

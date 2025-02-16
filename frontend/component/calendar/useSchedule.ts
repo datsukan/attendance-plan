@@ -1,72 +1,135 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import type { Schedule } from '@/type/schedule';
-import { CreateSchedule } from '@/model/create-schedule';
-import { EditSchedule } from '@/model/edit-schedule';
+import type { Type } from '@/type';
+import { ScheduleTypeMaster } from '@/const/schedule';
+import { Model } from '@/model';
+
+import { fetchSchedules } from '@/api/fetchSchedules';
+import { createSchedule, CreateScheduleParam } from '@/api/createSchedule';
+import { updateSchedule } from '@/api/updateSchedule';
+import { deleteSchedule } from '@/api/deleteSchedule';
+import { Schedule } from '@/model/schedule';
 
 export const useSchedule = () => {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [masterSchedules, setMasterSchedules] = useState<Type.ScheduleDateItem[]>([]);
+  const [customSchedules, setCustomSchedules] = useState<Type.ScheduleDateItem[]>([]);
 
-  const addSchedule = (createSchedule: CreateSchedule) => {
-    const afterSchedules: Schedule[] = [...schedules];
-    if (createSchedule.getHasBulk()) {
-      for (let number = createSchedule.getBulkFrom(); number <= createSchedule.getBulkTo(); number++) {
-        afterSchedules.push({
-          id: createSchedule.getId() + '-' + number,
-          name: `第${number}回 ${createSchedule.getName()}`,
-          startDate: createSchedule.getStartDate(),
-          endDate: createSchedule.getEndDate(),
-          color: createSchedule.getColor(),
-          type: createSchedule.getType(),
-        });
-      }
-    } else {
-      afterSchedules.push({
-        id: createSchedule.getId(),
-        name: createSchedule.getName(),
-        startDate: createSchedule.getStartDate(),
-        endDate: createSchedule.getEndDate(),
-        color: createSchedule.getColor(),
-        type: createSchedule.getType(),
-      });
+  useEffect(() => {
+    (async () => {
+      const result = await fetchSchedules();
+      setMasterSchedules(result.masterSchedules);
+      setCustomSchedules(result.customSchedules);
+    })();
+  }, []);
+
+  const schedulesByType = (type: Type.ScheduleType) => {
+    return type === ScheduleTypeMaster ? masterSchedules : customSchedules;
+  };
+
+  const setSchedulesByType = (type: Type.ScheduleType, schedules: Type.ScheduleDateItem[]) => {
+    if (type === ScheduleTypeMaster) {
+      setMasterSchedules(schedules);
+      return;
     }
 
-    setSchedules(afterSchedules);
+    setCustomSchedules(schedules);
   };
 
-  const removeSchedule = (id: string) => {
-    setSchedules(schedules.filter((schedule) => schedule.id !== id));
-  };
+  const addSchedule = async (scheduleRequest: Model.CreateSchedule) => {
+    const targetSchedules = schedulesByType(scheduleRequest.getType());
+    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
+    if (scheduleRequest.getHasBulk()) {
+      for (let number = scheduleRequest.getBulkFrom(); number <= scheduleRequest.getBulkTo(); number++) {
+        const s: CreateScheduleParam = {
+          name: `第${number}回 ${scheduleRequest.getName()}`,
+          startDate: scheduleRequest.getStartDate(),
+          endDate: scheduleRequest.getEndDate(),
+          color: scheduleRequest.getColor(),
+          type: scheduleRequest.getType(),
+        };
+        const resSchedule = await createSchedule(s);
+        if (resSchedule === null) {
+          continue;
+        }
 
-  const saveSchedule = (editSchedule: EditSchedule) => {
-    const set = (schedule: Schedule) => {
-      if (schedule.id !== editSchedule.getId()) {
-        return schedule;
+        const dateKey = Model.ScheduleDateItem.toKey(s.startDate);
+        const type = new Model.ScheduleType(s.type);
+        resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
+      }
+    } else {
+      const s = {
+        name: scheduleRequest.getName(),
+        startDate: scheduleRequest.getStartDate(),
+        endDate: scheduleRequest.getEndDate(),
+        color: scheduleRequest.getColor(),
+        type: scheduleRequest.getType(),
+      };
+      const resSchedule = await createSchedule(s);
+      if (resSchedule === null) {
+        return;
       }
 
-      schedule.name = editSchedule.getName();
-      schedule.startDate = editSchedule.getStartDate();
-      schedule.endDate = editSchedule.getEndDate();
-      schedule.color = editSchedule.getColor();
-      schedule.type = editSchedule.getType();
-      return schedule;
-    };
+      const dateKey = Model.ScheduleDateItem.toKey(s.startDate);
+      const type = new Model.ScheduleType(s.type);
+      resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
+    }
 
-    setSchedules(schedules.map(set));
+    setSchedulesByType(scheduleRequest.getType(), resultSchedules.toTypeScheduleDateItems());
   };
 
-  const changeScheduleColor = (id: string, color: string) => {
-    const set = (schedule: Schedule) => {
-      if (schedule.id !== id) {
-        return schedule;
-      }
-
-      schedule.color = color;
-      return schedule;
-    };
-
-    setSchedules(schedules.map(set));
+  const removeSchedule = async (id: string, type: Type.ScheduleType) => {
+    await deleteSchedule(id);
+    const targetSchedules = schedulesByType(type);
+    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
+    resultSchedules.removeSchedule(id);
+    setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
   };
 
-  return { schedules, setSchedules, addSchedule, removeSchedule, saveSchedule, changeScheduleColor };
+  const saveSchedule = async (scheduleRequest: Model.EditSchedule) => {
+    const s: Type.Schedule = {
+      id: scheduleRequest.getId(),
+      name: scheduleRequest.getName(),
+      startDate: scheduleRequest.getStartDate(),
+      endDate: scheduleRequest.getEndDate(),
+      color: scheduleRequest.getColor(),
+      type: scheduleRequest.getType(),
+      order: scheduleRequest.getOrder(),
+    };
+
+    await updateSchedule(s);
+
+    const targetSchedules = schedulesByType(s.type);
+    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
+    resultSchedules.updateSchedule(new Schedule(s));
+
+    setSchedulesByType(s.type, resultSchedules.toTypeScheduleDateItems());
+  };
+
+  const changeScheduleColor = async (id: string, type: Type.ScheduleType, color: string) => {
+    const targetSchedules = schedulesByType(type);
+    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
+    const schedule = resultSchedules.getSchedule(id);
+    if (!schedule) {
+      return;
+    }
+
+    schedule.setColor(color);
+
+    await updateSchedule(schedule.toTypeSchedule());
+
+    resultSchedules.updateSchedule(schedule);
+  };
+
+  return {
+    masterSchedules,
+    customSchedules,
+    setMasterSchedules,
+    setCustomSchedules,
+    schedulesByType,
+    setSchedulesByType,
+    addSchedule,
+    removeSchedule,
+    saveSchedule,
+    changeScheduleColor,
+  };
 };

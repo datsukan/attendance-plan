@@ -34,75 +34,6 @@ func testScheduleSetup(t *testing.T) (*dynamo.DB, *dynamo.Table, error) {
 	return db, &table, nil
 }
 
-func TestSchedule_ReadByUserID(t *testing.T) {
-	now := time.Now()
-
-	var schedules []model.Schedule
-	for i := 0; i < 10; i++ {
-		s := model.Schedule{
-			ID:        fmt.Sprintf("test-id-%d", i),
-			UserID:    "test-user-id",
-			Name:      "test name",
-			StartsAt:  time.Date(2021, 1, 1, i, 0, 0, 0, time.UTC),
-			EndsAt:    now,
-			Color:     "test color",
-			Type:      "master",
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		schedules = append(schedules, s)
-	}
-
-	tests := []struct {
-		name string
-		data []model.Schedule
-		want []model.Schedule
-	}{
-		{name: "0件取得", data: []model.Schedule{}, want: []model.Schedule{}},
-		{name: "1件取得", data: schedules[:1], want: schedules[:1]},
-		{name: "2件取得", data: schedules[:2], want: schedules[:2]},
-		{name: "10件取得", data: schedules[:10], want: schedules[:10]},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			require := require.New(t)
-			assert := assert.New(t)
-
-			db, table, err := testScheduleSetup(t)
-			require.NoError(err)
-			require.NotNil(db)
-			require.NotNil(table)
-
-			repo := NewScheduleRepository(*db)
-
-			for _, s := range tt.data {
-				err := table.Put(s).Run()
-				require.NoError(err)
-			}
-
-			schedules, err := repo.ReadByUserID("test-user-id")
-			assert.NoError(err)
-
-			if !assert.Len(schedules, len(tt.want)) {
-				return
-			}
-
-			for i, want := range tt.want {
-				assert.Equal(want.ID, schedules[i].ID)
-				assert.Equal(want.UserID, schedules[i].UserID)
-				assert.Equal(want.Name, schedules[i].Name)
-				assert.Equal(want.StartsAt.Format(time.DateTime), schedules[i].StartsAt.Format(time.DateTime))
-				assert.Equal(want.EndsAt.Format(time.DateTime), schedules[i].EndsAt.Format(time.DateTime))
-				assert.Equal(want.Color, schedules[i].Color)
-				assert.Equal(want.Type, schedules[i].Type)
-				assert.Equal(want.CreatedAt.Format(time.DateTime), schedules[i].CreatedAt.Format(time.DateTime))
-				assert.Equal(want.UpdatedAt.Format(time.DateTime), schedules[i].UpdatedAt.Format(time.DateTime))
-			}
-		})
-	}
-}
-
 func TestSchedule_Read(t *testing.T) {
 	now := time.Now()
 
@@ -183,6 +114,175 @@ func TestSchedule_Read(t *testing.T) {
 			assert.Equal(tt.wantData.Type, schedule.Type)
 			assert.Equal(tt.wantData.CreatedAt.Format(time.DateTime), schedule.CreatedAt.Format(time.DateTime))
 			assert.Equal(tt.wantData.UpdatedAt.Format(time.DateTime), schedule.UpdatedAt.Format(time.DateTime))
+		})
+	}
+}
+
+func TestSchedule_ReadByUserID(t *testing.T) {
+	now := time.Now()
+
+	var schedules []model.Schedule
+	for i := 0; i < 10; i++ {
+		s := model.Schedule{
+			ID:        fmt.Sprintf("test-id-%d", i),
+			UserID:    "test-user-id",
+			Name:      "test name",
+			StartsAt:  time.Date(2021, 1, 1, i, 0, 0, 0, time.UTC),
+			EndsAt:    now,
+			Color:     "test color",
+			Type:      "master",
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		schedules = append(schedules, s)
+	}
+
+	tests := []struct {
+		name string
+		data []model.Schedule
+		want []model.Schedule
+	}{
+		{name: "0件取得", data: []model.Schedule{}, want: []model.Schedule{}},
+		{name: "1件取得", data: schedules[:1], want: schedules[:1]},
+		{name: "2件取得", data: schedules[:2], want: schedules[:2]},
+		{name: "10件取得", data: schedules[:10], want: schedules[:10]},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require := require.New(t)
+			assert := assert.New(t)
+
+			db, table, err := testScheduleSetup(t)
+			require.NoError(err)
+			require.NotNil(db)
+			require.NotNil(table)
+
+			repo := NewScheduleRepository(*db)
+
+			for _, s := range tt.data {
+				err := table.Put(s).Run()
+				require.NoError(err)
+			}
+
+			schedules, err := repo.ReadByUserID("test-user-id")
+			assert.NoError(err)
+
+			if !assert.Len(schedules, len(tt.want)) {
+				return
+			}
+
+			for i, want := range tt.want {
+				assert.Equal(want.ID, schedules[i].ID)
+				assert.Equal(want.UserID, schedules[i].UserID)
+				assert.Equal(want.Name, schedules[i].Name)
+				assert.Equal(want.StartsAt.Format(time.DateTime), schedules[i].StartsAt.Format(time.DateTime))
+				assert.Equal(want.EndsAt.Format(time.DateTime), schedules[i].EndsAt.Format(time.DateTime))
+				assert.Equal(want.Color, schedules[i].Color)
+				assert.Equal(want.Type, schedules[i].Type)
+				assert.Equal(want.CreatedAt.Format(time.DateTime), schedules[i].CreatedAt.Format(time.DateTime))
+				assert.Equal(want.UpdatedAt.Format(time.DateTime), schedules[i].UpdatedAt.Format(time.DateTime))
+			}
+		})
+	}
+}
+
+func TestSchedule_ReadByUserIDStartsAt(t *testing.T) {
+	now := time.Now()
+
+	dates := []time.Time{
+		time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 3, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 3, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 3, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 4, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 4, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 4, 0, 0, 0, 0, time.UTC),
+		time.Date(2021, 1, 4, 0, 0, 0, 0, time.UTC),
+	}
+
+	var schedules []model.Schedule
+	for i, date := range dates {
+		s := model.Schedule{
+			ID:        fmt.Sprintf("test-id-%d", i),
+			UserID:    "test-user-id",
+			Name:      "test name",
+			StartsAt:  date,
+			EndsAt:    now,
+			Color:     "test color",
+			Type:      "master",
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		schedules = append(schedules, s)
+
+		os := model.Schedule{
+			ID:        fmt.Sprintf("test-other-id-%d", i),
+			UserID:    "test-other-user-id",
+			Name:      "test other name",
+			StartsAt:  date,
+			EndsAt:    now,
+			Color:     "test other color",
+			Type:      "custom",
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		schedules = append(schedules, os)
+	}
+
+	require := require.New(t)
+
+	db, table, err := testScheduleSetup(t)
+	require.NoError(err)
+	require.NotNil(db)
+	require.NotNil(table)
+
+	for _, s := range schedules {
+		err := table.Put(s).Run()
+		require.NoError(err)
+	}
+
+	tests := []struct {
+		name     string
+		startsAt time.Time
+		want     []model.Schedule
+	}{
+		{name: "0件取得", startsAt: time.Date(2021, 1, 5, 0, 0, 0, 0, time.UTC), want: []model.Schedule{}},
+		{name: "1件取得", startsAt: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC), want: schedules[:1]},
+		{name: "2件取得", startsAt: time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC), want: []model.Schedule{schedules[2], schedules[4]}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			repo := NewScheduleRepository(*db)
+			got, err := repo.ReadByUserIDStartsAt("test-user-id", tt.startsAt)
+			assert.NoError(err)
+
+			if !assert.Len(got, len(tt.want)) {
+				return
+			}
+
+			for _, want := range tt.want {
+				for _, s := range got {
+					if want.ID != s.ID {
+						continue
+					}
+
+					assert.Equal(want.ID, s.ID)
+					assert.Equal(want.UserID, s.UserID)
+					assert.Equal(want.Name, s.Name)
+					assert.Equal(want.StartsAt.Format(time.DateTime), s.StartsAt.Format(time.DateTime))
+					assert.Equal(want.EndsAt.Format(time.DateTime), s.EndsAt.Format(time.DateTime))
+					assert.Equal(want.Color, s.Color)
+					assert.Equal(want.Type, s.Type)
+					assert.Equal(want.CreatedAt.Format(time.DateTime), s.CreatedAt.Format(time.DateTime))
+					assert.Equal(want.UpdatedAt.Format(time.DateTime), s.UpdatedAt.Format(time.DateTime))
+				}
+			}
 		})
 	}
 }

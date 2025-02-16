@@ -1,7 +1,4 @@
-import { format } from 'date-fns';
-
 export class CreateSchedule {
-  private id: string;
   private name: string;
   private startDate: Date;
   private endDate: Date;
@@ -21,7 +18,6 @@ export class CreateSchedule {
     bulkFrom: number = 0,
     bulkTo: number = 0
   ) {
-    this.id = format(new Date(), 'yyyyMMddHHmmss');
     this.name = name;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -30,10 +26,6 @@ export class CreateSchedule {
     this.hasBulk = hasBulk;
     this.bulkFrom = bulkFrom;
     this.bulkTo = bulkTo;
-  }
-
-  public getId(): string {
-    return this.id;
   }
 
   public getName(): string {
@@ -54,6 +46,14 @@ export class CreateSchedule {
 
   public getType(): 'master' | 'custom' {
     return this.type;
+  }
+
+  public isMasterType(): boolean {
+    return this.type === 'master';
+  }
+
+  public isCustomType(): boolean {
+    return this.type === 'custom';
   }
 
   public getHasBulk(): boolean {

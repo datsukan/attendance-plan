@@ -17,7 +17,7 @@ func NewDB() *dynamo.DB {
 		dynamoDbRegion = "ap-northeast-1"
 	}
 
-	dynamoDbEndpoint := os.Getenv("DynamoEndpoint")
+	dynamoDbEndpoint := os.Getenv("DYNAMO_ENDPOINT")
 
 	config := &aws.Config{
 		Region:   aws.String(dynamoDbRegion),

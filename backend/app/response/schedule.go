@@ -15,13 +15,21 @@ type ScheduleResponse struct {
 	EndsAt    string `json:"ends_at"`
 	Color     string `json:"color"`
 	Type      string `json:"type"`
+	Order     int    `json:"order"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
 
+type ScheduleResponseDateItem struct {
+	Date      string             `json:"date"`
+	Type      string             `json:"type"`
+	Schedules []ScheduleResponse `json:"schedules"`
+}
+
 // GetScheduleListResponse はスケジュールリスト取得のレスポンスを表す構造体です。
 type GetScheduleListResponse struct {
-	Schedules []ScheduleResponse `json:"schedules"`
+	MasterSchedules []ScheduleResponseDateItem `json:"master_schedules"`
+	CustomSchedules []ScheduleResponseDateItem `json:"custom_schedules"`
 }
 
 // GetScheduleResponse はスケジュール取得のレスポンスを表す構造体です。
@@ -33,21 +41,52 @@ type PostScheduleResponse ScheduleResponse
 // PutScheduleResponse はスケジュール更新のレスポンスを表す構造体です。
 type PutScheduleResponse ScheduleResponse
 
+type PutBulkScheduleResponse struct {
+	Schedules []ScheduleResponse `json:"schedules"`
+}
+
 // ToGetScheduleListResponse はスケジュールリスト取得のレスポンスに変換します。
 func ToGetScheduleListResponse(output *port.GetScheduleListOutputData) GetScheduleListResponse {
-	if output == nil || len(output.Schedules) == 0 {
+	if output == nil || (len(output.MasterSchedules) == 0 && len(output.CustomSchedules) == 0) {
 		return GetScheduleListResponse{
-			Schedules: []ScheduleResponse{},
+			MasterSchedules: []ScheduleResponseDateItem{},
+			CustomSchedules: []ScheduleResponseDateItem{},
 		}
 	}
 
-	var ss []ScheduleResponse
-	for _, s := range output.Schedules {
-		ss = append(ss, ScheduleResponse(s))
+	var ms []ScheduleResponseDateItem
+	for _, s := range output.MasterSchedules {
+		di := ScheduleResponseDateItem{
+			Date:      s.Date,
+			Type:      s.Type,
+			Schedules: []ScheduleResponse{},
+		}
+
+		for _, ss := range s.Schedules {
+			di.Schedules = append(di.Schedules, ScheduleResponse(ss))
+		}
+
+		ms = append(ms, di)
+	}
+
+	var cs []ScheduleResponseDateItem
+	for _, s := range output.CustomSchedules {
+		di := ScheduleResponseDateItem{
+			Date:      s.Date,
+			Type:      s.Type,
+			Schedules: []ScheduleResponse{},
+		}
+
+		for _, ss := range s.Schedules {
+			di.Schedules = append(di.Schedules, ScheduleResponse(ss))
+		}
+
+		cs = append(cs, di)
 	}
 
 	return GetScheduleListResponse{
-		Schedules: ss,
+		MasterSchedules: ms,
+		CustomSchedules: cs,
 	}
 }
 
@@ -74,6 +113,7 @@ func ToPostScheduleResponse(output *port.CreateScheduleOutputData) PostScheduleR
 		EndsAt:    output.EndsAt.Format(time.DateTime),
 		Color:     output.Color,
 		Type:      output.Type.String(),
+		Order:     output.Order.Int(),
 		CreatedAt: output.CreatedAt.Format(time.DateTime),
 		UpdatedAt: output.UpdatedAt.Format(time.DateTime),
 	}
@@ -86,4 +126,22 @@ func ToPutScheduleResponse(output *port.UpdateScheduleOutputData) PutScheduleRes
 	}
 
 	return PutScheduleResponse(output.Schedule)
+}
+
+// ToPutBulkScheduleResponse はスケジュール一括更新のレスポンスに変換します。
+func ToPutBulkScheduleResponse(output *port.UpdateBulkScheduleOutputData) PutBulkScheduleResponse {
+	if output == nil || len(output.Schedules) == 0 {
+		return PutBulkScheduleResponse{
+			Schedules: []ScheduleResponse{},
+		}
+	}
+
+	var ss []ScheduleResponse
+	for _, s := range output.Schedules {
+		ss = append(ss, ScheduleResponse(s))
+	}
+
+	return PutBulkScheduleResponse{
+		Schedules: ss,
+	}
 }

@@ -17,6 +17,9 @@ import (
 
 // GetScheduleList はスケジュールリストを取得します。
 func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start get schedule list")
+
 	config := infrastructure.GetConfig()
 	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
 	am := middleware.NewAuthMiddleware(ssRepo)
@@ -46,12 +49,19 @@ func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
+		Headers:    response.CORSHeaders,
 	}
+
+	logger.Info("end get schedule list")
+
 	return res, nil
 }
 
 // GetSchedule はスケジュールを取得します。
 func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start get schedule")
+
 	config := infrastructure.GetConfig()
 	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
 	am := middleware.NewAuthMiddleware(ssRepo)
@@ -90,12 +100,19 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
+		Headers:    response.CORSHeaders,
 	}
+
+	logger.Info("end get schedule")
+
 	return res, nil
 }
 
 // PostSchedule はスケジュールを登録します。
 func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start post schedule")
+
 	config := infrastructure.GetConfig()
 	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
 	am := middleware.NewAuthMiddleware(ssRepo)
@@ -126,6 +143,7 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 			EndsAt:   req.EndsAt,
 			Color:    req.Color,
 			Type:     req.Type,
+			Order:    req.Order,
 		},
 	}
 	interactor.CreateSchedule(input)
@@ -134,12 +152,19 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
+		Headers:    response.CORSHeaders,
 	}
+
+	logger.Info("end post schedule")
+
 	return res, nil
 }
 
 // PutSchedule はスケジュールを更新します。
 func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start put schedule")
+
 	config := infrastructure.GetConfig()
 	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
 	am := middleware.NewAuthMiddleware(ssRepo)
@@ -183,6 +208,7 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 			EndsAt:   req.EndsAt,
 			Color:    req.Color,
 			Type:     req.Type,
+			Order:    req.Order,
 		},
 	}
 	interactor.UpdateSchedule(input)
@@ -191,12 +217,86 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
+		Headers:    response.CORSHeaders,
 	}
+
+	logger.Info("end put schedule")
+
+	return res, nil
+}
+
+// PutBulkSchedule はスケジュールを一括更新します。
+func PutBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start put bulk schedule")
+
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, err.Error())
+	}
+
+	req, err := request.ToPutBulkScheduleRequest(r)
+	if err != nil {
+		return response.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := request.ValidatePutBulkScheduleRequest(req); err != nil {
+		return response.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	db := infrastructure.NewDB()
+	sr := repository.NewScheduleRepository(*db)
+	op := presenter.NewSchedulePresenter()
+	interactor := usecase.NewScheduleInteractor(sr, op)
+
+	schedules := make([]port.UpdateScheduleData, len(req.Schedules))
+	for i, s := range req.Schedules {
+		schedule, err := sr.Read(s.ScheduleID)
+		if err != nil {
+			if errors.Is(err, repository.NewNotFoundError()) {
+				return response.NewError(http.StatusNotFound, err.Error())
+			}
+			return response.NewError(http.StatusInternalServerError, err.Error())
+		}
+
+		if schedule.UserID != userID {
+			return response.NewError(http.StatusForbidden, "forbidden")
+		}
+
+		schedules[i] = port.UpdateScheduleData{
+			ID:       s.ScheduleID,
+			Name:     s.Name,
+			StartsAt: s.StartsAt,
+			EndsAt:   s.EndsAt,
+			Color:    s.Color,
+			Type:     s.Type,
+			Order:    s.Order,
+		}
+	}
+
+	input := port.UpdateBulkScheduleInputData{Schedules: schedules}
+	interactor.UpdateBulkSchedule(input)
+
+	statusCode, body := op.GetResponse()
+	res := events.APIGatewayProxyResponse{
+		StatusCode: statusCode,
+		Body:       body,
+		Headers:    response.CORSHeaders,
+	}
+
+	logger.Info("end put bulk schedule")
+
 	return res, nil
 }
 
 // DeleteSchedule はスケジュールを削除します。
 func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start delete schedule")
+
 	config := infrastructure.GetConfig()
 	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
 	am := middleware.NewAuthMiddleware(ssRepo)
@@ -235,6 +335,10 @@ func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResp
 	res := events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       body,
+		Headers:    response.CORSHeaders,
 	}
+
+	logger.Info("end delete schedule")
+
 	return res, nil
 }

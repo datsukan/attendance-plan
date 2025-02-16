@@ -27,6 +27,12 @@ SignUpFunction:
     Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref UserTable
+      - Statement:
+          - Effect: Allow
+            Action:
+              - ses:SendEmail
+              - ses:SendRawEmail
+            Resource: "*"
 SignUpFunctionPermission:
   Type: AWS::Lambda::Permission
   Properties:

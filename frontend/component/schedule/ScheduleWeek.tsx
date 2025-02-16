@@ -1,10 +1,10 @@
 import { useDroppable, DragOverlay } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { SortableContext } from '@dnd-kit/sortable';
 
 import { ScheduleWeekItem } from '@/component/schedule/ScheduleWeekItem';
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
-import { Schedule } from '@/type/schedule';
+import { Type } from '@/type';
 import { useDateKey } from '@/component/useDateKey';
 import {
   isShowItem,
@@ -13,37 +13,46 @@ import {
   getColEndClassName,
   toScheduleTypeName,
 } from '@/component/schedule/schedule-module';
-import { EditSchedule } from '@/model/edit-schedule';
+import { Model } from '@/model';
 
 type Props = {
-  type: 'master' | 'custom';
+  type: Type.ScheduleType;
   dates: Date[];
-  schedules: Schedule[];
-  activeSchedule: Schedule | null;
-  removeSchedule: (id: string) => void;
-  saveSchedule: (editSchedule: EditSchedule) => void;
-  changeScheduleColor: (id: string, color: string) => void;
+  schedules: Type.ScheduleDateItem[];
+  activeSchedule: Type.Schedule | null;
+  removeSchedule: (id: string, type: Type.ScheduleType) => void;
+  saveSchedule: (editSchedule: Model.EditSchedule) => void;
+  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
-export const ScheduleWeek = ({ type, dates, schedules, activeSchedule, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
+export const ScheduleWeek = ({
+  type,
+  dates,
+  schedules: scheduleDateItem,
+  activeSchedule,
+  removeSchedule,
+  saveSchedule,
+  changeScheduleColor,
+}: Props) => {
   const { dateToKey } = useDateKey();
+  const schedules = scheduleDateItem.flatMap((item) => item.schedules);
 
   if (!dates || dates.length === 0) {
     return;
   }
 
-  if (!schedules || schedules.length === 0) {
+  if (!scheduleDateItem || scheduleDateItem.length === 0) {
     return;
   }
 
   return (
-    <div className="min-h-14 grid">
-      <div className="col-start-1 row-start-1 grid grid-cols-7 h-full">
+    <div className="grid min-h-14">
+      <div className="col-start-1 row-start-1 grid h-full grid-cols-7">
         {dates.map((date) => (
           <Droppable key={`${type}-${dateToKey(date)}`} id={`${type}-${dateToKey(date)}`} date={date} type={type} />
         ))}
       </div>
-      <div className="col-start-1 row-start-1 grid grid-cols-7 gap-y-1 grid-flow-col">
+      <div className="col-start-1 row-start-1 grid grid-flow-col grid-cols-7 gap-y-1 pb-4">
         {dates.map((date, index) => {
           const displaySchedules = schedules.filter((schedule) => isDisplaySchedule(schedule, date) && isShowItem(index, schedule, date));
           return (
@@ -95,8 +104,8 @@ const Droppable = ({ id, date, type }: DroppableProps) => {
   });
 
   return (
-    <div ref={setNodeRef} className={isOver ? 'bg-blue-50 flex justify-center items-center' : ''}>
-      {isOver && <span className="z-10 text-sm text-blue-600 px-3 py-1 rounded-md bg-blue-50">{toScheduleTypeName(type)}</span>}
+    <div ref={setNodeRef} className={isOver ? 'flex items-center justify-center bg-blue-200' : ''}>
+      {isOver && <span className="z-[9999] rounded-md bg-blue-600 px-3 py-1 text-sm text-blue-50">{toScheduleTypeName(type)}</span>}
     </div>
   );
 };

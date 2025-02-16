@@ -17,7 +17,18 @@ export const Calender = () => {
   const { targetDate, targetYear, targetMonth, incrementMonth, decrementMonth, resetMonth } = useTargetDate(now, calendarRef);
   const { weeks, monthCount, addMonthCount } = useDates(targetDate);
   const { initPagePosition, execWhenPageBottom } = usePagePosition();
-  const { schedules, setSchedules, addSchedule, removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
+  const {
+    masterSchedules,
+    customSchedules,
+    setMasterSchedules,
+    setCustomSchedules,
+    schedulesByType,
+    setSchedulesByType,
+    addSchedule,
+    removeSchedule,
+    saveSchedule,
+    changeScheduleColor,
+  } = useSchedule();
 
   useEffect(() => {
     initPagePosition();
@@ -46,13 +57,17 @@ export const Calender = () => {
 
   return (
     <div className="relative" ref={calendarRef}>
-      <div className="sticky top-0 bg-white z-10">
+      <div className="sticky top-0 z-10 bg-white">
         <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
       </div>
       <CalenderDates
         weeks={weeks}
-        schedules={schedules}
-        setSchedules={setSchedules}
+        masterSchedules={masterSchedules}
+        customSchedules={customSchedules}
+        setMasterSchedules={setMasterSchedules}
+        setCustomSchedules={setCustomSchedules}
+        schedulesByType={schedulesByType}
+        setSchedulesByType={setSchedulesByType}
         removeSchedule={removeSchedule}
         saveSchedule={saveSchedule}
         changeScheduleColor={changeScheduleColor}

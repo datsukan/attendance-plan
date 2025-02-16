@@ -38,21 +38,37 @@ func TestUser_ReadByEmail(t *testing.T) {
 	db, table, err := testUserSetup(t)
 	require.NoError(t, err)
 
-	user := model.User{
-		ID:    "test-id",
-		Email: "test@example.com",
-		Name:  "test name",
+	users := []model.User{
+		{
+			ID:      "test-id",
+			Email:   "test@example.com",
+			Name:    "test name",
+			Enabled: true,
+		},
+		{
+			ID:      "test-disabled-id",
+			Email:   "test-disabled@example.com",
+			Enabled: false,
+		},
 	}
-	err = table.Put(user).Run()
-	require.NoError(t, err)
+	for _, user := range users {
+		err := table.Put(user).Run()
+		require.NoError(t, err)
+	}
 
 	tests := []struct {
 		name         string
 		email        string
+		enabledOnly  bool
+		wantUser     model.User
 		wantHasError bool
 	}{
-		{name: "存在しないメールアドレス", email: "none@example.com", wantHasError: true},
-		{name: "存在するメールアドレス", email: "test@example.com", wantHasError: false},
+		{name: "有効のみ取得 / 存在しないメールアドレス", email: "none@example.com", enabledOnly: true, wantHasError: true},
+		{name: "有効のみ取得 / 存在して有効なメールアドレス", email: "test@example.com", enabledOnly: true, wantUser: users[0], wantHasError: false},
+		{name: "有効のみ取得 / 存在して無効なメールアドレス", email: "test-disabled@example.com", enabledOnly: true, wantUser: users[1], wantHasError: true},
+		{name: "無効も取得 / 存在しないメールアドレス", email: "none@example.com", enabledOnly: false, wantHasError: true},
+		{name: "無効も取得 / 存在して有効なメールアドレス", email: "test@example.com", enabledOnly: false, wantUser: users[0], wantHasError: false},
+		{name: "無効も取得 / 存在して無効なメールアドレス", email: "test-disabled@example.com", enabledOnly: false, wantUser: users[1], wantHasError: false},
 	}
 
 	for _, tt := range tests {
@@ -60,7 +76,7 @@ func TestUser_ReadByEmail(t *testing.T) {
 			assert := assert.New(t)
 			repo := NewUserRepository(*db)
 
-			got, err := repo.ReadByEmail(tt.email)
+			got, err := repo.ReadByEmail(tt.email, tt.enabledOnly)
 			if tt.wantHasError {
 				assert.Error(err)
 				return
@@ -71,9 +87,9 @@ func TestUser_ReadByEmail(t *testing.T) {
 				return
 			}
 
-			assert.Equal(user.ID, got.ID)
-			assert.Equal(user.Email, got.Email)
-			assert.Equal(user.Name, got.Name)
+			assert.Equal(tt.wantUser.ID, got.ID)
+			assert.Equal(tt.wantUser.Email, got.Email)
+			assert.Equal(tt.wantUser.Name, got.Name)
 
 		})
 	}
@@ -83,21 +99,37 @@ func TestUser_Read(t *testing.T) {
 	db, table, err := testUserSetup(t)
 	require.NoError(t, err)
 
-	user := model.User{
-		ID:    "test-id",
-		Email: "test@example.com",
-		Name:  "test name",
+	users := []model.User{
+		{
+			ID:      "test-id",
+			Email:   "test@example.com",
+			Name:    "test name",
+			Enabled: true,
+		},
+		{
+			ID:      "test-disabled-id",
+			Email:   "test-disabled@example.com",
+			Enabled: false,
+		},
 	}
-	err = table.Put(user).Run()
-	require.NoError(t, err)
+	for _, user := range users {
+		err := table.Put(user).Run()
+		require.NoError(t, err)
+	}
 
 	tests := []struct {
 		name         string
 		id           string
+		enabledOnly  bool
+		wantUser     model.User
 		wantHasError bool
 	}{
-		{name: "存在しない ID", id: "none-id", wantHasError: true},
-		{name: "存在する ID", id: "test-id", wantHasError: false},
+		{name: "有効のみ取得 / 存在しない ID", id: "none-id", enabledOnly: true, wantHasError: true},
+		{name: "有効のみ取得 / 存在して有効な ID", id: "test-id", enabledOnly: true, wantUser: users[0], wantHasError: false},
+		{name: "有効のみ取得 / 存在して無効な ID", id: "test-disabled-id", enabledOnly: true, wantUser: users[1], wantHasError: true},
+		{name: "無効も取得 / 存在しない ID", id: "none-id", enabledOnly: false, wantHasError: true},
+		{name: "無効も取得 / 存在して有効な ID", id: "test-id", enabledOnly: false, wantUser: users[0], wantHasError: false},
+		{name: "無効も取得 / 存在して無効な ID", id: "test-disabled-id", enabledOnly: false, wantUser: users[1], wantHasError: false},
 	}
 
 	for _, tt := range tests {
@@ -105,7 +137,7 @@ func TestUser_Read(t *testing.T) {
 			assert := assert.New(t)
 			repo := NewUserRepository(*db)
 
-			got, err := repo.Read(tt.id)
+			got, err := repo.Read(tt.id, tt.enabledOnly)
 			if tt.wantHasError {
 				assert.Error(err)
 				return
@@ -116,9 +148,9 @@ func TestUser_Read(t *testing.T) {
 				return
 			}
 
-			assert.Equal(user.ID, got.ID)
-			assert.Equal(user.Email, got.Email)
-			assert.Equal(user.Name, got.Name)
+			assert.Equal(tt.wantUser.ID, got.ID)
+			assert.Equal(tt.wantUser.Email, got.Email)
+			assert.Equal(tt.wantUser.Name, got.Name)
 		})
 	}
 }
@@ -256,20 +288,44 @@ func TestUser_Exists(t *testing.T) {
 			Email:     fmt.Sprintf("test-%d@example.com", i),
 			Password:  fmt.Sprintf("test-password-%d", i),
 			Name:      fmt.Sprintf("test name %d", i),
+			Enabled:   true,
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
 		users = append(users, user)
 	}
 
+	var disabledUsers []model.User
+	for i := 0; i < 2; i++ {
+		user := model.User{
+			ID:        fmt.Sprintf("test-disabled-id-%d", i),
+			Email:     fmt.Sprintf("test-disabled-%d@example.com", i),
+			Enabled:   false,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		disabledUsers = append(disabledUsers, user)
+	}
+
 	tests := []struct {
-		name string
-		data []model.User
-		want bool
+		name        string
+		id          string
+		data        []model.User
+		enabledOnly bool
+		want        bool
 	}{
-		{name: "レコード全体が0件の場合", data: []model.User{}, want: false},
-		{name: "レコード全体が1件の場合", data: users[:1], want: true},
-		{name: "レコード全体が2件の場合", data: users[:2], want: true},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が0件の場合", id: "test-id-0", data: []model.User{}, enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が1件の場合", id: "test-id-0", data: users[:1], enabledOnly: true, want: true},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が2件の場合", id: "test-id-0", data: users[:2], enabledOnly: true, want: true},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が0件の場合", id: "test-disabled-id-0", data: []model.User{}, enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が1件の場合", id: "test-disabled-id-0", data: disabledUsers[:1], enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が2件の場合", id: "test-disabled-id-0", data: disabledUsers[:2], enabledOnly: true, want: false},
+		{name: "無効も取得 / 有効なレコード / レコード全体が0件の場合", id: "test-id-0", data: []model.User{}, enabledOnly: false, want: false},
+		{name: "無効も取得 / 有効なレコード / レコード全体が1件の場合", id: "test-id-0", data: users[:1], enabledOnly: false, want: true},
+		{name: "無効も取得 / 有効なレコード / レコード全体が2件の場合", id: "test-id-0", data: users[:2], enabledOnly: false, want: true},
+		{name: "無効も取得 / 無効なレコード / レコード全体が0件の場合", id: "test-disabled-id-0", data: []model.User{}, enabledOnly: false, want: false},
+		{name: "無効も取得 / 無効なレコード / レコード全体が1件の場合", id: "test-disabled-id-0", data: disabledUsers[:1], enabledOnly: false, want: true},
+		{name: "無効も取得 / 無効なレコード / レコード全体が2件の場合", id: "test-disabled-id-0", data: disabledUsers[:2], enabledOnly: false, want: true},
 	}
 
 	for _, tt := range tests {
@@ -289,7 +345,7 @@ func TestUser_Exists(t *testing.T) {
 
 			repo := NewUserRepository(*db)
 
-			got, err := repo.Exists("test-id-0")
+			got, err := repo.Exists(tt.id, tt.enabledOnly)
 			assert.NoError(err)
 
 			assert.Equal(tt.want, got)
@@ -307,20 +363,44 @@ func TestUser_ExistsByEmail(t *testing.T) {
 			Email:     fmt.Sprintf("test-%d@example.com", i),
 			Password:  fmt.Sprintf("test-password-%d", i),
 			Name:      fmt.Sprintf("test name %d", i),
+			Enabled:   true,
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
 		users = append(users, user)
 	}
 
+	var disabledUsers []model.User
+	for i := 0; i < 2; i++ {
+		user := model.User{
+			ID:        fmt.Sprintf("test-disabled-id-%d", i),
+			Email:     fmt.Sprintf("test-disabled-%d@example.com", i),
+			Enabled:   false,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		disabledUsers = append(disabledUsers, user)
+	}
+
 	tests := []struct {
-		name string
-		data []model.User
-		want bool
+		name        string
+		email       string
+		data        []model.User
+		enabledOnly bool
+		want        bool
 	}{
-		{name: "レコード全体が0件の場合", data: []model.User{}, want: false},
-		{name: "レコード全体が1件の場合", data: users[:1], want: true},
-		{name: "レコード全体が2件の場合", data: users[:2], want: true},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が0件の場合", email: "test-0@example.com", data: []model.User{}, enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が1件の場合", email: "test-0@example.com", data: users[:1], enabledOnly: true, want: true},
+		{name: "有効のみ取得 / 有効なレコード / レコード全体が2件の場合", email: "test-0@example.com", data: users[:2], enabledOnly: true, want: true},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が0件の場合", email: "test-disabled-0@example.com", data: []model.User{}, enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が1件の場合", email: "test-disabled-0@example.com", data: disabledUsers[:1], enabledOnly: true, want: false},
+		{name: "有効のみ取得 / 無効なレコード / レコード全体が2件の場合", email: "test-disabled-0@example.com", data: disabledUsers[:2], enabledOnly: true, want: false},
+		{name: "無効も取得 / 有効なレコード / レコード全体が0件の場合", email: "test-0@example.com", data: []model.User{}, enabledOnly: false, want: false},
+		{name: "無効も取得 / 有効なレコード / レコード全体が1件の場合", email: "test-0@example.com", data: users[:1], enabledOnly: false, want: true},
+		{name: "無効も取得 / 有効なレコード / レコード全体が2件の場合", email: "test-0@example.com", data: users[:2], enabledOnly: false, want: true},
+		{name: "無効も取得 / 無効なレコード / レコード全体が0件の場合", email: "test-disabled-0@example.com", data: []model.User{}, enabledOnly: false, want: false},
+		{name: "無効も取得 / 無効なレコード / レコード全体が1件の場合", email: "test-disabled-0@example.com", data: disabledUsers[:1], enabledOnly: false, want: true},
+		{name: "無効も取得 / 無効なレコード / レコード全体が2件の場合", email: "test-disabled-0@example.com", data: disabledUsers[:2], enabledOnly: false, want: true},
 	}
 
 	for _, tt := range tests {
@@ -340,7 +420,7 @@ func TestUser_ExistsByEmail(t *testing.T) {
 
 			repo := NewUserRepository(*db)
 
-			got, err := repo.ExistsByEmail("test-0@example.com")
+			got, err := repo.ExistsByEmail(tt.email, tt.enabledOnly)
 			assert.NoError(err)
 
 			assert.Equal(tt.want, got)

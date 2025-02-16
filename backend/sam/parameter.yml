@@ -1,3 +1,13 @@
+Env:
+  Type: String
+ServiceName:
+  Type: String
+BaseUrl:
+  Type: String
+SenderEmail:
+  Type: String
+SenderName:
+  Type: String
 DomainName:
   Type: String
 CertificateArn:
