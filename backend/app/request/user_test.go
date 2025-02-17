@@ -2,9 +2,11 @@ package request
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/datsukan/attendance-plan/backend/app/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -170,10 +172,18 @@ func TestValidatePasswordSetRequest(t *testing.T) {
 			want: errors.New("パスワードを入力してください"),
 		},
 		{
+			name: "異常系: password の内容が条件を満たさない場合はエラー",
+			req: &PasswordSetRequest{
+				Token:    "test-token",
+				Password: "test",
+			},
+			want: fmt.Errorf("パスワードは%d～%d文字以内にしてください", model.PasswordMinLength, model.PasswordMaxLength),
+		},
+		{
 			name: "正常系",
 			req: &PasswordSetRequest{
 				Token:    "test-token",
-				Password: "test-password",
+				Password: "Password1!",
 			},
 			want: nil,
 		},

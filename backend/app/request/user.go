@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/datsukan/attendance-plan/backend/app/model"
 )
 
 // SignInRequest はサインインのリクエストパラメータの構造体です。
@@ -96,6 +97,11 @@ func ValidatePasswordSetRequest(req *PasswordSetRequest) error {
 
 	if req.Password == "" {
 		return fmt.Errorf("パスワードを入力してください")
+	}
+
+	password := model.Password(req.Password)
+	if err := password.Validate(); err != nil {
+		return err
 	}
 
 	return nil

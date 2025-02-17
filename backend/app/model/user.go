@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 // User はユーザーの model を表す構造体です。
 type User struct {
