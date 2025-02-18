@@ -25,22 +25,38 @@ func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req := request.ToGetScheduleListRequest(r)
 	if err := request.ValidateGetScheduleListRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	if req.UserID != userID {
-		return response.NewError(http.StatusForbidden, "forbidden")
+		logger.Warn("forbidden", "request_user_id", req.UserID)
+		return response.NewError(http.StatusForbidden, usecase.MsgUserNotFound)
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
 	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 
 	input := port.GetScheduleListInputData{UserID: req.UserID}
 	interactor.GetScheduleList(input)
@@ -67,31 +83,50 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req := request.ToGetScheduleRequest(r)
 	if err := request.ValidateGetScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
 
 	schedule, err := sr.Read(req.ScheduleID)
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
-			return response.NewError(http.StatusNotFound, err.Error())
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusNotFound, usecase.MsgScheduleNotFound)
 		}
-		return response.NewError(http.StatusInternalServerError, err.Error())
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 	}
 
 	if schedule.UserID != userID {
-		return response.NewError(http.StatusForbidden, "forbidden")
+		logger.Warn("forbidden", "request_user_id", schedule.UserID)
+		return response.NewError(http.StatusForbidden, usecase.MsgUserNotFound)
 	}
 
 	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 
 	input := port.GetScheduleInputData{ScheduleID: req.ScheduleID}
 	interactor.GetSchedule(input)
@@ -118,22 +153,37 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req, err := request.ToPostScheduleRequest(r)
 	if err != nil {
-		return response.NewError(http.StatusBadRequest, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusBadRequest, usecase.MsgRequestFormatInvalid)
 	}
 
 	if err := request.ValidatePostScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
 	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 
 	input := port.CreateScheduleInputData{
 		Schedule: port.CreateScheduleData{
@@ -170,35 +220,54 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req, err := request.ToPutScheduleRequest(r)
 	if err != nil {
-		return response.NewError(http.StatusBadRequest, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusBadRequest, usecase.MsgRequestFormatInvalid)
 	}
 
 	if err := request.ValidatePutScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
 
 	schedule, err := sr.Read(req.ScheduleID)
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
-			return response.NewError(http.StatusNotFound, err.Error())
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusNotFound, usecase.MsgScheduleNotFound)
 		}
-		return response.NewError(http.StatusInternalServerError, err.Error())
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 	}
 
 	if schedule.UserID != userID {
-		return response.NewError(http.StatusForbidden, "forbidden")
+		logger.Warn("forbidden", "request_user_id", schedule.UserID)
+		return response.NewError(http.StatusForbidden, usecase.MsgUserNotFound)
 	}
 
 	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 
 	input := port.UpdateScheduleInputData{
 		Schedule: port.UpdateScheduleData{
@@ -235,35 +304,52 @@ func PutBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req, err := request.ToPutBulkScheduleRequest(r)
 	if err != nil {
-		return response.NewError(http.StatusBadRequest, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusBadRequest, usecase.MsgRequestFormatInvalid)
 	}
 
 	if err := request.ValidatePutBulkScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
-	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
 
 	schedules := make([]port.UpdateScheduleData, len(req.Schedules))
 	for i, s := range req.Schedules {
 		schedule, err := sr.Read(s.ScheduleID)
 		if err != nil {
 			if errors.Is(err, repository.NewNotFoundError()) {
-				return response.NewError(http.StatusNotFound, err.Error())
+				logger.Warn(err.Error())
+				return response.NewError(http.StatusNotFound, usecase.MsgScheduleNotFound)
 			}
-			return response.NewError(http.StatusInternalServerError, err.Error())
+
+			logger.Error(err.Error())
+			return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 		}
 
 		if schedule.UserID != userID {
-			return response.NewError(http.StatusForbidden, "forbidden")
+			logger.Warn("forbidden", "request_user_id", schedule.UserID)
+			return response.NewError(http.StatusForbidden, usecase.MsgUserNotFound)
 		}
 
 		schedules[i] = port.UpdateScheduleData{
@@ -278,6 +364,8 @@ func PutBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	}
 
 	input := port.UpdateBulkScheduleInputData{Schedules: schedules}
+	op := presenter.NewSchedulePresenter()
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 	interactor.UpdateBulkSchedule(input)
 
 	statusCode, body := op.GetResponse()
@@ -302,31 +390,57 @@ func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResp
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
-		return response.NewError(http.StatusUnauthorized, err.Error())
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
 	}
+
+	logger.With("user_id", userID)
 
 	req := request.ToDeleteScheduleRequest(r)
 	if err := request.ValidateDeleteScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
 	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
 	sr := repository.NewScheduleRepository(*db)
 
 	schedule, err := sr.Read(req.ScheduleID)
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
-			return response.NewError(http.StatusNotFound, err.Error())
+			logger.Warn(err.Error())
+			res := events.APIGatewayProxyResponse{
+				StatusCode: http.StatusNoContent,
+				Headers:    response.CORSHeaders,
+			}
+
+			logger.Info("end delete schedule")
+
+			return res, nil
 		}
-		return response.NewError(http.StatusInternalServerError, err.Error())
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 	}
 
 	if schedule.UserID != userID {
-		return response.NewError(http.StatusForbidden, "forbidden")
+		logger.Warn("forbidden", "request_user_id", schedule.UserID)
+		return response.NewError(http.StatusForbidden, usecase.MsgUserNotFound)
 	}
 
 	op := presenter.NewSchedulePresenter()
-	interactor := usecase.NewScheduleInteractor(sr, op)
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
 
 	input := port.DeleteScheduleInputData{ScheduleID: req.ScheduleID}
 	interactor.DeleteSchedule(input)

@@ -3,12 +3,12 @@ import { format } from 'date-fns';
 import { Type } from '@/type';
 
 import { loadAuthUser } from '@/storage/user';
+import { newThrowResponseError } from './error';
 
-export const updateBulkSchedules = async (schedules: Type.Schedule[]) => {
+export const updateBulkSchedules = async (schedules: Type.Schedule[]): Promise<void> => {
   const user = loadAuthUser();
   if (!user) {
-    console.error('User not found');
-    return;
+    throw new Error('User not found');
   }
 
   const params = schedules.map((schedule, i) => {
@@ -34,7 +34,8 @@ export const updateBulkSchedules = async (schedules: Type.Schedule[]) => {
         },
       }
     );
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    newThrowResponseError(e);
+    throw e;
   }
 };

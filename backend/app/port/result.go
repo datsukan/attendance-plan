@@ -2,16 +2,21 @@ package port
 
 // Result は処理結果を表す構造体です。
 type Result struct {
-	StatusCode int
-	HasError   bool
-	Message    string
+	StatusCode   int
+	HasError     bool
+	ErrorMessage string
 }
 
-// NewResult は Result を生成します。
-func NewResult(statusCode int, hasError bool, message string) Result {
+// NewSuccessResult は成功時の Result を生成します。
+func NewSuccessResult(statusCode int) Result {
+	return Result{StatusCode: statusCode}
+}
+
+// NewErrorResult はエラー時の Result を生成します。
+func NewErrorResult(statusCode int, errorMessage string) Result {
 	return Result{
-		StatusCode: statusCode,
-		HasError:   hasError,
-		Message:    message,
+		StatusCode:   statusCode,
+		HasError:     true,
+		ErrorMessage: errorMessage,
 	}
 }

@@ -29,7 +29,7 @@ func TestValidateGetScheduleListRequest(t *testing.T) {
 		{
 			name: "異常系: user_id が未指定の場合はエラー",
 			req:  &GetScheduleListRequest{},
-			want: errors.New("user_id is empty"),
+			want: errors.New("ユーザーIDを指定してください"),
 		},
 		{
 			name: "正常系: user_id が指定されている場合はエラーなし",
@@ -86,12 +86,12 @@ func TestValidateInputScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: name が未指定の場合はエラー",
 			req:  Param{},
-			want: errors.New("name is empty"),
+			want: errors.New("スケジュール名を入力してください"),
 		},
 		{
 			name: "異常系: name が50文字より多い場合はエラー",
 			req:  Param{Name: strings.Repeat("a", 51)},
-			want: errors.New("name must be 50 characters or less"),
+			want: errors.New("スケジュール名は50文字以内で入力してください"),
 		},
 		{
 			name: "正常系: name が50文字の場合はエラーになし",
@@ -101,42 +101,42 @@ func TestValidateInputScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: starts_at が未指定の場合はエラー",
 			req:  Param{Name: "test-name"},
-			want: errors.New("starts_at is empty"),
+			want: errors.New("開始日を入力してください"),
 		},
 		{
 			name: "異常系: ends_at が未指定の場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:00"},
-			want: errors.New("ends_at is empty"),
+			want: errors.New("終了日を入力してください"),
 		},
 		{
 			name: "異常系: starts_at のフォーマットが不正な場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at is invalid"),
+			want: errors.New("開始日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: ends_at のフォーマットが不正な場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01"},
-			want: errors.New("ends_at is invalid"),
+			want: errors.New("終了日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: starts_at が ends_at より後の場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at must be earlier than or equal to ends_at"),
+			want: errors.New("終了日は開始日以降の日付を入力してください"),
 		},
 		{
 			name: "異常系: color が未指定の場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("color is empty"),
+			want: errors.New("色を指定してください"),
 		},
 		{
 			name: "異常系: type が未指定の場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color"},
-			want: errors.New("type is empty"),
+			want: errors.New("スケジュールの種類を指定してください"),
 		},
 		{
 			name: "異常系: type が不正な場合はエラー",
 			req:  Param{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color", Type: "invalid"},
-			want: errors.New("type is invalid"),
+			want: errors.New("スケジュールの種類は master または custom を指定してください"),
 		},
 		{
 			name: "正常系",
@@ -162,12 +162,12 @@ func TestValidatePostScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: name が未指定の場合はエラー",
 			req:  &PostScheduleRequest{},
-			want: errors.New("name is empty"),
+			want: errors.New("スケジュール名を入力してください"),
 		},
 		{
 			name: "異常系: name が50文字より多い場合はエラー",
 			req:  &PostScheduleRequest{Name: strings.Repeat("a", 51)},
-			want: errors.New("name must be 50 characters or less"),
+			want: errors.New("スケジュール名は50文字以内で入力してください"),
 		},
 		{
 			name: "正常系: name が50文字の場合はエラーになし",
@@ -177,42 +177,42 @@ func TestValidatePostScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: starts_at が未指定の場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name"},
-			want: errors.New("starts_at is empty"),
+			want: errors.New("開始日を入力してください"),
 		},
 		{
 			name: "異常系: ends_at が未指定の場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:00"},
-			want: errors.New("ends_at is empty"),
+			want: errors.New("終了日を入力してください"),
 		},
 		{
 			name: "異常系: starts_at のフォーマットが不正な場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at is invalid"),
+			want: errors.New("開始日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: ends_at のフォーマットが不正な場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01"},
-			want: errors.New("ends_at is invalid"),
+			want: errors.New("終了日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: starts_at が ends_at より後の場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at must be earlier than or equal to ends_at"),
+			want: errors.New("終了日は開始日以降の日付を入力してください"),
 		},
 		{
 			name: "異常系: color が未指定の場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("color is empty"),
+			want: errors.New("色を指定してください"),
 		},
 		{
 			name: "異常系: type が未指定の場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color"},
-			want: errors.New("type is empty"),
+			want: errors.New("スケジュールの種類を指定してください"),
 		},
 		{
 			name: "異常系: type が不正な場合はエラー",
 			req:  &PostScheduleRequest{Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color", Type: "invalid"},
-			want: errors.New("type is invalid"),
+			want: errors.New("スケジュールの種類は master または custom を指定してください"),
 		},
 		{
 			name: "正常系",
@@ -255,17 +255,17 @@ func TestValidatePutScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: schedule_id が未指定の場合はエラー",
 			req:  &PutScheduleRequest{},
-			want: errors.New("schedule_id is empty"),
+			want: errors.New("スケジュールIDを指定してください"),
 		},
 		{
 			name: "異常系: name が未指定の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id"},
-			want: errors.New("name is empty"),
+			want: errors.New("スケジュール名を入力してください"),
 		},
 		{
 			name: "異常系: name が50文字より多い場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: strings.Repeat("a", 51)},
-			want: errors.New("name must be 50 characters or less"),
+			want: errors.New("スケジュール名は50文字以内で入力してください"),
 		},
 		{
 			name: "正常系: name が50文字の場合はエラーになし",
@@ -275,42 +275,42 @@ func TestValidatePutScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: starts_at が未指定の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name"},
-			want: errors.New("starts_at is empty"),
+			want: errors.New("開始日を入力してください"),
 		},
 		{
 			name: "異常系: ends_at が未指定の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00"},
-			want: errors.New("ends_at is empty"),
+			want: errors.New("終了日を入力してください"),
 		},
 		{
 			name: "異常系: starts_at のフォーマットが不正な場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at is invalid"),
+			want: errors.New("開始日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: ends_at のフォーマットが不正な場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01"},
-			want: errors.New("ends_at is invalid"),
+			want: errors.New("終了日は yyyy-MM-dd HH:mm:ss の形式で入力してください"),
 		},
 		{
 			name: "異常系: starts_at が ends_at より後の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:01", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("starts_at must be earlier than or equal to ends_at"),
+			want: errors.New("終了日は開始日以降の日付を入力してください"),
 		},
 		{
 			name: "異常系: color が未指定の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00"},
-			want: errors.New("color is empty"),
+			want: errors.New("色を指定してください"),
 		},
 		{
 			name: "異常系: type が未指定の場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color"},
-			want: errors.New("type is empty"),
+			want: errors.New("スケジュールの種類を指定してください"),
 		},
 		{
 			name: "異常系: type が不正な場合はエラー",
 			req:  &PutScheduleRequest{ScheduleID: "test-schedule-id", Name: "test-name", StartsAt: "2021-01-01 00:00:00", EndsAt: "2021-01-01 00:00:00", Color: "test-color", Type: "invalid"},
-			want: errors.New("type is invalid"),
+			want: errors.New("スケジュールの種類は master または custom を指定してください"),
 		},
 		{
 			name: "正常系",
@@ -352,12 +352,12 @@ func TestValidatePutBulkScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: schedules が未指定の場合はエラー",
 			req:  &PutBulkScheduleRequest{},
-			want: errors.New("schedules is empty"),
+			want: errors.New("スケジュールを指定してください"),
 		},
 		{
 			name: "異常系: schedules が空の場合はエラー",
 			req:  &PutBulkScheduleRequest{Schedules: []PutScheduleRequest{}},
-			want: errors.New("schedules is empty"),
+			want: errors.New("スケジュールを指定してください"),
 		},
 		{
 			name: "正常系",
@@ -397,7 +397,7 @@ func TestValidateDeleteScheduleRequest(t *testing.T) {
 		{
 			name: "異常系: schedule_id が未指定の場合はエラー",
 			req:  &DeleteScheduleRequest{},
-			want: errors.New("schedule_id is empty"),
+			want: errors.New("スケジュールIDを指定してください"),
 		},
 		{
 			name: "正常系",

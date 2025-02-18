@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Type } from '@/type';
 
 import { loadAuthUser } from '@/storage/user';
+import { newThrowResponseError } from './error';
 
 export type FetchScheduleResult = {
   masterSchedules: Type.ScheduleDateItem[];
@@ -29,8 +30,7 @@ type ResScheduleDateItemList = ResScheduleDateItem[];
 export const fetchSchedules = async (): Promise<FetchScheduleResult> => {
   const user = loadAuthUser();
   if (!user) {
-    console.error('User not found');
-    return { masterSchedules: [], customSchedules: [] };
+    throw new Error('User not found');
   }
 
   try {
@@ -51,11 +51,10 @@ export const fetchSchedules = async (): Promise<FetchScheduleResult> => {
     }
 
     return result;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    newThrowResponseError(e);
+    throw e;
   }
-
-  return { masterSchedules: [], customSchedules: [] };
 };
 
 const toResultSchedules = (schedules: ResScheduleDateItemList): Type.ScheduleDateItem[] => {

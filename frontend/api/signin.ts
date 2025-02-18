@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { newThrowResponseError } from './error';
+
 type result = {
   id: string;
   email: string;
@@ -9,7 +11,7 @@ type result = {
   sessionToken: string;
 };
 
-export const signin = async (email: string, password: string): Promise<result | null> => {
+export const signin = async (email: string, password: string): Promise<result> => {
   const param = { email, password };
 
   try {
@@ -29,9 +31,8 @@ export const signin = async (email: string, password: string): Promise<result | 
     };
 
     return result;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    newThrowResponseError(e);
+    throw e;
   }
-
-  return null;
 };

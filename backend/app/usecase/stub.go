@@ -121,7 +121,7 @@ type stubScheduleOutputPort struct {
 }
 
 func (p *stubScheduleOutputPort) GetResponse() (int, string) {
-	return p.Result.StatusCode, p.Result.Message
+	return p.Result.StatusCode, p.Result.ErrorMessage
 }
 
 func (p *stubScheduleOutputPort) SetResponseGetScheduleList(output *port.GetScheduleListOutputData, result port.Result) {
@@ -256,7 +256,7 @@ type stubUserOutputPort struct {
 }
 
 func (p *stubUserOutputPort) GetResponse() (int, string) {
-	return p.Result.StatusCode, p.Result.Message
+	return p.Result.StatusCode, p.Result.ErrorMessage
 }
 
 func (p *stubUserOutputPort) SetResponseSignIn(output *port.SignInOutputData, result port.Result) {

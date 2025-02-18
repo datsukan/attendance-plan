@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -13,20 +15,26 @@ import (
 
 // ScheduleInteractor はスケジュールのユースケースの実装を表す構造体です。
 type ScheduleInteractor struct {
+	Logger             *slog.Logger
 	ScheduleRepository repository.ScheduleRepository
 	OutputPort         port.ScheduleOutputPort
 }
 
 // NewScheduleInteractor は ScheduleInteractor を生成します。
-func NewScheduleInteractor(scheduleRepository repository.ScheduleRepository, outputPort port.ScheduleOutputPort) *ScheduleInteractor {
-	return &ScheduleInteractor{ScheduleRepository: scheduleRepository, OutputPort: outputPort}
+func NewScheduleInteractor(logger *slog.Logger, scheduleRepository repository.ScheduleRepository, outputPort port.ScheduleOutputPort) *ScheduleInteractor {
+	return &ScheduleInteractor{
+		Logger:             logger,
+		ScheduleRepository: scheduleRepository,
+		OutputPort:         outputPort,
+	}
 }
 
 // GetScheduleList はスケジュールリストを取得します。
 func (i *ScheduleInteractor) GetScheduleList(input port.GetScheduleListInputData) {
 	schedules, err := i.ScheduleRepository.ReadByUserID(input.UserID)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseGetScheduleList(nil, r)
 		return
 	}
@@ -67,21 +75,25 @@ func (i *ScheduleInteractor) GetScheduleList(input port.GetScheduleListInputData
 	customSchedules := appendSchedules(customDateItems)
 
 	o := &port.GetScheduleListOutputData{MasterSchedules: masterSchedules, CustomSchedules: customSchedules}
-	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseGetScheduleList(o, r)
 }
 
 // GetSchedule はスケジュールを取得します。
 func (i *ScheduleInteractor) GetSchedule(input port.GetScheduleInputData) {
+	i.Logger.With("schedule_id", input.ScheduleID)
+
 	schedule, err := i.ScheduleRepository.Read(input.ScheduleID)
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
-			r := port.Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusNotFound, MsgScheduleNotFound)
 			i.OutputPort.SetResponseGetSchedule(nil, r)
 			return
 		}
 
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseGetSchedule(nil, r)
 		return
 	}
@@ -100,7 +112,7 @@ func (i *ScheduleInteractor) GetSchedule(input port.GetScheduleInputData) {
 	}
 
 	o := &port.GetScheduleOutputData{Schedule: s}
-	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseGetSchedule(o, r)
 }
 
@@ -108,14 +120,16 @@ func (i *ScheduleInteractor) GetSchedule(input port.GetScheduleInputData) {
 func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) {
 	startsAt, err := time.Parse(time.DateTime, input.Schedule.StartsAt)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.Logger.Warn(err.Error())
+		r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, "開始日"))
 		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
 
 	endsAt, err := time.Parse(time.DateTime, input.Schedule.EndsAt)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.Logger.Warn(err.Error())
+		r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, "終了日"))
 		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
@@ -126,7 +140,8 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 	if order.Empty() {
 		someStartsAtSchedules, err := i.ScheduleRepository.ReadByUserIDStartsAt(input.Schedule.UserID, startsAt)
 		if err != nil {
-			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 			i.OutputPort.SetResponseCreateSchedule(nil, r)
 			return
 		}
@@ -148,8 +163,11 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 		UpdatedAt: time.Now(),
 	}
 
+	i.Logger.With("schedule_id", s.ID)
+
 	if err := i.ScheduleRepository.Create(&s); err != nil {
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseCreateSchedule(nil, r)
 		return
 	}
@@ -157,22 +175,26 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 	o := &port.CreateScheduleOutputData{
 		Schedule: s,
 	}
-	r := port.Result{StatusCode: http.StatusCreated, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusCreated)
 	i.OutputPort.SetResponseCreateSchedule(o, r)
 }
 
 // UpdateSchedule はスケジュールを更新します。
 func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) {
+	i.Logger.With("schedule_id", input.Schedule.ID)
+
 	startsAt, err := time.Parse(time.DateTime, input.Schedule.StartsAt)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.Logger.Warn(err.Error())
+		r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, "開始日"))
 		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
 	endsAt, err := time.Parse(time.DateTime, input.Schedule.EndsAt)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+		i.Logger.Warn(err.Error())
+		r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, "終了日"))
 		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
@@ -182,12 +204,13 @@ func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) 
 	bs, err := i.ScheduleRepository.Read(input.Schedule.ID)
 	if err != nil {
 		if repository.IsNotFoundError(err) {
-			r := port.Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusNotFound, MsgScheduleNotFound)
 			i.OutputPort.SetResponseUpdateSchedule(nil, r)
 			return
 		}
 
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
@@ -206,14 +229,16 @@ func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) 
 	}
 
 	if err := i.ScheduleRepository.Update(&s); err != nil {
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
 
 	as, err := i.ScheduleRepository.Read(s.ID)
 	if err != nil {
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseUpdateSchedule(nil, r)
 		return
 	}
@@ -232,7 +257,7 @@ func (i *ScheduleInteractor) UpdateSchedule(input port.UpdateScheduleInputData) 
 			UpdatedAt: as.UpdatedAt.Format(time.DateTime),
 		},
 	}
-	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseUpdateSchedule(o, r)
 }
 
@@ -243,14 +268,16 @@ func (i *ScheduleInteractor) UpdateBulkSchedule(input port.UpdateBulkScheduleInp
 	for _, s := range input.Schedules {
 		startsAt, err := time.Parse(time.DateTime, s.StartsAt)
 		if err != nil {
-			r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, s.Name+"の開始日"))
 			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 			return
 		}
 
 		endsAt, err := time.Parse(time.DateTime, s.EndsAt)
 		if err != nil {
-			r := port.Result{StatusCode: http.StatusBadRequest, HasError: true, Message: err.Error()}
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, s.Name+"の終了日"))
 			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 			return
 		}
@@ -260,12 +287,14 @@ func (i *ScheduleInteractor) UpdateBulkSchedule(input port.UpdateBulkScheduleInp
 		bs, err := i.ScheduleRepository.Read(s.ID)
 		if err != nil {
 			if repository.IsNotFoundError(err) {
-				r := port.Result{StatusCode: http.StatusNotFound, HasError: true, Message: err.Error()}
+				i.Logger.Warn(err.Error())
+				r := port.NewErrorResult(http.StatusNotFound, MsgScheduleNotFound)
 				i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 				return
 			}
 
-			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 			return
 		}
@@ -284,14 +313,16 @@ func (i *ScheduleInteractor) UpdateBulkSchedule(input port.UpdateBulkScheduleInp
 		}
 
 		if err := i.ScheduleRepository.Update(&s); err != nil {
-			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 			return
 		}
 
 		as, err := i.ScheduleRepository.Read(s.ID)
 		if err != nil {
-			r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 			i.OutputPort.SetResponseUpdateBulkSchedule(nil, r)
 			return
 		}
@@ -313,19 +344,22 @@ func (i *ScheduleInteractor) UpdateBulkSchedule(input port.UpdateBulkScheduleInp
 	}
 
 	o := &port.UpdateBulkScheduleOutputData{Schedules: responseSchedules}
-	r := port.Result{StatusCode: http.StatusOK, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseUpdateBulkSchedule(o, r)
 }
 
 // DeleteSchedule はスケジュールを削除します。
 func (i *ScheduleInteractor) DeleteSchedule(input port.DeleteScheduleInputData) {
+	i.Logger.With("schedule_id", input.ScheduleID)
+
 	if err := i.ScheduleRepository.Delete(input.ScheduleID); err != nil {
-		r := port.Result{StatusCode: http.StatusInternalServerError, HasError: true, Message: err.Error()}
+		i.Logger.Error(err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseDeleteSchedule(nil, r)
 		return
 	}
 
 	o := &port.DeleteScheduleOutputData{ScheduleID: input.ScheduleID}
-	r := port.Result{StatusCode: http.StatusNoContent, Message: "Success"}
+	r := port.NewSuccessResult(http.StatusNoContent)
 	i.OutputPort.SetResponseDeleteSchedule(o, r)
 }

@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 import { loadAuthUser } from '@/storage/user';
+import { newThrowResponseError } from './error';
 
-export const deleteSchedule = async (id: string) => {
+export const deleteSchedule = async (id: string): Promise<void> => {
   const user = loadAuthUser();
   if (!user) {
-    console.error('User not found');
-    return;
+    throw new Error('User not found');
   }
 
   try {
@@ -15,7 +15,8 @@ export const deleteSchedule = async (id: string) => {
         Authorization: `Bearer ${user.session_token}`,
       },
     });
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    newThrowResponseError(e);
+    throw e;
   }
 };

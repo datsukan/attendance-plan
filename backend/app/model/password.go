@@ -49,7 +49,7 @@ func (p Password) Validate() error {
 	}
 
 	// 記号が1文字以上含まれている必要がある
-	if !regexp.MustCompile(`[@#$%&*!]`).MatchString(p.String()) {
+	if !regexp.MustCompile("[!\"#$%&'()*+,\\-./:;<=>?@[\\\\\\]^_`{|}~]").MatchString(p.String()) {
 		return ErrPasswordSymbol
 	}
 

@@ -25,7 +25,7 @@ func NewDB() *dynamo.DB {
 	}
 
 	// DynamoDB Local を利用する場合
-	if len(dynamoDbEndpoint) != 0 {
+	if os.Getenv("ENV") != "prd" {
 		config.DisableSSL = aws.Bool(true)
 		config.CredentialsChainVerboseErrors = aws.Bool(true)
 		config.Credentials = credentials.NewStaticCredentials("dummy", "dummy", "dummy")

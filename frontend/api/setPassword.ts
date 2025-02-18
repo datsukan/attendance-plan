@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { UnknownErrorMessage } from './error';
+import { newThrowResponseError } from './error';
 
-export const setPassword = async (token: string, password: string): Promise<string> => {
+export const setPassword = async (token: string, password: string): Promise<void> => {
   const param = { token, password };
 
   try {
@@ -12,17 +12,9 @@ export const setPassword = async (token: string, password: string): Promise<stri
       },
     });
 
-    return '';
+    return;
   } catch (e) {
-    if (!axios.isAxiosError(e)) {
-      return UnknownErrorMessage;
-    }
-
-    const body = e.response?.data;
-    if (!body) {
-      return UnknownErrorMessage;
-    }
-
-    return body.message || UnknownErrorMessage;
+    newThrowResponseError(e);
+    throw e;
   }
 };

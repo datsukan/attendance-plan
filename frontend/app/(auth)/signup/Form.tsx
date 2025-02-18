@@ -29,10 +29,17 @@ export const Form = ({ complete }: Props) => {
     (async () => {
       setLoading(true);
 
-      const errorMessage = await signup(email.toString());
-      if (errorMessage) {
-        setErrorMessage(errorMessage);
+      try {
+        await signup(email.toString());
+      } catch (e) {
         setLoading(false);
+
+        if (e instanceof Error) {
+          setErrorMessage(e.message);
+          return;
+        }
+
+        alert(String(e));
         return;
       }
 

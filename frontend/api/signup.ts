@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { UnknownErrorMessage } from './error';
+import { newThrowResponseError } from './error';
 
-export const signup = async (email: string): Promise<string> => {
+export const signup = async (email: string): Promise<void> => {
   const param = { email };
 
   try {
@@ -12,17 +12,9 @@ export const signup = async (email: string): Promise<string> => {
       },
     });
 
-    return '';
+    return;
   } catch (e) {
-    if (!axios.isAxiosError(e)) {
-      return UnknownErrorMessage;
-    }
-
-    const body = e.response?.data;
-    if (!body) {
-      return UnknownErrorMessage;
-    }
-
-    return body.message || UnknownErrorMessage;
+    newThrowResponseError(e);
+    throw e;
   }
 };

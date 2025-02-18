@@ -57,7 +57,7 @@ func ToGetScheduleListRequest(r events.APIGatewayProxyRequest) *GetScheduleListR
 // ValidateGetScheduleListRequest は GetScheduleListRequest のバリデーションを行います。
 func ValidateGetScheduleListRequest(req *GetScheduleListRequest) error {
 	if req.UserID == "" {
-		return fmt.Errorf("user_id is empty")
+		return fmt.Errorf("ユーザーIDを指定してください")
 	}
 	return nil
 }
@@ -70,7 +70,7 @@ func ToGetScheduleRequest(r events.APIGatewayProxyRequest) *GetScheduleRequest {
 // ValidateGetScheduleRequest は GetScheduleRequest のバリデーションを行います。
 func ValidateGetScheduleRequest(req *GetScheduleRequest) error {
 	if req.ScheduleID == "" {
-		return fmt.Errorf("schedule_id is empty")
+		return fmt.Errorf("スケジュールIDを指定してください")
 	}
 	return nil
 }
@@ -88,55 +88,55 @@ func ToPostScheduleRequest(r events.APIGatewayProxyRequest) (*PostScheduleReques
 func ValidateInputScheduleRequest(name, startsAt, endsAt, color, sType string) error {
 	// name が空文字
 	if name == "" {
-		return fmt.Errorf("name is empty")
+		return fmt.Errorf("スケジュール名を入力してください")
 	}
 
 	// name が50文字より多い
 	const upperNameLength = 50
 	if len(name) > upperNameLength {
-		return fmt.Errorf("name must be %d characters or less", upperNameLength)
+		return fmt.Errorf("スケジュール名は%d文字以内で入力してください", upperNameLength)
 	}
 
 	// starts_at が空文字
 	if startsAt == "" {
-		return fmt.Errorf("starts_at is empty")
+		return fmt.Errorf("開始日を入力してください")
 	}
 
 	// ends_at が空文字
 	if endsAt == "" {
-		return fmt.Errorf("ends_at is empty")
+		return fmt.Errorf("終了日を入力してください")
 	}
 
 	// starts_at のフォーマットが正しくない
 	sa, err := time.Parse(time.DateTime, startsAt)
 	if err != nil {
-		return fmt.Errorf("starts_at is invalid")
+		return fmt.Errorf("開始日は yyyy-MM-dd HH:mm:ss の形式で入力してください")
 	}
 
 	// ends_at のフォーマットが正しくない
 	ea, err := time.Parse(time.DateTime, endsAt)
 	if err != nil {
-		return fmt.Errorf("ends_at is invalid")
+		return fmt.Errorf("終了日は yyyy-MM-dd HH:mm:ss の形式で入力してください")
 	}
 
 	// starts_at が ends_at より後
 	if sa.After(ea) {
-		return fmt.Errorf("starts_at must be earlier than or equal to ends_at")
+		return fmt.Errorf("終了日は開始日以降の日付を入力してください")
 	}
 
 	// color が空文字
 	if color == "" {
-		return fmt.Errorf("color is empty")
+		return fmt.Errorf("色を指定してください")
 	}
 
 	// type が空文字
 	if sType == "" {
-		return fmt.Errorf("type is empty")
+		return fmt.Errorf("スケジュールの種類を指定してください")
 	}
 
 	// type が不正
 	if model.ScheduleType(sType).String() == "" {
-		return fmt.Errorf("type is invalid")
+		return fmt.Errorf("スケジュールの種類は %s または %s を指定してください", model.ScheduleTypeMaster, model.ScheduleTypeCustom)
 	}
 
 	return nil
@@ -163,7 +163,7 @@ func ToPutScheduleRequest(r events.APIGatewayProxyRequest) (*PutScheduleRequest,
 func ValidatePutScheduleRequest(req *PutScheduleRequest) error {
 	// ID が空文字
 	if req.ScheduleID == "" {
-		return fmt.Errorf("schedule_id is empty")
+		return fmt.Errorf("スケジュールIDを指定してください")
 	}
 
 	return ValidateInputScheduleRequest(req.Name, req.StartsAt, req.EndsAt, req.Color, req.Type)
@@ -182,17 +182,17 @@ func ToPutBulkScheduleRequest(r events.APIGatewayProxyRequest) (*PutBulkSchedule
 // ValidatePutBulkScheduleRequest は PutBulkScheduleRequest のバリデーションを行います。
 func ValidatePutBulkScheduleRequest(req *PutBulkScheduleRequest) error {
 	if len(req.Schedules) == 0 {
-		return fmt.Errorf("schedules is empty")
+		return fmt.Errorf("スケジュールを指定してください")
 	}
 
 	for i, schedule := range req.Schedules {
 		// ID が空文字
 		if schedule.ScheduleID == "" {
-			return fmt.Errorf("schedule_id is empty. index: %d", i)
+			return fmt.Errorf("スケジュールIDを指定してください: %d番目", i+1)
 		}
 
 		if err := ValidateInputScheduleRequest(schedule.Name, schedule.StartsAt, schedule.EndsAt, schedule.Color, schedule.Type); err != nil {
-			return fmt.Errorf("%s. index: %d", err.Error(), i)
+			return fmt.Errorf("%s: %d番目", err.Error(), i+1)
 		}
 	}
 	return nil
@@ -206,7 +206,7 @@ func ToDeleteScheduleRequest(r events.APIGatewayProxyRequest) *DeleteScheduleReq
 // ValidateDeleteScheduleRequest は DeleteScheduleRequest のバリデーションを行います。
 func ValidateDeleteScheduleRequest(req *DeleteScheduleRequest) error {
 	if req.ScheduleID == "" {
-		return fmt.Errorf("schedule_id is empty")
+		return fmt.Errorf("スケジュールIDを指定してください")
 	}
 	return nil
 }

@@ -36,7 +36,7 @@ func NewUserInteractor(logger *slog.Logger, userRepository repository.UserReposi
 	}
 }
 
-// SignUp はサインイン処理を行います。
+// SignIn はサインイン処理を行います。
 func (i *UserInteractor) SignIn(input port.SignInInputData) {
 	i.Logger.With("email", input.Email)
 
@@ -44,19 +44,20 @@ func (i *UserInteractor) SignIn(input port.SignInInputData) {
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
 			i.Logger.Warn("user not found")
-			r := port.NewResult(http.StatusUnauthorized, true, "Invalid email or password")
+			r := port.NewErrorResult(http.StatusUnauthorized, MsgEmailOrPasswordInvalid)
 			i.OutputPort.SetResponseSignIn(nil, r)
 			return
 		}
+
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignIn(nil, r)
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		i.Logger.Warn("password is invalid")
-		r := port.NewResult(http.StatusUnauthorized, true, "Invalid email or password")
+		r := port.NewErrorResult(http.StatusUnauthorized, MsgEmailOrPasswordInvalid)
 		i.OutputPort.SetResponseSignIn(nil, r)
 		return
 	}
@@ -64,7 +65,7 @@ func (i *UserInteractor) SignIn(input port.SignInInputData) {
 	sessionToken, err := i.SessionRepository.GenerateToken(user.ID)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, "Failed to start session")
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignIn(nil, r)
 		return
 	}
@@ -79,7 +80,7 @@ func (i *UserInteractor) SignIn(input port.SignInInputData) {
 		},
 		SessionToken: sessionToken,
 	}
-	r := port.NewResult(http.StatusOK, false, "Success")
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseSignIn(o, r)
 }
 
@@ -90,13 +91,13 @@ func (i *UserInteractor) SignUp(ctx context.Context, input port.SignUpInputData)
 	user, err := i.UserRepository.ReadByEmail(input.Email, false)
 	if err != nil && !errors.Is(err, repository.NewNotFoundError()) {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
 	if user != nil && user.Enabled {
-		i.Logger.Warn("user already exists")
-		r := port.NewResult(http.StatusBadRequest, true, "入力されたメールアドレスはすでに登録されています")
+		i.Logger.Warn("email already exists")
+		r := port.NewErrorResult(http.StatusBadRequest, MsgEmailAlreadyExists)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
@@ -111,7 +112,7 @@ func (i *UserInteractor) SignUp(ctx context.Context, input port.SignUpInputData)
 		}
 		if err := i.UserRepository.Create(user); err != nil {
 			i.Logger.Error(err.Error())
-			r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 			i.OutputPort.SetResponseSignUp(nil, r)
 			return
 		}
@@ -122,7 +123,7 @@ func (i *UserInteractor) SignUp(ctx context.Context, input port.SignUpInputData)
 	token, err := i.SessionRepository.GenerateToken(user.ID)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
@@ -145,7 +146,7 @@ func (i *UserInteractor) SignUp(ctx context.Context, input port.SignUpInputData)
 	msgID, err := i.MailRepository.Send(ctx, user.Email, title, body)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
@@ -153,7 +154,7 @@ func (i *UserInteractor) SignUp(ctx context.Context, input port.SignUpInputData)
 	i.Logger.Info("mail sent", "message_id", msgID)
 
 	o := &port.SignUpOutputData{}
-	r := port.NewResult(http.StatusOK, false, "Success")
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponseSignUp(o, r)
 }
 
@@ -164,14 +165,14 @@ func (i *UserInteractor) PasswordReset(ctx context.Context, input port.PasswordR
 	user, err := i.UserRepository.ReadByEmail(input.Email, true)
 	if err != nil {
 		if errors.Is(err, repository.NewNotFoundError()) {
-			i.Logger.Warn("user not found")
-			r := port.NewResult(http.StatusUnauthorized, true, "存在しないメールアドレスです")
+			i.Logger.Warn("user not found by email")
+			r := port.NewErrorResult(http.StatusUnauthorized, MsgEmailNotFound)
 			i.OutputPort.SetResponsePasswordReset(nil, r)
 			return
 		}
 
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponsePasswordReset(nil, r)
 		return
 	}
@@ -179,7 +180,7 @@ func (i *UserInteractor) PasswordReset(ctx context.Context, input port.PasswordR
 	token, err := i.SessionRepository.GenerateToken(user.ID)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
@@ -202,7 +203,7 @@ func (i *UserInteractor) PasswordReset(ctx context.Context, input port.PasswordR
 	msgID, err := i.MailRepository.Send(ctx, user.Email, title, body)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponseSignUp(nil, r)
 		return
 	}
@@ -210,7 +211,7 @@ func (i *UserInteractor) PasswordReset(ctx context.Context, input port.PasswordR
 	i.Logger.Info("mail sent", "message_id", msgID)
 
 	o := &port.PasswordResetOutputData{}
-	r := port.NewResult(http.StatusOK, false, "Success")
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponsePasswordReset(o, r)
 }
 
@@ -221,7 +222,7 @@ func (i *UserInteractor) PasswordSet(input port.PasswordSetInputData) {
 	valid, userID := i.SessionRepository.IsValidToken(input.Token)
 	if !valid {
 		i.Logger.Warn("token is invalid")
-		r := port.NewResult(http.StatusUnauthorized, true, "トークンが無効もしくは期限切れです")
+		r := port.NewErrorResult(http.StatusUnauthorized, MsgTokenInvalid)
 		i.OutputPort.SetResponsePasswordReset(nil, r)
 		return
 	}
@@ -229,7 +230,7 @@ func (i *UserInteractor) PasswordSet(input port.PasswordSetInputData) {
 	user, err := i.UserRepository.Read(userID, false)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponsePasswordReset(nil, r)
 		return
 	}
@@ -237,7 +238,7 @@ func (i *UserInteractor) PasswordSet(input port.PasswordSetInputData) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponsePasswordReset(nil, r)
 		return
 	}
@@ -248,12 +249,12 @@ func (i *UserInteractor) PasswordSet(input port.PasswordSetInputData) {
 
 	if err := i.UserRepository.Update(user); err != nil {
 		i.Logger.Error(err.Error())
-		r := port.NewResult(http.StatusInternalServerError, true, err.Error())
+		r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
 		i.OutputPort.SetResponsePasswordReset(nil, r)
 		return
 	}
 
 	o := &port.PasswordResetOutputData{}
-	r := port.NewResult(http.StatusOK, false, "Success")
+	r := port.NewSuccessResult(http.StatusOK)
 	i.OutputPort.SetResponsePasswordReset(o, r)
 }

@@ -21,6 +21,7 @@ func SignIn(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 
 	req := request.ToSignInRequest(r)
 	if err := request.ValidateSignInRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
@@ -53,6 +54,7 @@ func SignUp(ctx context.Context, r events.APIGatewayProxyRequest) (events.APIGat
 
 	req := request.ToSignUpRequest(r)
 	if err := request.ValidateSignUpRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
@@ -63,7 +65,8 @@ func SignUp(ctx context.Context, r events.APIGatewayProxyRequest) (events.APIGat
 
 	mc, err := infrastructure.NewMailClient(ctx, config.SESRegion)
 	if err != nil {
-		return response.NewError(http.StatusInternalServerError, err.Error())
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 	}
 
 	mr := repository.NewEmailRepository(mc, config.SenderEmail, config.SenderName)
@@ -92,6 +95,7 @@ func PasswordReset(ctx context.Context, r events.APIGatewayProxyRequest) (events
 
 	req := request.ToPasswordResetRequest(r)
 	if err := request.ValidatePasswordResetRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 
@@ -102,7 +106,8 @@ func PasswordReset(ctx context.Context, r events.APIGatewayProxyRequest) (events
 
 	mc, err := infrastructure.NewMailClient(ctx, config.SESRegion)
 	if err != nil {
-		return response.NewError(http.StatusInternalServerError, err.Error())
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
 	}
 
 	mr := repository.NewEmailRepository(mc, config.SenderEmail, config.SenderName)
@@ -131,6 +136,7 @@ func PasswordSet(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 
 	req := request.ToPasswordSetRequest(r)
 	if err := request.ValidatePasswordSetRequest(req); err != nil {
+		logger.Warn(err.Error())
 		return response.NewError(http.StatusBadRequest, err.Error())
 	}
 

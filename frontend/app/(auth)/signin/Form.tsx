@@ -41,23 +41,28 @@ export const Form = () => {
     (async () => {
       setLoading(true);
 
-      const user = await signin(email.toString(), password.toString());
+      try {
+        const user = await signin(email.toString(), password.toString());
+        saveAuthUser({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          session_token: user.sessionToken,
+        });
+      } catch (e) {
+        setLoading(false);
 
-      setLoading(false);
+        if (e instanceof Error) {
+          setEmailErrorMessage(e.message);
+          setPasswordErrorMessage('');
+          return;
+        }
 
-      if (!user) {
-        setEmailErrorMessage('メールアドレスまたはパスワードが間違っています');
-        setPasswordErrorMessage('');
+        alert(String(e));
         return;
       }
 
-      saveAuthUser({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        session_token: user.sessionToken,
-      });
-
+      setLoading(false);
       setEmailErrorMessage('');
       setPasswordErrorMessage('');
       router.push('/');

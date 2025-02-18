@@ -58,12 +58,18 @@ export const Form = ({ complete }: Props) => {
     (async () => {
       setLoading(true);
 
-      const errorMessage = await setPassword(token, password.toString());
-
-      if (errorMessage) {
-        setPasswordErrorMessage(errorMessage);
-        setRePasswordErrorMessage('');
+      try {
+        await setPassword(token, password.toString());
+      } catch (e) {
         setLoading(false);
+
+        if (e instanceof Error) {
+          setPasswordErrorMessage(e.message);
+          setRePasswordErrorMessage('');
+          return;
+        }
+
+        alert(String(e));
         return;
       }
 

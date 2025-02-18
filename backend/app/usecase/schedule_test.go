@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -16,9 +18,10 @@ func TestGetScheduleList(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.GetScheduleListInputData{UserID: "test-user-id"}
 		i.GetScheduleList(input)
@@ -59,7 +62,7 @@ func TestGetScheduleList(t *testing.T) {
 		}
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 
 		outputMasterLen := 0
@@ -115,9 +118,10 @@ func TestGetSchedule(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.GetScheduleInputData{ScheduleID: "test-id"}
 		i.GetSchedule(input)
@@ -156,22 +160,23 @@ func TestGetSchedule(t *testing.T) {
 		assert.Equal(wantSchedule.UpdatedAt.Format(time.DateTime), os.UpdatedAt)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 
 	t.Run("スケジュールが存在しない場合はエラーを返す", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubNotFoundScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.GetScheduleInputData{ScheduleID: "not-found-id"}
 		i.GetSchedule(input)
 
 		assert.Equal(http.StatusNotFound, p.Result.StatusCode)
-		assert.Equal("not found", p.Result.Message)
+		assert.Equal(MsgScheduleNotFound, p.Result.ErrorMessage)
 		assert.True(p.Result.HasError)
 	})
 }
@@ -180,9 +185,10 @@ func TestCreateSchedule(t *testing.T) {
 	t.Run("スケジュールを作成する", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.CreateScheduleInputData{
 			Schedule: port.CreateScheduleData{
@@ -197,7 +203,7 @@ func TestCreateSchedule(t *testing.T) {
 		i.CreateSchedule(input)
 
 		assert.Equal(http.StatusCreated, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 }
@@ -206,9 +212,10 @@ func TestUpdateSchedule(t *testing.T) {
 	t.Run("スケジュールを更新する", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.UpdateScheduleInputData{
 			Schedule: port.UpdateScheduleData{
@@ -224,16 +231,17 @@ func TestUpdateSchedule(t *testing.T) {
 		i.UpdateSchedule(input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 
 	t.Run("スケジュールが存在しない場合はエラーを返す", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubNotFoundScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.UpdateScheduleInputData{
 			Schedule: port.UpdateScheduleData{
@@ -249,7 +257,7 @@ func TestUpdateSchedule(t *testing.T) {
 		i.UpdateSchedule(input)
 
 		assert.Equal(http.StatusNotFound, p.Result.StatusCode)
-		assert.Equal("not found", p.Result.Message)
+		assert.Equal(MsgScheduleNotFound, p.Result.ErrorMessage)
 		assert.True(p.Result.HasError)
 	})
 }
@@ -258,9 +266,10 @@ func TestUpdateBulkSchedule(t *testing.T) {
 	t.Run("スケジュールを一括更新する", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.UpdateBulkScheduleInputData{
 			Schedules: []port.UpdateScheduleData{
@@ -287,16 +296,17 @@ func TestUpdateBulkSchedule(t *testing.T) {
 		i.UpdateBulkSchedule(input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 
 	t.Run("スケジュールが存在しない場合はエラーを返す", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubNotFoundScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.UpdateBulkScheduleInputData{
 			Schedules: []port.UpdateScheduleData{
@@ -314,7 +324,7 @@ func TestUpdateBulkSchedule(t *testing.T) {
 		i.UpdateBulkSchedule(input)
 
 		assert.Equal(http.StatusNotFound, p.Result.StatusCode)
-		assert.Equal("not found", p.Result.Message)
+		assert.Equal(MsgScheduleNotFound, p.Result.ErrorMessage)
 		assert.True(p.Result.HasError)
 	})
 }
@@ -323,15 +333,16 @@ func TestDeleteSchedule(t *testing.T) {
 	t.Run("スケジュールを削除する", func(t *testing.T) {
 		assert := assert.New(t)
 
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 		r := &stubScheduleRepository{}
 		p := &stubScheduleOutputPort{}
-		i := NewScheduleInteractor(r, p)
+		i := NewScheduleInteractor(l, r, p)
 
 		input := port.DeleteScheduleInputData{ScheduleID: "test-id"}
 		i.DeleteSchedule(input)
 
 		assert.Equal(http.StatusNoContent, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 }

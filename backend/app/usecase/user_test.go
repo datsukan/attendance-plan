@@ -48,7 +48,7 @@ func TestSignIn(t *testing.T) {
 		assert.Equal("test-token", output.SessionToken)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 
@@ -73,7 +73,7 @@ func TestSignIn(t *testing.T) {
 
 		assert.Nil(output)
 		assert.Equal(http.StatusUnauthorized, p.Result.StatusCode)
-		assert.Equal("Invalid email or password", p.Result.Message)
+		assert.Equal(MsgEmailOrPasswordInvalid, p.Result.ErrorMessage)
 		assert.True(p.Result.HasError)
 	})
 }
@@ -96,7 +96,7 @@ func TestSignUp(t *testing.T) {
 		i.SignUp(ctx, input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 }
@@ -119,7 +119,7 @@ func TestPasswordReset(t *testing.T) {
 		i.PasswordReset(ctx, input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 }
@@ -142,7 +142,7 @@ func TestPasswordSet(t *testing.T) {
 		i.PasswordSet(input)
 
 		assert.Equal(http.StatusOK, p.Result.StatusCode)
-		assert.Equal("Success", p.Result.Message)
+		assert.Empty(p.Result.ErrorMessage)
 		assert.False(p.Result.HasError)
 	})
 }

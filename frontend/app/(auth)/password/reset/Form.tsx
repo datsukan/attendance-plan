@@ -29,10 +29,17 @@ export const Form = ({ complete }: Props) => {
     (async () => {
       setLoading(true);
 
-      const errorMessage = await resetPassword(email.toString());
-      if (errorMessage) {
-        setErrorMessage(errorMessage);
+      try {
+        await resetPassword(email.toString());
+      } catch (e) {
         setLoading(false);
+
+        if (e instanceof Error) {
+          setErrorMessage(e.message);
+          return;
+        }
+
+        alert(String(e));
         return;
       }
 

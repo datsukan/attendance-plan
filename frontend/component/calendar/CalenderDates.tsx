@@ -221,7 +221,13 @@ export const CalenderDates = ({
     }
 
     (async () => {
-      updateBulkSchedules(targetSchedules);
+      try {
+        await updateBulkSchedules(targetSchedules);
+      } catch (e) {
+        alert(e);
+        return;
+      }
+
       setIsRunningUpdateSortSchedules(false);
     })();
   };

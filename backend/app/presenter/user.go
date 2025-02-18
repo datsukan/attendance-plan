@@ -28,7 +28,7 @@ func (p *UserPresenter) SetResponseSignIn(output *port.SignInOutputData, result 
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (p *UserPresenter) SetResponseSignUp(output *port.SignUpOutputData, result 
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (p *UserPresenter) SetResponsePasswordReset(output *port.PasswordResetOutpu
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (p *UserPresenter) SetResponsePasswordSet(output *port.PasswordSetOutputDat
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 

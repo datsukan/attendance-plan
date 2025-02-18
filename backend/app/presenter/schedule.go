@@ -29,7 +29,7 @@ func (p *SchedulePresenter) SetResponseGetScheduleList(output *port.GetScheduleL
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (p *SchedulePresenter) SetResponseGetSchedule(output *port.GetScheduleOutpu
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (p *SchedulePresenter) SetResponseCreateSchedule(output *port.CreateSchedul
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (p *SchedulePresenter) SetResponseUpdateSchedule(output *port.UpdateSchedul
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (p *SchedulePresenter) SetResponseUpdateBulkSchedule(output *port.UpdateBul
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (p *SchedulePresenter) SetResponseDeleteSchedule(output *port.DeleteSchedul
 	p.StatusCode = result.StatusCode
 
 	if result.HasError {
-		p.Body = response.ToErrorBody(result.Message)
+		p.Body = response.ToErrorBody(result.ErrorMessage)
 		return
 	}
 

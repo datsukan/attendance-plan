@@ -3,14 +3,14 @@ import { format } from 'date-fns';
 import { Type } from '@/type';
 
 import { loadAuthUser } from '@/storage/user';
+import { newThrowResponseError } from './error';
 
 export type CreateScheduleParam = Omit<Type.Schedule, 'id' | 'order'>;
 
-export const createSchedule = async (schedule: CreateScheduleParam): Promise<Type.Schedule | null> => {
+export const createSchedule = async (schedule: CreateScheduleParam): Promise<Type.Schedule> => {
   const user = loadAuthUser();
   if (!user) {
-    console.error('User not found');
-    return null;
+    throw new Error('User not found');
   }
 
   const param = {
@@ -40,9 +40,8 @@ export const createSchedule = async (schedule: CreateScheduleParam): Promise<Typ
     };
 
     return s;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    newThrowResponseError(e);
+    throw e;
   }
-
-  return null;
 };
