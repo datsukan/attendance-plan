@@ -9,7 +9,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.41.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/guregu/dynamo v1.23.0
-	github.com/joho/godotenv v1.5.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.2
