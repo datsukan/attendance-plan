@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import type { Type } from '@/type';
 import { ScheduleTypeMaster } from '@/const/schedule';
@@ -21,7 +22,7 @@ export const useSchedule = () => {
         setMasterSchedules(result.masterSchedules);
         setCustomSchedules(result.customSchedules);
       } catch (e) {
-        alert(e);
+        toast.error(String(e));
       }
     })();
   }, []);
@@ -58,7 +59,7 @@ export const useSchedule = () => {
           const type = new Model.ScheduleType(s.type);
           resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
         } catch (e) {
-          alert(e);
+          toast.error(String(e));
           return;
         }
       }
@@ -77,7 +78,7 @@ export const useSchedule = () => {
         const type = new Model.ScheduleType(s.type);
         resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
       } catch (e) {
-        alert(e);
+        toast.error(String(e));
         return;
       }
     }
@@ -89,7 +90,7 @@ export const useSchedule = () => {
     try {
       await deleteSchedule(id);
     } catch (e) {
-      alert(e);
+      toast.error(String(e));
       return;
     }
 
@@ -113,7 +114,7 @@ export const useSchedule = () => {
     try {
       await updateSchedule(s);
     } catch (e) {
-      alert(e);
+      toast.error(String(e));
       return;
     }
 
@@ -137,7 +138,7 @@ export const useSchedule = () => {
     try {
       await updateSchedule(schedule.toTypeSchedule());
     } catch (e) {
-      alert(e);
+      toast.error(String(e));
       return;
     }
 

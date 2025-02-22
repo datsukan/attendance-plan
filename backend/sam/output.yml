@@ -10,6 +10,21 @@ PasswordResetFunction:
 PasswordSetFunction:
   Description: "PasswordSetFunction Name"
   Value: !Ref PasswordSetFunction
+PutUserFunction:
+  Description: "PutUserFunction Name"
+  Value: !Ref PutUserFunction
+DeleteUserFunction:
+  Description: "DeleteUserFunction Name"
+  Value: !Ref DeleteUserFunction
+EmailResetFunction:
+  Description: "EmailResetFunction Name"
+  Value: !Ref EmailResetFunction
+EmailSetFunction:
+  Description: "EmailSetFunction Name"
+  Value: !Ref EmailSetFunction
+GetUserFunction:
+  Description: "GetUserFunction Name"
+  Value: !Ref GetUserFunction
 GetScheduleListFunction:
   Description: "GetScheduleListFunction Name"
   Value: !Ref GetScheduleListFunction

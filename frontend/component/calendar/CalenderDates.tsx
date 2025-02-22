@@ -3,6 +3,7 @@ import { differenceInDays, addDays, getTime, isSameDay } from 'date-fns';
 import { DndContext, pointerWithin, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import toast from 'react-hot-toast';
 
 import { CalendarDateItem } from './CalendarDateItem';
 import { ScheduleWeekContainer } from '@/component/schedule/ScheduleWeekContainer';
@@ -224,7 +225,7 @@ export const CalenderDates = ({
       try {
         await updateBulkSchedules(targetSchedules);
       } catch (e) {
-        alert(e);
+        toast.error(String(e));
         return;
       }
 

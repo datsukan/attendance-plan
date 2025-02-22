@@ -11,4 +11,5 @@ const (
 	MsgUnauthorized           = "ログインしてください"
 	MsgUserNotFound           = "ユーザーが見つかりません"
 	MsgRequestFormatInvalid   = "リクエストの形式が正しくありません"
+	MsgEmailIsSame            = "新しいメールアドレスが現在と同じです"
 )

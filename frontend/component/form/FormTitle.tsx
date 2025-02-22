@@ -3,5 +3,5 @@ type Props = {
 };
 
 export const FormTitle = ({ label }: Props) => {
-  return <h1 className="text-2xl">{label}</h1>;
+  return <h2 className="text-2xl">{label}</h2>;
 };

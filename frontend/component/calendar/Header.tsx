@@ -17,8 +17,8 @@ type Props = {
 export const Header = ({ year, month, prev, next, reset, create }: Props) => {
   return (
     <>
-      <div className="py-6 flex gap-6 items-center justify-between">
-        <div className="flex gap-6 items-center">
+      <div className="flex items-center justify-between gap-6 py-6">
+        <div className="flex items-center gap-6">
           <YearMonthLabel year={year} month={month} />
           <AddMasterScheduleButton create={create} />
         </div>

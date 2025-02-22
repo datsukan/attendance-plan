@@ -2,15 +2,17 @@
 
 import { useState, FormEventHandler } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 import { InputTextField } from '@/component/form/InputTextField';
 import { SubmitButton } from '@/component/form/SubmitButton';
 
 import { signin } from '@/api/signin';
-import { saveAuthUser } from '@/storage/user';
+import { useStorage } from '@/provider/StorageProvider';
 
 export const Form = () => {
   const router = useRouter();
+  const { saveUser } = useStorage();
 
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
@@ -43,7 +45,7 @@ export const Form = () => {
 
       try {
         const user = await signin(email.toString(), password.toString());
-        saveAuthUser({
+        saveUser({
           id: user.id,
           email: user.email,
           name: user.name,
@@ -58,7 +60,7 @@ export const Form = () => {
           return;
         }
 
-        alert(String(e));
+        toast.error(String(e));
         return;
       }
 

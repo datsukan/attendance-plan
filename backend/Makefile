@@ -5,18 +5,25 @@ test:
 	go clean -testcache
 	ENV=test DYNAMO_ENDPOINT=http://localhost:8000 go test -v ./app/...
 
-.PHONY: up
-up:
+.PHONY: docker-up
+docker-up:
 	docker-compose up -d
+
+.PHONY: docker-down
+docker-down:
+	docker-compose down
+
+.PHONY: migrate-up
+migrate-up:
 	go run ./migrate/. up
 
-.PHONY: down
-down:
-	docker-compose down
+.PHONY: migrate-down
+migrate-down:
+	go run ./migrate/. down
 
 .PHONY: dev
 dev:
-	make up
+	make docker-up
 	sh ./dev.sh
 
 .PHONY: deploy

@@ -1,0 +1,40 @@
+PutUserFunction:
+  Type: AWS::Serverless::Function
+  Metadata:
+    BuildMethod: go1.x
+  Properties:
+    FunctionName: PutUserFunction
+    Description: !Sub
+      - Stack ${AWS::StackName} Function ${ResourceName}
+      - ResourceName: PutUserFunction
+    CodeUri: cmd/user/put
+    Handler: bootstrap
+    Runtime: provided.al2023
+    MemorySize: 128
+    Timeout: 30
+    Tracing: Active
+    Events:
+      ApiPutUser:
+        Type: Api
+        Properties:
+          Path: /users/{user_id}
+          Method: PUT
+          RestApiId: !Ref Api
+    Environment:
+      Variables:
+        USER_TABLE_NAME: !Ref UserTable
+        USER_TABLE_ARN: !GetAtt UserTable.Arn
+    Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserTable
+PutUserFunctionPermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !GetAtt PutUserFunction.Arn
+    Action: lambda:InvokeFunction
+    Principal: apigateway.amazonaws.com
+PutUserFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  DeletionPolicy: Retain
+  Properties:
+    LogGroupName: !Sub /aws/lambda/${PutUserFunction}

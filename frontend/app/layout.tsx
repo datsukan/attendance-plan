@@ -1,16 +1,9 @@
-import type { Metadata } from 'next';
 import { M_PLUS_1 } from 'next/font/google';
 import './globals.css';
+import { Toaster } from '@/component/Toaster';
+import { ProviderContainer } from '@/component/ProviderContainer';
 
 const mPlus1 = M_PLUS_1({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: {
-    template: '%s | TOU 受講計画管理',
-    default: 'TOU 受講計画管理',
-  },
-  description: 'TOU向けの受講計画を管理するアプリケーションです。',
-};
 
 export default function RootLayout({
   children,
@@ -19,7 +12,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={mPlus1.className}>{children}</body>
+      <body className={mPlus1.className}>
+        <Toaster />
+        <ProviderContainer>{children}</ProviderContainer>
+      </body>
     </html>
   );
 }

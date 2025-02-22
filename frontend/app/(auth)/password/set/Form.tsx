@@ -2,6 +2,7 @@
 
 import { useState, FormEventHandler } from 'react';
 import { useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 import { InputTextField } from '@/component/form/InputTextField';
 import { SubmitButton } from '@/component/form/SubmitButton';
@@ -69,7 +70,7 @@ export const Form = ({ complete }: Props) => {
           return;
         }
 
-        alert(String(e));
+        toast.error(String(e));
         return;
       }
 

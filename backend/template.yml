@@ -11,6 +11,11 @@ Resources:
   - $resources: sam/resource/function/auth/signup.yml
   - $resources: sam/resource/function/auth/password_reset.yml
   - $resources: sam/resource/function/auth/password_set.yml
+  - $resources: sam/resource/function/user/email_reset.yml
+  - $resources: sam/resource/function/user/email_set.yml
+  - $resources: sam/resource/function/user/get.yml
+  - $resources: sam/resource/function/user/put.yml
+  - $resources: sam/resource/function/user/delete.yml
   - $resources: sam/resource/function/schedule/get_list.yml
   - $resources: sam/resource/function/schedule/get.yml
   - $resources: sam/resource/function/schedule/post.yml

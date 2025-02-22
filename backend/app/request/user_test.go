@@ -8,13 +8,15 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/datsukan/attendance-plan/backend/app/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestToSignInRequest(t *testing.T) {
 	r := events.APIGatewayProxyRequest{
 		Body: `{"email": "test@example.com", "password": "test-password"}`,
 	}
-	req := ToSignInRequest(r)
+	req, err := ToSignInRequest(r)
+	require.NoError(t, err)
 
 	assert := assert.New(t)
 	assert.Equal("test@example.com", req.Email)
@@ -64,7 +66,8 @@ func TestToSignUpRequest(t *testing.T) {
 	r := events.APIGatewayProxyRequest{
 		Body: `{"email": "test@example.com"}`,
 	}
-	req := ToSignUpRequest(r)
+	req, err := ToSignUpRequest(r)
+	require.NoError(t, err)
 
 	assert := assert.New(t)
 	assert.Equal("test@example.com", req.Email)
@@ -103,7 +106,8 @@ func TestToPasswordResetRequest(t *testing.T) {
 	r := events.APIGatewayProxyRequest{
 		Body: `{"email": "test@example.com"}`,
 	}
-	req := ToPasswordResetRequest(r)
+	req, err := ToPasswordResetRequest(r)
+	require.NoError(t, err)
 
 	assert := assert.New(t)
 	assert.Equal("test@example.com", req.Email)
@@ -142,7 +146,8 @@ func TestToPasswordSetRequest(t *testing.T) {
 	r := events.APIGatewayProxyRequest{
 		Body: `{"token": "test-token", "password": "test-password"}`,
 	}
-	req := ToPasswordSetRequest(r)
+	req, err := ToPasswordSetRequest(r)
+	require.NoError(t, err)
 
 	assert := assert.New(t)
 	assert.Equal("test-token", req.Token)

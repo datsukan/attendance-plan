@@ -146,3 +146,143 @@ func TestPasswordSet(t *testing.T) {
 		assert.False(p.Result.HasError)
 	})
 }
+
+func TestGetUser(t *testing.T) {
+	t.Run("ユーザー情報を取得する", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, nil, p)
+
+		input := port.GetUserInputData{
+			UserID: "test-id",
+		}
+		i.GetUser(input)
+
+		output, ok := p.Output.(*port.GetUserOutputData)
+		assert.True(ok)
+
+		if !assert.NotNil(output) {
+			return
+		}
+
+		assert.Equal("test-id", output.ID)
+		assert.Equal("test-email@example.com", output.Email)
+		assert.Equal("test name", output.Name)
+
+		date := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+		assert.Equal(date.Format(time.DateTime), output.CreatedAt)
+		assert.Equal(date.Format(time.DateTime), output.UpdatedAt)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestUpdateUser(t *testing.T) {
+	t.Run("ユーザー情報を更新する", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, nil, p)
+
+		input := port.UpdateUserInputData{
+			UserID: "test-id",
+			Name:   "test-name",
+		}
+		i.UpdateUser(input)
+
+		output, ok := p.Output.(*port.UpdateUserOutputData)
+		assert.True(ok)
+
+		if !assert.NotNil(output) {
+			return
+		}
+
+		assert.Equal("test-id", output.ID)
+		assert.Equal("test-email@example.com", output.Email)
+		assert.Equal("test-name", output.Name)
+
+		date := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+		assert.Equal(date.Format(time.DateTime), output.CreatedAt)
+		assert.True(output.UpdatedAt >= time.Now().Format(time.DateTime))
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestDeleteUser(t *testing.T) {
+	t.Run("ユーザーを削除する", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, nil, p)
+
+		input := port.DeleteUserInputData{
+			UserID: "test-id",
+		}
+		i.DeleteUser(input)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestResetEmail(t *testing.T) {
+	t.Run("メールアドレスをリセットする", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		mr := &stubEmailRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, mr, p)
+
+		input := port.ResetEmailInputData{
+			UserID: "test-id",
+			Email:  "test-email@example.com",
+		}
+		i.ResetEmail(input)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}
+
+func TestSetEmail(t *testing.T) {
+	t.Run("メールアドレスを設定する", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		ur := &stubUserRepository{}
+		sr := &stubSessionRepository{}
+		mr := &stubEmailRepository{}
+		p := &stubUserOutputPort{}
+		i := NewUserInteractor(l, ur, sr, mr, p)
+
+		input := port.SetEmailInputData{
+			UserIDToken: "test-id-token",
+			EmailToken:  "test-email-token",
+		}
+		i.SetEmail(input)
+
+		assert.Equal(http.StatusOK, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}

@@ -6,10 +6,15 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+const (
+	TokenKeyValue = "value"
+	TokenKeyExp   = "exp"
+)
+
 // SessionRepository はセッションの repository を表すインターフェースです。
 type SessionRepository interface {
-	GenerateToken(userID string) (token string, err error)
-	IsValidToken(token string) (valid bool, userID string)
+	GenerateToken(value string) (token string, err error)
+	IsValidToken(token string) (valid bool, value string)
 }
 
 // SessionRepositoryImpl はセッションの repository の実装を表す構造体です。
@@ -24,10 +29,10 @@ func NewSessionRepository(secretKey string, tokenLifeTime int) SessionRepository
 }
 
 // GenerateToken はセッショントークンを生成します。
-func (r *SessionRepositoryImpl) GenerateToken(userID string) (string, error) {
+func (r *SessionRepositoryImpl) GenerateToken(value string) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * time.Duration(r.TokenLifeTime)).Unix(),
+		TokenKeyValue: value,
+		TokenKeyExp:   time.Now().Add(time.Hour * time.Duration(r.TokenLifeTime)).Unix(),
 	}
 	jt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := jt.SignedString([]byte(r.SecretKey))
@@ -52,17 +57,17 @@ func (r *SessionRepositoryImpl) IsValidToken(token string) (bool, string) {
 		return false, ""
 	}
 
-	baseUserID, ok := claims["user_id"]
+	baseValue, ok := claims[TokenKeyValue]
 	if !ok {
 		return false, ""
 	}
 
-	userID, ok := baseUserID.(string)
+	value, ok := baseValue.(string)
 	if !ok {
 		return false, ""
 	}
 
-	baseExp, ok := claims["exp"]
+	baseExp, ok := claims[TokenKeyExp]
 	if !ok {
 		return false, ""
 	}
@@ -77,5 +82,5 @@ func (r *SessionRepositoryImpl) IsValidToken(token string) (bool, string) {
 		return false, ""
 	}
 
-	return jt.Valid, userID
+	return jt.Valid, value
 }

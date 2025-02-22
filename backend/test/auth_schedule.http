@@ -4,7 +4,7 @@ POST {{base_url}}/signup
 Content-Type: application/json
 
 {
-    "email": "s.datsukan@gmail.com"
+    "email": ""
 }
 
 ### サインイン
@@ -13,8 +13,8 @@ POST {{base_url}}/signin
 Content-Type: application/json
 
 {
-    "email": "sample@example.com",
-    "password": "sample-password"
+    "email": "",
+    "password": ""
 }
 
 ###
@@ -31,6 +31,21 @@ Content-Type: application/json
     "token": "sample-token",
     "password": "sample-password"
 }
+
+### ユーザー情報の更新
+# @name update_user
+PUT {{base_url}}/users/{{user_id}}
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テスト 太郎"
+}
+
+### ユーザーの削除
+# @name delete_user
+DELETE {{base_url}}/users/{{user_id}}
+Authorization: Bearer {{session_token}}
 
 ### 学事の新規作成（前の要素なし）
 # @name create

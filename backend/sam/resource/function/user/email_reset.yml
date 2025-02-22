@@ -1,0 +1,46 @@
+EmailResetFunction:
+  Type: AWS::Serverless::Function
+  Metadata:
+    BuildMethod: go1.x
+  Properties:
+    FunctionName: EmailResetFunction
+    Description: !Sub
+      - Stack ${AWS::StackName} Function ${ResourceName}
+      - ResourceName: EmailResetFunction
+    CodeUri: cmd/user/email_reset
+    Handler: bootstrap
+    Runtime: provided.al2023
+    MemorySize: 128
+    Timeout: 30
+    Tracing: Active
+    Events:
+      ApiEmailReset:
+        Type: Api
+        Properties:
+          Path: /users/{user_id}/email/reset
+          Method: POST
+          RestApiId: !Ref Api
+    Environment:
+      Variables:
+        USER_TABLE_NAME: !Ref UserTable
+        USER_TABLE_ARN: !GetAtt UserTable.Arn
+    Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserTable
+      - Statement:
+          - Effect: Allow
+            Action:
+              - ses:SendEmail
+              - ses:SendRawEmail
+            Resource: "*"
+EmailResetFunctionPermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !GetAtt EmailResetFunction.Arn
+    Action: lambda:InvokeFunction
+    Principal: apigateway.amazonaws.com
+EmailResetFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  DeletionPolicy: Retain
+  Properties:
+    LogGroupName: !Sub /aws/lambda/${EmailResetFunction}

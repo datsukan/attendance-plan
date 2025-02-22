@@ -17,7 +17,14 @@ export const useAuth = () => {
 
     if (user) {
       setIsAuth(true);
-      router.push('/');
+
+      switch (pathname) {
+        case '/settings':
+          break;
+        default:
+          router.push('/');
+          return;
+      }
       return;
     }
 
@@ -30,7 +37,7 @@ export const useAuth = () => {
         break;
       default:
         router.push('/signin');
-        break;
+        return;
     }
   }, [router, pathname]);
 

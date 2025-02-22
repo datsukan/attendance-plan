@@ -154,6 +154,16 @@ func (p *stubScheduleOutputPort) SetResponseDeleteSchedule(output *port.DeleteSc
 	p.Result = result
 }
 
+func (p *stubScheduleOutputPort) SetResponseResetEmail(output *port.ResetEmailOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubScheduleOutputPort) SetResponseSetEmail(output *port.SetEmailOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
 type stubUserRepository struct{}
 
 func (r *stubUserRepository) ReadByEmail(email string, enabledOnly bool) (*model.User, error) {
@@ -275,6 +285,31 @@ func (p *stubUserOutputPort) SetResponsePasswordSet(output *port.PasswordSetOutp
 }
 
 func (p *stubUserOutputPort) SetResponsePasswordReset(output *port.PasswordResetOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubUserOutputPort) SetResponseGetUser(output *port.GetUserOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubUserOutputPort) SetResponseUpdateUser(output *port.UpdateUserOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubUserOutputPort) SetResponseDeleteUser(output *port.DeleteUserOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubUserOutputPort) SetResponseResetEmail(output *port.ResetEmailOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
+func (p *stubUserOutputPort) SetResponseSetEmail(output *port.SetEmailOutputData, result port.Result) {
 	p.Output = output
 	p.Result = result
 }
