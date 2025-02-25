@@ -27,7 +27,7 @@ export const useSchedule = () => {
     })();
   }, []);
 
-  const schedulesByType = (type: Type.ScheduleType) => {
+  const schedulesByType = (type: Type.ScheduleType): Type.ScheduleDateItem[] => {
     return type === ScheduleTypeMaster ? masterSchedules : customSchedules;
   };
 
