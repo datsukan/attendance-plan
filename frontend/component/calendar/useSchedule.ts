@@ -124,6 +124,14 @@ export const useSchedule = () => {
       return;
     }
 
+    if (beforeSchedule.getType() === s.type) {
+      const typeSchedules = schedulesByType(s.type);
+      const typeResultSchedules = new Model.ScheduleDateItemList(typeSchedules);
+      typeResultSchedules.updateSchedule(new Model.Schedule(s));
+      setSchedulesByType(s.type, typeResultSchedules.toTypeScheduleDateItems());
+      return;
+    }
+
     const beforeTypeSchedules = schedulesByType(beforeSchedule.getType());
     const beforeTypeResultSchedules = new Model.ScheduleDateItemList(beforeTypeSchedules);
     beforeTypeResultSchedules.removeSchedule(s.id);
