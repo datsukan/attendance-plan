@@ -5,7 +5,7 @@ import { Note } from './Note';
 
 export const metadata: Metadata = {
   title: 'サインイン',
-  description: 'TOU 受講計画管理のサインインページです。',
+  description: 'TOU 受講スケジュール管理のサインインページです。',
 };
 
 export default function SignIn() {

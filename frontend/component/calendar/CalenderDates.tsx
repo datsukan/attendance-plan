@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { differenceInDays, addDays, getTime, isSameDay } from 'date-fns';
+import { differenceInDays, addDays, getTime, isSameDay, format } from 'date-fns';
 import { DndContext, pointerWithin, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -11,38 +11,21 @@ import { ScheduleWeekContainer } from '@/component/schedule/ScheduleWeekContaine
 import { Type } from '@/type';
 import { Model } from '@/model';
 import { useDateKey } from '@/component/useDateKey';
+import { useSchedule } from '@/provider/ScheduleProvider';
 
-import { updateBulkSchedules } from '@/api/updateBulkSchedules';
+import { updateBulkSchedules } from '@/backend-api/updateBulkSchedules';
 
 type Props = {
   weeks: Date[][];
-  masterSchedules: Type.ScheduleDateItem[];
-  customSchedules: Type.ScheduleDateItem[];
-  setMasterSchedules: (schedules: Type.ScheduleDateItem[]) => void;
-  setCustomSchedules: (schedules: Type.ScheduleDateItem[]) => void;
-  schedulesByType: (type: Type.ScheduleType) => Type.ScheduleDateItem[];
-  setSchedulesByType: (type: Type.ScheduleType, schedules: Type.ScheduleDateItem[]) => void;
-  removeSchedule: (id: string, type: Type.ScheduleType) => void;
-  saveSchedule: (editSchedule: Model.EditSchedule) => void;
-  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
-export const CalenderDates = ({
-  weeks,
-  masterSchedules,
-  customSchedules,
-  setMasterSchedules,
-  setCustomSchedules,
-  schedulesByType,
-  setSchedulesByType,
-  removeSchedule,
-  saveSchedule,
-  changeScheduleColor,
-}: Props) => {
+export const CalenderDates = ({ weeks }: Props) => {
   const { dateToKey } = useDateKey();
+  const { masterSchedules, customSchedules, schedulesByType, setSchedulesByType, removeSchedule, saveSchedule, changeScheduleColor } =
+    useSchedule();
 
   const [activeSchedule, setActiveSchedule] = useState<Type.Schedule | null>(null);
-  const [isRunningUpdateSortSchedules, setIsRunningUpdateSortSchedules] = useState(false);
+  const [queueUpdateSortSchedules, setQueueUpdateSortSchedules] = useState<Type.Schedule[][]>([]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 0.1 } }),
     useSensor(KeyboardSensor, {
@@ -92,6 +75,10 @@ export const CalenderDates = ({
 
       const diff = differenceInDays(afterDate, beforeDate);
       const end = addDays(beforeSchedule.toTypeSchedule().endDate, diff);
+      if (!isSameDay(afterDate, end)) {
+        console.log('日付がズレた！', format(afterDate, 'yyyy-MM-dd'), format(end, 'yyyy-MM-dd'));
+        return;
+      }
       const afterSchedule: Type.Schedule = {
         ...beforeSchedule.toTypeSchedule(),
         startDate: afterDate,
@@ -211,25 +198,28 @@ export const CalenderDates = ({
   };
 
   const updateSortSchedules = (targetSchedules: Type.Schedule[]) => {
-    if (isRunningUpdateSortSchedules) {
-      setTimeout(() => updateSortSchedules(targetSchedules), 100);
-    }
-
-    setIsRunningUpdateSortSchedules(true);
-
     if (!targetSchedules || targetSchedules.length === 0) {
       return;
     }
 
+    const newQueue = [...queueUpdateSortSchedules, targetSchedules];
+    setQueueUpdateSortSchedules(newQueue);
+
     (async () => {
-      try {
-        await updateBulkSchedules(targetSchedules);
-      } catch (e) {
-        toast.error(String(e));
+      const tss = newQueue.pop();
+      if (!tss) {
         return;
       }
 
-      setIsRunningUpdateSortSchedules(false);
+      try {
+        await updateBulkSchedules(tss);
+      } catch (e) {
+        toast.error(String(e));
+        setQueueUpdateSortSchedules(newQueue);
+        return;
+      }
+
+      setQueueUpdateSortSchedules(newQueue);
     })();
   };
 
@@ -255,15 +245,7 @@ export const CalenderDates = ({
                 })}
               </div>
               <div className="col-start-1 row-start-1 mt-10 pb-1">
-                <ScheduleWeekContainer
-                  week={week}
-                  masterSchedules={masterSchedules}
-                  customSchedules={customSchedules}
-                  activeSchedule={activeSchedule}
-                  removeSchedule={removeSchedule}
-                  saveSchedule={saveSchedule}
-                  changeScheduleColor={changeScheduleColor}
-                />
+                <ScheduleWeekContainer week={week} activeSchedule={activeSchedule} />
               </div>
             </div>
           );

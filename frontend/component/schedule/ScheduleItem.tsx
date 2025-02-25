@@ -8,17 +8,15 @@ import { EditScheduleDialog } from '@/component/dialog/edit/EditScheduleDialog';
 
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { getColorClassName } from '@/component/calendar/color-module';
-import { Model } from '@/model';
 import type { Type } from '@/type';
+import { useSchedule } from '@/provider/ScheduleProvider';
 
 type Props = {
   schedule: Type.Schedule;
-  removeSchedule: (id: string, type: Type.ScheduleType) => void;
-  saveSchedule: (editSchedule: Model.EditSchedule) => void;
-  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
-export const ScheduleItem = ({ schedule, removeSchedule, saveSchedule, changeScheduleColor }: Props) => {
+export const ScheduleItem = ({ schedule }: Props) => {
+  const { removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
   const ref = useRef<HTMLDivElement>(null);
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 

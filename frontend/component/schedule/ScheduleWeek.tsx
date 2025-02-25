@@ -13,27 +13,15 @@ import {
   getColEndClassName,
   toScheduleTypeName,
 } from '@/component/schedule/schedule-module';
-import { Model } from '@/model';
 
 type Props = {
   type: Type.ScheduleType;
   dates: Date[];
   schedules: Type.ScheduleDateItem[];
   activeSchedule: Type.Schedule | null;
-  removeSchedule: (id: string, type: Type.ScheduleType) => void;
-  saveSchedule: (editSchedule: Model.EditSchedule) => void;
-  changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => void;
 };
 
-export const ScheduleWeek = ({
-  type,
-  dates,
-  schedules: scheduleDateItem,
-  activeSchedule,
-  removeSchedule,
-  saveSchedule,
-  changeScheduleColor,
-}: Props) => {
+export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeSchedule }: Props) => {
   const { dateToKey } = useDateKey();
   const schedules = scheduleDateItem.flatMap((item) => item.schedules);
 
@@ -63,13 +51,7 @@ export const ScheduleWeek = ({
 
                 return (
                   <div key={schedule.id} className={`pr-2 ${colStartClassName} ${colEndClassName}`}>
-                    <ScheduleWeekItem
-                      schedule={schedule}
-                      isActive={activeSchedule !== null && activeSchedule.id === schedule.id}
-                      removeSchedule={removeSchedule}
-                      saveSchedule={saveSchedule}
-                      changeScheduleColor={changeScheduleColor}
-                    />
+                    <ScheduleWeekItem schedule={schedule} isActive={activeSchedule !== null && activeSchedule.id === schedule.id} />
                   </div>
                 );
               })}
@@ -79,12 +61,7 @@ export const ScheduleWeek = ({
       </div>
       {activeSchedule && (
         <DragOverlay>
-          <ScheduleItem
-            schedule={activeSchedule}
-            removeSchedule={removeSchedule}
-            saveSchedule={saveSchedule}
-            changeScheduleColor={changeScheduleColor}
-          />
+          <ScheduleItem schedule={activeSchedule} />
         </DragOverlay>
       )}
     </div>

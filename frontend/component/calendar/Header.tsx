@@ -11,7 +11,7 @@ type Props = {
   prev: () => void;
   next: () => void;
   reset: () => void;
-  create: (createSchedule: CreateSchedule) => void;
+  create: (createSchedule: CreateSchedule) => Promise<void>;
 };
 
 export const Header = ({ year, month, prev, next, reset, create }: Props) => {

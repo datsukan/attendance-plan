@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { InputTextField } from '@/component/form/InputTextField';
 import { SubmitButton } from '@/component/form/SubmitButton';
 
-import { signup } from '@/api/signup';
+import { signup } from '@/backend-api/signup';
 
 type Props = {
   complete: () => void;

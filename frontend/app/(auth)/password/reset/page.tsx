@@ -4,7 +4,7 @@ import { Content } from './Content';
 
 export const metadata: Metadata = {
   title: 'パスワードリセット',
-  description: 'TOU 受講計画管理のパスワードリセットページです。',
+  description: 'TOU 受講スケジュール管理のパスワードリセットページです。',
 };
 
 export default function PasswordReset() {

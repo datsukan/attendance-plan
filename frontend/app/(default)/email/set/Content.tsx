@@ -7,8 +7,8 @@ import toast from 'react-hot-toast';
 import { CompleteMessage } from './CompleteMessage';
 import { Loading } from './Loading';
 
-import { setEmail } from '@/api/setEmail';
-import { getUser } from '@/api/getUser';
+import { setEmail } from '@/backend-api/setEmail';
+import { getUser } from '@/backend-api/getUser';
 import { useStorage } from '@/provider/StorageProvider';
 
 export const Content = () => {

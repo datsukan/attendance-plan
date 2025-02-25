@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 import { Form } from './Form';
 import { Note } from './Note';
@@ -18,7 +18,9 @@ export const Content = () => {
   } else {
     return (
       <div className="flex flex-col gap-8">
-        <Form complete={() => setIsComplete(true)} />
+        <Suspense>
+          <Form complete={() => setIsComplete(true)} />
+        </Suspense>
         <Note />
       </div>
     );

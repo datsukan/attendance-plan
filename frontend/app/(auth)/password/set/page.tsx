@@ -5,7 +5,7 @@ import { Content } from './Content';
 
 export const metadata: Metadata = {
   title: 'パスワード設定',
-  description: 'TOU 受講計画管理のパスワード設定ページです。',
+  description: 'TOU 受講スケジュール管理のパスワード設定ページです。',
 };
 
 export default function PasswordSet() {

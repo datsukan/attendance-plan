@@ -5,10 +5,19 @@ import { AccountDropDown } from '@/component/AccountDropDown';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | TOU 受講計画管理',
-    default: 'TOU 受講計画管理',
+    template: '%s | TOU 受講スケジュール管理',
+    default: 'TOU 受講スケジュール管理',
   },
-  description: 'TOU向けの受講計画を管理するアプリケーションです。',
+  description: 'TOU向けの受講スケジュールを管理するアプリケーションです。',
+  openGraph: {
+    title: 'TOU 受講スケジュール管理',
+    description: 'TOU向けの受講スケジュールを管理するアプリケーションです。',
+  },
+  twitter: {
+    title: 'TOU 受講スケジュール管理',
+    description: 'TOU向けの受講スケジュールを管理するアプリケーションです。',
+    card: 'summary_large_image',
+  },
 };
 
 export default function RootLayout({

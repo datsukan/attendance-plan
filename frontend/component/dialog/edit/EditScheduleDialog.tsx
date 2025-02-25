@@ -17,7 +17,7 @@ import { Type } from '@/type';
 type Props = {
   schedule: Type.Schedule;
   isOpen: boolean;
-  submit: (editSchedule: EditSchedule) => void;
+  submit: (editSchedule: EditSchedule) => Promise<void>;
   close: () => void;
 };
 
@@ -28,6 +28,7 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
   const [colorKey, setColorKey] = useState(schedule.color);
   const [scheduleType, setScheduleType] = useState(schedule.type);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setName(schedule.name);
@@ -38,7 +39,7 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
     setErrorMessage('');
   }, [isOpen, schedule.name, schedule.startDate, schedule.endDate, schedule.color, schedule.type]);
 
-  const save = () => {
+  const save = async () => {
     const mStartDate = startOfDay(startDate);
     const mEndDate = startOfDay(endDate);
 
@@ -59,12 +60,14 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
     editSchedule.setColor(colorKey);
     editSchedule.setType(scheduleType);
 
-    submit(editSchedule);
+    setLoading(true);
+    await submit(editSchedule);
     close();
+    setLoading(false);
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールを編集">
+    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールを編集" disabled={loading}>
       {errorMessage && <ErrorMessage message={errorMessage} />}
       <div className="flex gap-2">
         <ScheduleTypeButton
@@ -82,8 +85,8 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
       <InputScheduleName value={name} onChange={setName} />
       <InputDuration from={startDate} to={endDate} onChangeFrom={setStartDate} onChangeTo={setEndDate} />
       <div className="flex justify-end gap-2">
-        <SaveButton onClick={save} />
-        <CancelButton onClick={close} />
+        <SaveButton onClick={save} loading={loading} />
+        <CancelButton onClick={close} disabled={loading} />
       </div>
     </BaseDialog>
   );

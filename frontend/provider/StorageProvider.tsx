@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 import { saveAuthUser, loadAuthUser, removeAuthUser } from '@/storage/user';
 import type { AuthUser } from '@/storage/user';
-import { getUser } from '@/api/getUser';
+import { getUser } from '@/backend-api/getUser';
 import toast from 'react-hot-toast';
 
 type StorageContextType = {
@@ -34,7 +34,10 @@ export const StorageProvider = ({ children }: Props) => {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    setUser(loadAuthUser());
+    const au = loadAuthUser();
+    if (!au) return;
+
+    setUser(au);
 
     (async () => {
       try {
@@ -43,11 +46,12 @@ export const StorageProvider = ({ children }: Props) => {
           id: u.id,
           name: u.name,
           email: u.email,
-          session_token: user?.session_token ?? '',
+          session_token: au.session_token,
         };
         setUser(nu);
-      } catch {
+      } catch (e) {
         toast.error('ユーザー情報の取得に失敗しました');
+        toast.error(String(e));
         return;
       }
     })();

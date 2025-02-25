@@ -4,7 +4,7 @@ import { Content } from './Content';
 
 export const metadata: Metadata = {
   title: 'サインアップ',
-  description: 'TOU 受講計画管理のサインアップページです。',
+  description: 'TOU 受講スケジュール管理のサインアップページです。',
 };
 
 export default function SignUp() {

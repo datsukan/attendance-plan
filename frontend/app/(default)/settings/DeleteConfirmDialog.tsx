@@ -9,7 +9,7 @@ import { DeleteConfirmSubmitButton } from './DeleteConfirmSubmitButton';
 import { CancelButton } from '@/component/dialog/CancelButton';
 
 import { useStorage } from '@/provider/StorageProvider';
-import { deleteUser } from '@/api/deleteUser';
+import { deleteUser } from '@/backend-api/deleteUser';
 
 type Props = {
   isOpen: boolean;

@@ -4,7 +4,7 @@ import { useState, FormEventHandler } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
-import { updateUser } from '@/api/updateUser';
+import { updateUser } from '@/backend-api/updateUser';
 import { useStorage } from '@/provider/StorageProvider';
 
 export const Name = () => {

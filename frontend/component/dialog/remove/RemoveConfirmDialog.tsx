@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { format, isEqual } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
@@ -13,17 +16,21 @@ type Props = {
   schedule: Type.Schedule;
   isOpen: boolean;
   close: () => void;
-  remove: () => void;
+  remove: () => Promise<void>;
 };
 
 export const RemoveConfirmDialog = ({ schedule, isOpen, close, remove }: Props) => {
-  const removeSchedule = () => {
-    remove();
+  const [loading, setLoading] = useState(false);
+
+  const removeSchedule = async () => {
+    setLoading(true);
+    await remove();
     close();
+    setLoading(false);
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールの削除">
+    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールの削除" disabled={loading}>
       <div className="text-red-500">本当にこのスケジュールを削除しますか？</div>
       <div className="space-y-2 rounded-lg border p-3">
         <div className="flex items-center gap-2">
@@ -37,8 +44,8 @@ export const RemoveConfirmDialog = ({ schedule, isOpen, close, remove }: Props) 
         </div>
       </div>
       <div className="flex justify-end gap-2">
-        <RemoveButton onClick={removeSchedule} />
-        <CancelButton onClick={close} />
+        <RemoveButton onClick={removeSchedule} loading={loading} />
+        <CancelButton onClick={close} disabled={loading} />
       </div>
     </BaseDialog>
   );

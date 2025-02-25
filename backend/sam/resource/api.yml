@@ -37,6 +37,20 @@ Api:
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PasswordSetFunction.Arn}/invocations
             responses: {}
+        /users/{user_id}/schedules:
+          get:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleListFunction.Arn}/invocations
+            responses: {}
+        /users/{user_id}/email/reset:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmailResetFunction.Arn}/invocations
+            responses: {}
         /users/{user_id}:
           get:
             x-amazon-apigateway-integration:
@@ -56,26 +70,19 @@ Api:
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteUserFunction.Arn}/invocations
             responses: {}
-        /users/{user_id}/schedules:
-          get:
-            x-amazon-apigateway-integration:
-              httpMethod: POST
-              type: aws_proxy
-              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleListFunction.Arn}/invocations
-            responses: {}
-        /users/{user_id}/email/reset:
-          post:
-            x-amazon-apigateway-integration:
-              httpMethod: POST
-              type: aws_proxy
-              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmailResetFunction.Arn}/invocations
-            responses: {}
         /email/set:
           post:
             x-amazon-apigateway-integration:
               httpMethod: POST
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EmailSetFunction.Arn}/invocations
+            responses: {}
+        /schedules/bulk:
+          put:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutBulkScheduleFunction.Arn}/invocations
             responses: {}
         /schedules/{schedule_id}:
           get:
@@ -95,13 +102,6 @@ Api:
               httpMethod: POST
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteScheduleFunction.Arn}/invocations
-            responses: {}
-        /schedules/bulk:
-          put:
-            x-amazon-apigateway-integration:
-              httpMethod: POST
-              type: aws_proxy
-              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutBulkScheduleFunction.Arn}/invocations
             responses: {}
         /schedules:
           post:

@@ -6,7 +6,7 @@ import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDi
 import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
-  create: (createSchedule: CreateSchedule) => void;
+  create: (createSchedule: CreateSchedule) => Promise<void>;
 };
 
 export const AddMasterScheduleButton = ({ create }: Props) => {
@@ -14,8 +14,8 @@ export const AddMasterScheduleButton = ({ create }: Props) => {
 
   return (
     <>
-      <button className="rounded-full px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-400" onClick={() => setIsOpen(true)}>
-        <div className="flex gap-1 items-center text-white">
+      <button className="rounded-full bg-blue-600 px-4 py-1.5 hover:bg-blue-500 active:bg-blue-400" onClick={() => setIsOpen(true)}>
+        <div className="flex items-center gap-1 text-white">
           <PlusIcon className="size-5" />
           <span className="text-sm">作成</span>
         </div>

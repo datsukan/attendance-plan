@@ -8,7 +8,7 @@ import { CalenderDates } from './CalenderDates';
 import { usePagePosition } from './usePagePosition';
 import { useTargetDate } from './useTargetDate';
 import { useDates } from './useDates';
-import { useSchedule } from './useSchedule';
+import { useSchedule } from '@/provider/ScheduleProvider';
 
 export const Calender = () => {
   const now = useMemo(() => new Date(), []);
@@ -17,18 +17,7 @@ export const Calender = () => {
   const { targetDate, targetYear, targetMonth, incrementMonth, decrementMonth, resetMonth } = useTargetDate(now, calendarRef);
   const { weeks, monthCount, addMonthCount } = useDates(targetDate);
   const { initPagePosition, execWhenPageBottom } = usePagePosition();
-  const {
-    masterSchedules,
-    customSchedules,
-    setMasterSchedules,
-    setCustomSchedules,
-    schedulesByType,
-    setSchedulesByType,
-    addSchedule,
-    removeSchedule,
-    saveSchedule,
-    changeScheduleColor,
-  } = useSchedule();
+  const { addSchedule } = useSchedule();
 
   useEffect(() => {
     initPagePosition();
@@ -60,18 +49,7 @@ export const Calender = () => {
       <div className="sticky top-0 z-10 bg-white">
         <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
       </div>
-      <CalenderDates
-        weeks={weeks}
-        masterSchedules={masterSchedules}
-        customSchedules={customSchedules}
-        setMasterSchedules={setMasterSchedules}
-        setCustomSchedules={setCustomSchedules}
-        schedulesByType={schedulesByType}
-        setSchedulesByType={setSchedulesByType}
-        removeSchedule={removeSchedule}
-        saveSchedule={saveSchedule}
-        changeScheduleColor={changeScheduleColor}
-      />
+      <CalenderDates weeks={weeks} />
     </div>
   );
 };

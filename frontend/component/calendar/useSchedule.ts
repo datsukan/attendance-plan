@@ -5,10 +5,10 @@ import type { Type } from '@/type';
 import { ScheduleTypeMaster } from '@/const/schedule';
 import { Model } from '@/model';
 
-import { fetchSchedules } from '@/api/fetchSchedules';
-import { createSchedule, CreateScheduleParam } from '@/api/createSchedule';
-import { updateSchedule } from '@/api/updateSchedule';
-import { deleteSchedule } from '@/api/deleteSchedule';
+import { fetchSchedules } from '@/backend-api/fetchSchedules';
+import { createSchedule, CreateScheduleParam } from '@/backend-api/createSchedule';
+import { updateSchedule } from '@/backend-api/updateSchedule';
+import { deleteSchedule } from '@/backend-api/deleteSchedule';
 import { Schedule } from '@/model/schedule';
 
 export const useSchedule = () => {
@@ -40,7 +40,7 @@ export const useSchedule = () => {
     setCustomSchedules(schedules);
   };
 
-  const addSchedule = async (scheduleRequest: Model.CreateSchedule) => {
+  const addSchedule = async (scheduleRequest: Model.CreateSchedule): Promise<void> => {
     const targetSchedules = schedulesByType(scheduleRequest.getType());
     const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
     if (scheduleRequest.getHasBulk()) {
@@ -86,7 +86,7 @@ export const useSchedule = () => {
     setSchedulesByType(scheduleRequest.getType(), resultSchedules.toTypeScheduleDateItems());
   };
 
-  const removeSchedule = async (id: string, type: Type.ScheduleType) => {
+  const removeSchedule = async (id: string, type: Type.ScheduleType): Promise<void> => {
     try {
       await deleteSchedule(id);
     } catch (e) {
@@ -100,7 +100,7 @@ export const useSchedule = () => {
     setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
   };
 
-  const saveSchedule = async (scheduleRequest: Model.EditSchedule) => {
+  const saveSchedule = async (scheduleRequest: Model.EditSchedule): Promise<void> => {
     const s: Type.Schedule = {
       id: scheduleRequest.getId(),
       name: scheduleRequest.getName(),
@@ -118,14 +118,26 @@ export const useSchedule = () => {
       return;
     }
 
-    const targetSchedules = schedulesByType(s.type);
-    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
-    resultSchedules.updateSchedule(new Schedule(s));
+    const allSchedules = [...masterSchedules, ...customSchedules];
+    const beforeSchedule = new Model.ScheduleDateItemList(allSchedules).getSchedule(s.id);
+    if (!beforeSchedule) {
+      return;
+    }
 
-    setSchedulesByType(s.type, resultSchedules.toTypeScheduleDateItems());
+    const beforeTypeSchedules = schedulesByType(beforeSchedule.getType());
+    const beforeTypeResultSchedules = new Model.ScheduleDateItemList(beforeTypeSchedules);
+    beforeTypeResultSchedules.removeSchedule(s.id);
+
+    setSchedulesByType(beforeSchedule.getType(), beforeTypeResultSchedules.toTypeScheduleDateItems());
+
+    const afterTypeSchedules = schedulesByType(s.type);
+    const afterTypeResultSchedules = new Model.ScheduleDateItemList(afterTypeSchedules);
+    afterTypeResultSchedules.addSchedule(Model.ScheduleDateItem.toKey(s.startDate), new Model.ScheduleType(s.type), new Model.Schedule(s));
+
+    setSchedulesByType(s.type, afterTypeResultSchedules.toTypeScheduleDateItems());
   };
 
-  const changeScheduleColor = async (id: string, type: Type.ScheduleType, color: string) => {
+  const changeScheduleColor = async (id: string, type: Type.ScheduleType, color: string): Promise<void> => {
     const targetSchedules = schedulesByType(type);
     const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
     const schedule = resultSchedules.getSchedule(id);

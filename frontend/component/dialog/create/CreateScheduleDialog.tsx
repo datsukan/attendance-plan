@@ -18,7 +18,7 @@ import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
   isOpen: boolean;
-  submit: (createSchedule: CreateSchedule) => void;
+  submit: (createSchedule: CreateSchedule) => Promise<void>;
   close: () => void;
 };
 
@@ -32,6 +32,7 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
   const [bulkFrom, setBulkFrom] = useState(1);
   const [bulkTo, setBulkTo] = useState(10);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setName('');
@@ -60,7 +61,7 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
     setColorKey(color);
   };
 
-  const create = () => {
+  const create = async () => {
     const mStartDate = startOfDay(startDate);
     const mEndDate = startOfDay(endDate);
 
@@ -79,12 +80,15 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
       createSchedule.setBulkFrom(bulkFrom);
       createSchedule.setBulkTo(bulkTo);
     }
-    submit(createSchedule);
+
+    setLoading(true);
+    await submit(createSchedule);
     close();
+    setLoading(false);
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールを追加">
+    <BaseDialog isOpen={isOpen} onClose={close} title="スケジュールを追加" disabled={loading}>
       {errorMessage && <ErrorMessage message={errorMessage} />}
       <div className="flex gap-2">
         <ScheduleTypeButton label={toScheduleTypeName('custom')} isSelected={scheduleType === 'custom'} onClick={onSelectCustom} />
@@ -105,8 +109,8 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
       )}
       <InputDuration from={startDate} to={endDate} onChangeFrom={setStartDate} onChangeTo={setEndDate} />
       <div className="flex justify-end gap-2">
-        <CreateButton onClick={create} />
-        <CancelButton onClick={close} />
+        <CreateButton onClick={create} loading={loading} />
+        <CancelButton onClick={close} disabled={loading} />
       </div>
     </BaseDialog>
   );
