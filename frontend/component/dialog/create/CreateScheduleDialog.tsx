@@ -17,12 +17,14 @@ import { toScheduleTypeName } from '@/component/schedule/schedule-module';
 import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
+  defaultType?: 'master' | 'custom';
+  defaultDate?: Date | null;
   isOpen: boolean;
   submit: (createSchedule: CreateSchedule) => Promise<void>;
   close: () => void;
 };
 
-export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
+export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, submit }: Props) => {
   const [name, setName] = useState('');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -36,15 +38,15 @@ export const CreateScheduleDialog = ({ isOpen, close, submit }: Props) => {
 
   useEffect(() => {
     setName('');
-    setStartDate(new Date());
-    setEndDate(new Date());
-    setScheduleType('custom');
+    setStartDate(defaultDate ?? new Date());
+    setEndDate(defaultDate ?? new Date());
+    setScheduleType(defaultType ?? 'custom');
     setColorKey(getFirstColorKey());
     setHasBulk(false);
     setBulkFrom(1);
     setBulkTo(10);
     setErrorMessage('');
-  }, [isOpen]);
+  }, [defaultDate, defaultType, isOpen]);
 
   const onSelectCustom = () => {
     setScheduleType('custom');

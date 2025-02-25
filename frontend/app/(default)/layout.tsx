@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { PageTitle } from '@/component/PageTitle';
+import { ContactButton } from '@/component/ContactButton';
 import { AccountDropDown } from '@/component/AccountDropDown';
 
 export const metadata: Metadata = {
@@ -31,7 +32,10 @@ export default function RootLayout({
         <main className="container mx-auto px-4 py-8">
           <div className="flex flex-wrap content-center justify-between gap-2">
             <PageTitle />
-            <AccountDropDown />
+            <div className="flex items-center gap-2">
+              <ContactButton />
+              <AccountDropDown />
+            </div>
           </div>
           <div className="mt-4">{children}</div>
         </main>

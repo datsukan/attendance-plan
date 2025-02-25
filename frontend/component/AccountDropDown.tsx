@@ -25,7 +25,7 @@ export const AccountDropDown = () => {
   };
 
   return (
-    <Menu as="div" className="relative">
+    <Menu as="div" className="relative min-w-fit">
       <MenuButton className="rounded py-1 ring-1 ring-gray-200 hover:bg-gray-100">
         <div className="hidden items-center space-x-2 pl-3 pr-1 sm:flex">
           <UserCircleIcon className="size-5" />

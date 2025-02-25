@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useDroppable, DragOverlay } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 
@@ -13,6 +14,8 @@ import {
   getColEndClassName,
   toScheduleTypeName,
 } from '@/component/schedule/schedule-module';
+import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
+import { useSchedule } from '@/provider/ScheduleProvider';
 
 type Props = {
   type: Type.ScheduleType;
@@ -22,6 +25,9 @@ type Props = {
 };
 
 export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeSchedule }: Props) => {
+  const { addSchedule } = useSchedule();
+  const [isOpenCreateDialog, setIsOpenCreateDialog] = useState(false);
+  const [createDate, setCreateDate] = useState<Date | null>(null);
   const { dateToKey } = useDateKey();
   const schedules = scheduleDateItem.flatMap((item) => item.schedules);
 
@@ -33,14 +39,36 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
     return;
   }
 
+  const openCreateDialog = async (date: Date) => {
+    setCreateDate(date);
+    setIsOpenCreateDialog(true);
+  };
+
+  const closeCreateDialog = () => {
+    setCreateDate(null);
+    setIsOpenCreateDialog(false);
+  };
+
   return (
     <div className="grid min-h-14">
+      <CreateScheduleDialog
+        defaultType={type}
+        defaultDate={createDate}
+        isOpen={isOpenCreateDialog}
+        close={closeCreateDialog}
+        submit={addSchedule}
+      />
       <div className="col-start-1 row-start-1 grid h-full grid-cols-7">
         {dates.map((date) => (
           <Droppable key={`${type}-${dateToKey(date)}`} id={`${type}-${dateToKey(date)}`} date={date} type={type} />
         ))}
       </div>
-      <div className="col-start-1 row-start-1 grid grid-flow-col grid-cols-7 gap-y-1 pb-4">
+      <div className="col-start-1 row-start-1 grid h-full grid-cols-7">
+        {dates.map((date) => {
+          return <div key={dateToKey(date)} onClick={() => openCreateDialog(date)} />;
+        })}
+      </div>
+      <div className="pointer-events-none col-start-1 row-start-1 mb-6 grid h-fit grid-flow-col grid-cols-7 gap-y-1">
         {dates.map((date, index) => {
           const displaySchedules = schedules.filter((schedule) => isDisplaySchedule(schedule, date) && isShowItem(index, schedule, date));
           return (
@@ -50,7 +78,7 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
                 const colEndClassName = getColEndClassName(index, schedule, dates);
 
                 return (
-                  <div key={schedule.id} className={`pr-2 ${colStartClassName} ${colEndClassName}`}>
+                  <div key={schedule.id} className={`pointer-events-auto mr-2 ${colStartClassName} ${colEndClassName}`}>
                     <ScheduleWeekItem schedule={schedule} isActive={activeSchedule !== null && activeSchedule.id === schedule.id} />
                   </div>
                 );
