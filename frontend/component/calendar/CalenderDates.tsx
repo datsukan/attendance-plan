@@ -76,7 +76,6 @@ export const CalenderDates = ({ weeks }: Props) => {
       const diff = differenceInDays(afterDate, beforeDate);
       const end = addDays(beforeSchedule.toTypeSchedule().endDate, diff);
       if (!isSameDay(afterDate, end)) {
-        console.log('日付がズレた！', format(afterDate, 'yyyy-MM-dd'), format(end, 'yyyy-MM-dd'));
         return;
       }
       const afterSchedule: Type.Schedule = {
