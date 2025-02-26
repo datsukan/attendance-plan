@@ -22,7 +22,7 @@ export const OptionCustomScheduleBulkCreate = ({ checked, setChecked, from, setF
           type="number"
           min={1}
           max={to}
-          className="border-b w-10 py-1 focus-visible:outline-none focus-visible:border-blue-500 text-right"
+          className="w-10 border-b py-1 text-right focus-visible:border-blue-500 focus-visible:outline-none"
           value={from}
           onChange={(e) => setFrom(Number(e.target.value))}
           disabled={!checked}
@@ -32,7 +32,7 @@ export const OptionCustomScheduleBulkCreate = ({ checked, setChecked, from, setF
           min={from}
           max={99}
           type="number"
-          className="border-b w-10 py-1 focus-visible:outline-none focus-visible:border-blue-500 text-right"
+          className="w-10 border-b py-1 text-right focus-visible:border-blue-500 focus-visible:outline-none"
           value={to}
           onChange={(e) => setTo(Number(e.target.value))}
           disabled={!checked}

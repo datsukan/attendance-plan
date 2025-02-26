@@ -33,7 +33,7 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
   const [colorKey, setColorKey] = useState(getFirstColorKey());
   const [hasBulk, setHasBulk] = useState(false);
   const [bulkFrom, setBulkFrom] = useState(1);
-  const [bulkTo, setBulkTo] = useState(10);
+  const [bulkTo, setBulkTo] = useState(8);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +45,7 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
     setColorKey(getFirstColorKey());
     setHasBulk(false);
     setBulkFrom(1);
-    setBulkTo(10);
+    setBulkTo(8);
     setErrorMessage('');
   }, [defaultDate, defaultType, isOpen]);
 
