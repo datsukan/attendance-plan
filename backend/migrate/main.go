@@ -43,6 +43,11 @@ func up(db *dynamo.DB) error {
 		return err
 	}
 
+	subject := Subject{}
+	if err := subject.Up(db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -54,6 +59,11 @@ func down(db *dynamo.DB) error {
 
 	user := User{}
 	if err := user.Down(db); err != nil {
+		return err
+	}
+
+	subject := Subject{}
+	if err := subject.Down(db); err != nil {
 		return err
 	}
 

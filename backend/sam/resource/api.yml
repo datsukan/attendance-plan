@@ -44,6 +44,13 @@ Api:
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetScheduleListFunction.Arn}/invocations
             responses: {}
+        /users/{user_id}/subjects:
+          get:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetSubjectListFunction.Arn}/invocations
+            responses: {}
         /users/{user_id}/email/reset:
           post:
             x-amazon-apigateway-integration:
@@ -109,6 +116,20 @@ Api:
               httpMethod: POST
               type: aws_proxy
               uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostScheduleFunction.Arn}/invocations
+            responses: {}
+        /subjects/{subject_id}:
+          delete:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteSubjectFunction.Arn}/invocations
+            responses: {}
+        /subjects:
+          post:
+            x-amazon-apigateway-integration:
+              httpMethod: POST
+              type: aws_proxy
+              uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostSubjectFunction.Arn}/invocations
             responses: {}
     EndpointConfiguration: REGIONAL
     TracingEnabled: true

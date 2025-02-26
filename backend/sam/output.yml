@@ -43,6 +43,15 @@ PutBulkScheduleFunction:
 DeleteScheduleFunction:
   Description: "DeleteScheduleFunction Name"
   Value: !Ref DeleteScheduleFunction
+GetSubjectListFunction:
+  Description: "GetSubjectListFunction Name"
+  Value: !Ref GetSubjectListFunction
+PostSubjectFunction:
+  Description: "PostSubjectFunction Name"
+  Value: !Ref PostSubjectFunction
+DeleteSubjectFunction:
+  Description: "DeleteSubjectFunction Name"
+  Value: !Ref DeleteSubjectFunction
 API:
   Description: "API Gateway endpoint URL for the API"
   Value: !Sub "https://${DomainName}"

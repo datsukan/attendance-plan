@@ -7,6 +7,7 @@ import { ScheduleTypeButton } from '../ScheduleTypeButton';
 import { SelectColor } from '../SelectColor';
 import { InputScheduleName } from '@/component/dialog/InputScheduleName';
 import { MasterScheduleTemplates } from './MasterScheduleTemplates';
+import { CustomScheduleSelects } from './CustomScheduleSelects';
 import { OptionCustomScheduleBulkCreate } from './OptionCustomScheduleBulkCreate';
 import { InputDuration } from '@/component/dialog/InputDuration';
 import { CreateButton } from './CreateButton';
@@ -100,14 +101,17 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
       <InputScheduleName value={name} onChange={setName} />
       {scheduleType === 'master' && <MasterScheduleTemplates onSelect={onSelectMasterScheduleTemplate} />}
       {scheduleType === 'custom' && (
-        <OptionCustomScheduleBulkCreate
-          checked={hasBulk}
-          setChecked={setHasBulk}
-          from={bulkFrom}
-          setFrom={setBulkFrom}
-          to={bulkTo}
-          setTo={setBulkTo}
-        />
+        <>
+          <CustomScheduleSelects onSelect={(name: string, color: string) => (setName(name), setColorKey(color))} />
+          <OptionCustomScheduleBulkCreate
+            checked={hasBulk}
+            setChecked={setHasBulk}
+            from={bulkFrom}
+            setFrom={setBulkFrom}
+            to={bulkTo}
+            setTo={setBulkTo}
+          />
+        </>
       )}
       <InputDuration from={startDate} to={endDate} onChangeFrom={setStartDate} onChangeTo={setEndDate} />
       <div className="flex justify-end gap-2">

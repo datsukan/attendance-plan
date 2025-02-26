@@ -1,0 +1,39 @@
+### サインイン
+# @name signin
+POST {{base_url}}/signin
+Content-Type: application/json
+
+{
+    "email": "",
+    "password": ""
+}
+
+###
+
+@user_id = {{signin.response.body.id}}
+@session_token = {{signin.response.body.session_token}}
+
+### 科目の追加
+# @name add_subject
+POST {{base_url}}/subjects
+Authorization: Bearer {{session_token}}
+Content-Type: application/json
+
+{
+    "name": "テスト科目",
+    "color": "white"
+}
+
+###
+
+@subject_id = {{add_subject.response.body.id}}
+
+### 科目一覧の取得
+# @name get_subjects
+GET {{base_url}}/users/{{user_id}}/subjects
+Authorization: Bearer {{session_token}}
+
+### 科目の削除
+# @name delete_subject
+DELETE {{base_url}}/subjects/{{subject_id}}
+Authorization: Bearer {{session_token}}

@@ -51,7 +51,7 @@ export const Form = ({ complete }: Props) => {
 
   return (
     <form className="flex w-full flex-col gap-8 pt-8" onSubmit={submit}>
-      <InputTextField name="email" label="メールアドレス" type="email" errorMessage={errorMessage} />
+      <InputTextField name="email" label="メールアドレス" type="email" autocomplete="new-password" errorMessage={errorMessage} />
       <SubmitButton label="サインアップする" loadingLabel="サインアップ中..." loading={loading} />
     </form>
   );

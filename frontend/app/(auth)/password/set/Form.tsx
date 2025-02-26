@@ -81,8 +81,20 @@ export const Form = ({ complete }: Props) => {
   return (
     <form className="flex w-full flex-col gap-8" onSubmit={submit}>
       <div className="flex w-full flex-col gap-5">
-        <InputTextField name="password" label="パスワード" type="password" errorMessage={passwordErrorMessage} />
-        <InputTextField name="re-password" label="パスワードの再入力" type="password" errorMessage={rePasswordErrorMessage} />
+        <InputTextField
+          name="password"
+          label="パスワード"
+          type="password"
+          autocomplete="current-password"
+          errorMessage={passwordErrorMessage}
+        />
+        <InputTextField
+          name="re-password"
+          label="パスワードの再入力"
+          type="password"
+          autocomplete="current-password"
+          errorMessage={rePasswordErrorMessage}
+        />
       </div>
       <SubmitButton label="パスワードを設定する" loadingLabel="パスワードを設定中..." loading={loading} />
     </form>

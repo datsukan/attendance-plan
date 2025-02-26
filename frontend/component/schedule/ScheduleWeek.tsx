@@ -35,10 +35,6 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
     return;
   }
 
-  if (!scheduleDateItem || scheduleDateItem.length === 0) {
-    return;
-  }
-
   const openCreateDialog = async (date: Date) => {
     setCreateDate(date);
     setIsOpenCreateDialog(true);

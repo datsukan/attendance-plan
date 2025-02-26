@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/datsukan/attendance-plan/backend/app/component/id"
 	"github.com/datsukan/attendance-plan/backend/app/model"
 	"github.com/datsukan/attendance-plan/backend/app/port"
 	"github.com/datsukan/attendance-plan/backend/app/repository"
-	ulid "github.com/oklog/ulid/v2"
 )
 
 // ScheduleInteractor はスケジュールのユースケースの実装を表す構造体です。
@@ -21,7 +21,7 @@ type ScheduleInteractor struct {
 }
 
 // NewScheduleInteractor は ScheduleInteractor を生成します。
-func NewScheduleInteractor(logger *slog.Logger, scheduleRepository repository.ScheduleRepository, outputPort port.ScheduleOutputPort) *ScheduleInteractor {
+func NewScheduleInteractor(logger *slog.Logger, scheduleRepository repository.ScheduleRepository, outputPort port.ScheduleOutputPort) port.ScheduleInputPort {
 	return &ScheduleInteractor{
 		Logger:             logger,
 		ScheduleRepository: scheduleRepository,
@@ -151,7 +151,7 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 	}
 
 	s := model.Schedule{
-		ID:        ulid.Make().String(),
+		ID:        id.NewID(),
 		UserID:    input.Schedule.UserID,
 		Name:      input.Schedule.Name,
 		StartsAt:  startsAt,

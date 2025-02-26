@@ -1,5 +1,5 @@
 import { YearMonthLabel } from './YearMonthLabel';
-import { AddMasterScheduleButton } from './AddMasterScheduleButton';
+import { AddScheduleButton } from './AddScheduleButton';
 import { MoveMonthNav } from './MoveMonthNav';
 import { DayOfWeeks } from './DayOfWeeks';
 
@@ -20,7 +20,7 @@ export const Header = ({ year, month, prev, next, reset, create }: Props) => {
       <div className="flex items-center justify-between gap-6 py-6">
         <div className="flex items-center gap-6">
           <YearMonthLabel year={year} month={month} />
-          <AddMasterScheduleButton create={create} />
+          <AddScheduleButton create={create} />
         </div>
         <MoveMonthNav prev={prev} next={next} reset={reset} />
       </div>

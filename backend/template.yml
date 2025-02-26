@@ -7,6 +7,7 @@ Resources:
   - $resources: sam/resource/api.yml
   - $resources: sam/resource/table/schedule.yml
   - $resources: sam/resource/table/user.yml
+  - $resources: sam/resource/table/subject.yml
   - $resources: sam/resource/function/auth/signin.yml
   - $resources: sam/resource/function/auth/signup.yml
   - $resources: sam/resource/function/auth/password_reset.yml
@@ -22,6 +23,9 @@ Resources:
   - $resources: sam/resource/function/schedule/put.yml
   - $resources: sam/resource/function/schedule/put_bulk.yml
   - $resources: sam/resource/function/schedule/delete.yml
+  - $resources: sam/resource/function/subject/get_list.yml
+  - $resources: sam/resource/function/subject/post.yml
+  - $resources: sam/resource/function/subject/delete.yml
   - $resources: sam/resource/domain.yml
 Outputs:
   $outputs: sam/output.yml

@@ -4,19 +4,21 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { getColorClassName, getColorKeys } from '@/component/calendar/color-module';
 
 type Props = {
+  isSmall?: boolean;
+  disabled?: boolean;
   value: string;
   onChange: (value: string) => void;
 };
 
-export const SelectColor = ({ value, onChange }: Props) => {
+export const SelectColor = ({ isSmall = false, disabled = false, value, onChange }: Props) => {
   return (
     <Menu>
-      <MenuButton className="rounded-lg p-2 flex gap-1 items-center hover:bg-gray-100 active:bg-gray-200">
-        <div className={`size-5 rounded-full ${getColorClassName(value)}`} />
+      <MenuButton className="flex items-center gap-1 rounded-lg p-2 hover:bg-gray-100 active:bg-gray-200" disabled={disabled}>
+        <div className={`${isSmall ? 'size-4' : 'size-5'} rounded-full ${getColorClassName(value)}`} />
         <ChevronDownIcon className="size-4" />
       </MenuButton>
 
-      <MenuItems transition anchor="bottom" className="border shadow-lg rounded p-3 bg-white grid grid-cols-2 gap-2">
+      <MenuItems transition anchor="bottom" className="grid grid-cols-2 gap-2 rounded border bg-white p-3 shadow-lg">
         {getColorKeys().map((key) => (
           <MenuItem key={key}>
             <button className={`size-6 rounded-full ${getColorClassName(key)}`} onClick={() => onChange(key)}></button>

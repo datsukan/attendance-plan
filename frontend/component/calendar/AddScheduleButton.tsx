@@ -9,15 +9,15 @@ type Props = {
   create: (createSchedule: CreateSchedule) => Promise<void>;
 };
 
-export const AddMasterScheduleButton = ({ create }: Props) => {
+export const AddScheduleButton = ({ create }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <button className="rounded-full bg-blue-600 px-4 py-1.5 hover:bg-blue-500 active:bg-blue-400" onClick={() => setIsOpen(true)}>
+      <button className="rounded-full bg-blue-600 py-1.5 pl-3 pr-4 hover:bg-blue-500 active:bg-blue-400" onClick={() => setIsOpen(true)}>
         <div className="flex items-center gap-1 text-white">
           <PlusIcon className="size-5" />
-          <span className="text-sm">作成</span>
+          <span className="mb-0.5 text-sm">作成</span>
         </div>
       </button>
       <CreateScheduleDialog isOpen={isOpen} close={() => setIsOpen(false)} submit={create} />

@@ -74,7 +74,13 @@ export const Form = () => {
     <form className="flex w-full flex-col gap-8" onSubmit={submit}>
       <div className="flex w-full flex-col gap-5">
         <InputTextField name="email" label="メールアドレス" type="email" errorMessage={emailErrorMessage} />
-        <InputTextField name="password" label="パスワード" type="password" errorMessage={passwordErrorMessage} />
+        <InputTextField
+          name="password"
+          label="パスワード"
+          type="password"
+          autocomplete="current-password"
+          errorMessage={passwordErrorMessage}
+        />
       </div>
       <SubmitButton label="サインインする" loadingLabel="サインイン中..." loading={loading} />
     </form>

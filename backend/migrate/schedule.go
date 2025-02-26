@@ -22,7 +22,17 @@ type Schedule struct {
 }
 
 func (s Schedule) Up(db *dynamo.DB) error {
-	db.Table(TableNameSchedule).DeleteTable().Run()
+	tables, err := db.ListTables().All()
+	if err != nil {
+		return err
+	}
+
+	for _, table := range tables {
+		if table == TableNameSchedule {
+			return nil
+		}
+	}
+
 	return db.CreateTable(TableNameSchedule, Schedule{}).Run()
 }
 

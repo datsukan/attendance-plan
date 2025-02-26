@@ -1,0 +1,44 @@
+GetSubjectListFunction:
+  Type: AWS::Serverless::Function
+  Metadata:
+    BuildMethod: go1.x
+  Properties:
+    FunctionName: GetSubjectListFunction
+    Description: !Sub
+      - Stack ${AWS::StackName} Function ${ResourceName}
+      - ResourceName: GetSubjectListFunction
+    CodeUri: cmd/subject/get_list
+    Handler: bootstrap
+    Runtime: provided.al2023
+    MemorySize: 128
+    Timeout: 30
+    Tracing: Active
+    Events:
+      ApiGetSubjectList:
+        Type: Api
+        Properties:
+          Path: /users/{user_id}/subjects
+          Method: GET
+          RestApiId: !Ref Api
+    Environment:
+      Variables:
+        SUBJECT_TABLE_NAME: !Ref SubjectTable
+        SUBJECT_TABLE_ARN: !GetAtt SubjectTable.Arn
+        USER_TABLE_NAME: !Ref UserTable
+        USER_TABLE_ARN: !GetAtt UserTable.Arn
+    Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref SubjectTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserTable
+GetSubjectListFunctionPermission:
+  Type: AWS::Lambda::Permission
+  Properties:
+    FunctionName: !GetAtt GetSubjectListFunction.Arn
+    Action: lambda:InvokeFunction
+    Principal: apigateway.amazonaws.com
+GetSubjectListFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  DeletionPolicy: Retain
+  Properties:
+    LogGroupName: !Sub /aws/lambda/${GetSubjectListFunction}

@@ -19,7 +19,17 @@ type User struct {
 }
 
 func (u User) Up(db *dynamo.DB) error {
-	db.Table(TableNameUser).DeleteTable().Run()
+	tables, err := db.ListTables().All()
+	if err != nil {
+		return err
+	}
+
+	for _, table := range tables {
+		if table == TableNameUser {
+			return nil
+		}
+	}
+
 	return db.CreateTable(TableNameUser, User{}).Run()
 }
 
