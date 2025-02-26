@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
+import { useState, useRef, KeyboardEvent } from 'react';
 import { PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import { SelectColor } from '../SelectColor';
@@ -14,6 +14,7 @@ type Props = {
 export const AddChip = ({ loading = false, submit }: Props) => {
   const [name, setName] = useState('');
   const [colorKey, setColorKey] = useState(getFirstColorKey());
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const keyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (loading) return;
@@ -28,11 +29,16 @@ export const AddChip = ({ loading = false, submit }: Props) => {
     await submit(name, colorKey);
     setName('');
     setColorKey(getFirstColorKey());
+
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
   };
 
   return (
     <div className="flex w-full items-center gap-1 rounded-full border pl-4 pr-1 active:ring-1">
       <input
+        ref={inputRef}
         type="text"
         value={name}
         autoComplete="schedule-label"
