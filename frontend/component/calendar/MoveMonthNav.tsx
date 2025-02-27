@@ -15,7 +15,7 @@ export const MoveMonthNav = ({ prev, next, reset }: Props) => {
       </NavButton>
       <NavButton onClick={() => reset()}>
         <div className="flex justify-center">
-          <span className="text-sm">今日</span>
+          <span className="text-sm">今月</span>
         </div>
       </NavButton>
       <NavButton onClick={() => next()}>
