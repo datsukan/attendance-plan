@@ -6,7 +6,7 @@ import { ScheduleTypeMaster } from '@/const/schedule';
 import { Model } from '@/model';
 
 import { fetchSchedules } from '@/backend-api/fetchSchedules';
-import { createSchedule, CreateScheduleParam } from '@/backend-api/createSchedule';
+import { createBulkSchedules, CreateScheduleParam } from '@/backend-api/createBulkSchedules';
 import { updateSchedule } from '@/backend-api/updateSchedule';
 import { deleteSchedule } from '@/backend-api/deleteSchedule';
 import { Schedule } from '@/model/schedule';
@@ -40,50 +40,40 @@ export const useSchedule = () => {
     setCustomSchedules(schedules);
   };
 
-  const addSchedule = async (scheduleRequest: Model.CreateSchedule): Promise<void> => {
-    const targetSchedules = schedulesByType(scheduleRequest.getType());
-    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
-    if (scheduleRequest.getHasBulk()) {
-      for (let number = scheduleRequest.getBulkFrom(); number <= scheduleRequest.getBulkTo(); number++) {
-        const s: CreateScheduleParam = {
-          name: `第${number}回 ${scheduleRequest.getName()}`,
-          startDate: scheduleRequest.getStartDate(),
-          endDate: scheduleRequest.getEndDate(),
-          color: scheduleRequest.getColor(),
-          type: scheduleRequest.getType(),
-        };
-
-        try {
-          const resSchedule = await createSchedule(s);
-          const dateKey = Model.ScheduleDateItem.toKey(s.startDate);
-          const type = new Model.ScheduleType(s.type);
-          resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
-        } catch (e) {
-          toast.error(String(e));
-          return;
-        }
-      }
-    } else {
-      const s = {
-        name: scheduleRequest.getName(),
-        startDate: scheduleRequest.getStartDate(),
-        endDate: scheduleRequest.getEndDate(),
-        color: scheduleRequest.getColor(),
-        type: scheduleRequest.getType(),
-      };
-
-      try {
-        const resSchedule = await createSchedule(s);
-        const dateKey = Model.ScheduleDateItem.toKey(s.startDate);
-        const type = new Model.ScheduleType(s.type);
-        resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
-      } catch (e) {
-        toast.error(String(e));
-        return;
-      }
+  const addSchedule = async (reqSchedules: Model.CreateSchedule[]): Promise<void> => {
+    if (reqSchedules.length === 0) {
+      return;
     }
 
-    setSchedulesByType(scheduleRequest.getType(), resultSchedules.toTypeScheduleDateItems());
+    const targetSchedules = schedulesByType(reqSchedules[0].getType());
+    const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
+
+    let createBulkScheduleParams: CreateScheduleParam[] = [];
+    for (const reqSchedule of reqSchedules) {
+      const s: CreateScheduleParam = {
+        name: reqSchedule.getName(),
+        startDate: reqSchedule.getStartDate(),
+        endDate: reqSchedule.getEndDate(),
+        color: reqSchedule.getColor(),
+        type: reqSchedule.getType(),
+      };
+
+      createBulkScheduleParams.push(s);
+    }
+
+    try {
+      const resSchedules = await createBulkSchedules(createBulkScheduleParams);
+      const dateKey = Model.ScheduleDateItem.toKey(createBulkScheduleParams[0].startDate);
+      const type = new Model.ScheduleType(createBulkScheduleParams[0].type);
+      for (const resSchedule of resSchedules) {
+        resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
+      }
+    } catch (e) {
+      toast.error(String(e));
+      return;
+    }
+
+    setSchedulesByType(reqSchedules[0].getType(), resultSchedules.toTypeScheduleDateItems());
   };
 
   const removeSchedule = async (id: string, type: Type.ScheduleType): Promise<void> => {

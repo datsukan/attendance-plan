@@ -2,10 +2,10 @@
 
 import { LinkText } from '@/component/form/LinkText';
 
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 
 export const Email = () => {
-  const { user } = useStorage();
+  const { user } = useUser();
 
   if (!user) return null;
 

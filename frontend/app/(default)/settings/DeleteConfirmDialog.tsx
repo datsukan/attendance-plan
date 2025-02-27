@@ -8,7 +8,7 @@ import { BaseDialog } from '@/component/dialog/BaseDialog';
 import { DeleteConfirmSubmitButton } from './DeleteConfirmSubmitButton';
 import { CancelButton } from '@/component/dialog/CancelButton';
 
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 import { deleteUser } from '@/backend-api/deleteUser';
 
 type Props = {
@@ -19,7 +19,7 @@ type Props = {
 export const DeleteConfirmDialog = ({ isOpen, close }: Props) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { user, removeUser } = useStorage();
+  const { user, removeUser } = useUser();
 
   if (!user) return null;
 

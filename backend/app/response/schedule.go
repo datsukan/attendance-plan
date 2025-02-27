@@ -1,8 +1,6 @@
 package response
 
 import (
-	"time"
-
 	"github.com/datsukan/attendance-plan/backend/app/port"
 )
 
@@ -37,6 +35,11 @@ type GetScheduleResponse ScheduleResponse
 
 // PostScheduleResponse はスケジュール登録のレスポンスを表す構造体です。
 type PostScheduleResponse ScheduleResponse
+
+// PostBulkScheduleResponse はスケジュール一括登録のレスポンスを表す構造体です。
+type PostBulkScheduleResponse struct {
+	Schedules []ScheduleResponse `json:"schedules"`
+}
 
 // PutScheduleResponse はスケジュール更新のレスポンスを表す構造体です。
 type PutScheduleResponse ScheduleResponse
@@ -106,16 +109,34 @@ func ToPostScheduleResponse(output *port.CreateScheduleOutputData) PostScheduleR
 	}
 
 	return PostScheduleResponse{
-		ID:        output.ID,
-		UserID:    output.UserID,
-		Name:      output.Name,
-		StartsAt:  output.StartsAt.Format(time.DateTime),
-		EndsAt:    output.EndsAt.Format(time.DateTime),
-		Color:     output.Color,
-		Type:      output.Type.String(),
-		Order:     output.Order.Int(),
-		CreatedAt: output.CreatedAt.Format(time.DateTime),
-		UpdatedAt: output.UpdatedAt.Format(time.DateTime),
+		ID:        output.Schedule.ID,
+		UserID:    output.Schedule.UserID,
+		Name:      output.Schedule.Name,
+		StartsAt:  output.Schedule.StartsAt,
+		EndsAt:    output.Schedule.EndsAt,
+		Color:     output.Schedule.Color,
+		Type:      output.Schedule.Type,
+		Order:     output.Schedule.Order,
+		CreatedAt: output.Schedule.CreatedAt,
+		UpdatedAt: output.Schedule.UpdatedAt,
+	}
+}
+
+// ToPostBulkScheduleResponse はスケジュール一括登録のレスポンスに変換します。
+func ToPostBulkScheduleResponse(output *port.CreateBulkScheduleOutputData) PostBulkScheduleResponse {
+	if output == nil || len(output.Schedules) == 0 {
+		return PostBulkScheduleResponse{
+			Schedules: []ScheduleResponse{},
+		}
+	}
+
+	var ss []ScheduleResponse
+	for _, s := range output.Schedules {
+		ss = append(ss, ScheduleResponse(s))
+	}
+
+	return PostBulkScheduleResponse{
+		Schedules: ss,
 	}
 }
 

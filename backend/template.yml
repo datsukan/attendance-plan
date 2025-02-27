@@ -20,6 +20,7 @@ Resources:
   - $resources: sam/resource/function/schedule/get_list.yml
   - $resources: sam/resource/function/schedule/get.yml
   - $resources: sam/resource/function/schedule/post.yml
+  - $resources: sam/resource/function/schedule/post_bulk.yml
   - $resources: sam/resource/function/schedule/put.yml
   - $resources: sam/resource/function/schedule/put_bulk.yml
   - $resources: sam/resource/function/schedule/delete.yml

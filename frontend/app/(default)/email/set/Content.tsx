@@ -9,12 +9,12 @@ import { Loading } from './Loading';
 
 import { setEmail } from '@/backend-api/setEmail';
 import { getUser } from '@/backend-api/getUser';
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 
 export const Content = () => {
   const searchParams = useSearchParams();
   const [isComplete, setIsComplete] = useState(false);
-  const { user, saveUser } = useStorage();
+  const { user, saveUser } = useUser();
 
   useEffect(() => {
     if (!user) return;

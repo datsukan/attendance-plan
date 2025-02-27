@@ -13,7 +13,7 @@ type Subject struct {
 	UserID    string    `dynamo:"UserID" index:"UserID-index,hash"`
 	Name      string    `dynamo:"Name"`
 	Color     string    `dynamo:"Color"`
-	CreatedAt time.Time `dynamo:"CreatedAt"`
+	CreatedAt time.Time `dynamo:"CreatedAt" index:"UserID-index,range"`
 	UpdatedAt time.Time `dynamo:"UpdatedAt"`
 }
 

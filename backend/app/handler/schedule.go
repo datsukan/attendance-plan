@@ -210,6 +210,76 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	return res, nil
 }
 
+// PostBulkSchedule はスケジュールを一括登録します。
+func PostBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	logger := infrastructure.NewLogger()
+	logger.Info("start post bulk schedule")
+
+	config := infrastructure.GetConfig()
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	am := middleware.NewAuthMiddleware(ssRepo)
+	userID, err := am.Auth(r)
+	if err != nil {
+		return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+	}
+
+	logger.With("user_id", userID)
+
+	req, err := request.ToPostBulkScheduleRequest(r)
+	if err != nil {
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusBadRequest, usecase.MsgRequestFormatInvalid)
+	}
+
+	if err := request.ValidatePostBulkScheduleRequest(req); err != nil {
+		logger.Warn(err.Error())
+		return response.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	db := infrastructure.NewDB()
+	ur := repository.NewUserRepository(*db)
+	if _, err := ur.Read(userID, true); err != nil {
+		if errors.Is(err, repository.NewNotFoundError()) {
+			logger.Warn(err.Error())
+			return response.NewError(http.StatusUnauthorized, usecase.MsgUnauthorized)
+		}
+
+		logger.Error(err.Error())
+		return response.NewError(http.StatusInternalServerError, usecase.MsgInternalServerError)
+	}
+
+	sr := repository.NewScheduleRepository(*db)
+
+	schedules := make([]port.CreateScheduleData, len(req.Schedules))
+	for i, s := range req.Schedules {
+		schedules[i] = port.CreateScheduleData{
+			UserID:   userID,
+			Name:     s.Name,
+			StartsAt: s.StartsAt,
+			EndsAt:   s.EndsAt,
+			Color:    s.Color,
+			Type:     s.Type,
+			Order:    s.Order,
+		}
+	}
+
+	input := port.CreateBulkScheduleInputData{Schedules: schedules}
+	op := presenter.NewSchedulePresenter()
+	interactor := usecase.NewScheduleInteractor(logger, sr, op)
+	interactor.CreateBulkSchedule(input)
+
+	statusCode, body := op.GetResponse()
+	res := events.APIGatewayProxyResponse{
+		StatusCode: statusCode,
+		Body:       body,
+		Headers:    response.CORSHeaders,
+	}
+
+	logger.Info("end post bulk schedule")
+
+	return res, nil
+}
+
 // PutSchedule はスケジュールを更新します。
 func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	logger := infrastructure.NewLogger()

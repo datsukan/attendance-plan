@@ -84,6 +84,26 @@ func (p *SchedulePresenter) SetResponseCreateSchedule(output *port.CreateSchedul
 	p.Body = string(b)
 }
 
+// SetResponseCreateBulkSchedule はスケジュールを一括作成するレスポンスをセットします。
+func (p *SchedulePresenter) SetResponseCreateBulkSchedule(output *port.CreateBulkScheduleOutputData, result port.Result) {
+	p.StatusCode = result.StatusCode
+
+	if result.HasError {
+		p.Body = response.ToErrorBody(result.ErrorMessage)
+		return
+	}
+
+	res := response.ToPostBulkScheduleResponse(output)
+	b, err := json.Marshal(res)
+	if err != nil {
+		p.StatusCode = http.StatusInternalServerError
+		p.Body = response.ToErrorBody(err.Error())
+		return
+	}
+
+	p.Body = string(b)
+}
+
 // SetResponseUpdateSchedule はスケジュールを更新するレスポンスをセットします。
 func (p *SchedulePresenter) SetResponseUpdateSchedule(output *port.UpdateScheduleOutputData, result port.Result) {
 	p.StatusCode = result.StatusCode

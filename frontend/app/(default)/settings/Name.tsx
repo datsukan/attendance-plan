@@ -5,11 +5,11 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 import { updateUser } from '@/backend-api/updateUser';
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 
 export const Name = () => {
   const [loading, setLoading] = useState(false);
-  const { user, saveUser } = useStorage();
+  const { user, saveUser } = useUser();
 
   if (!user) return null;
 

@@ -11,11 +11,11 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/react/20/solid';
 
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 
 export const AccountDropDown = () => {
   const router = useRouter();
-  const { user, removeUser } = useStorage();
+  const { user, removeUser } = useUser();
 
   if (!user) return null;
 

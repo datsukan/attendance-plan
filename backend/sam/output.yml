@@ -34,6 +34,9 @@ GetScheduleFunction:
 PostScheduleFunction:
   Description: "PostScheduleFunction Name"
   Value: !Ref PostScheduleFunction
+PostBulkScheduleFunction:
+  Description: "PostBulkScheduleFunction Name"
+  Value: !Ref PostBulkScheduleFunction
 PutScheduleFunction:
   Description: "PutScheduleFunction Name"
   Value: !Ref PutScheduleFunction

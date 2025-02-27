@@ -7,6 +7,7 @@ import type { Type } from '@/type';
 import { fetchSubjects } from '@/backend-api/fetchSubjects';
 import { createSubject } from '@/backend-api/createSubject';
 import { deleteSubject } from '@/backend-api/deleteSubject';
+import { loadAuthUser } from '@/storage/user';
 
 type SubjectContextType = {
   subjects: Type.Subject[];
@@ -36,6 +37,9 @@ export const SubjectProvider = ({ children }: Props) => {
   const [subjects, setSubjects] = useState<Type.Subject[]>([]);
 
   useEffect(() => {
+    const au = loadAuthUser();
+    if (!au) return;
+
     (async () => {
       try {
         const subjects = await fetchSubjects();

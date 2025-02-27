@@ -8,11 +8,11 @@ import { InputTextField } from '@/component/form/InputTextField';
 import { SubmitButton } from '@/component/form/SubmitButton';
 
 import { signin } from '@/backend-api/signin';
-import { useStorage } from '@/provider/StorageProvider';
+import { useUser } from '@/provider/UserProvider';
 
 export const Form = () => {
   const router = useRouter();
-  const { saveUser } = useStorage();
+  const { saveUser } = useUser();
 
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');

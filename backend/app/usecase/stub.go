@@ -139,6 +139,11 @@ func (p *stubScheduleOutputPort) SetResponseCreateSchedule(output *port.CreateSc
 	p.Result = result
 }
 
+func (p *stubScheduleOutputPort) SetResponseCreateBulkSchedule(output *port.CreateBulkScheduleOutputData, result port.Result) {
+	p.Output = output
+	p.Result = result
+}
+
 func (p *stubScheduleOutputPort) SetResponseUpdateSchedule(output *port.UpdateScheduleOutputData, result port.Result) {
 	p.Output = output
 	p.Result = result

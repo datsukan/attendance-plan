@@ -7,6 +7,8 @@ SubjectTable:
         AttributeType: S
       - AttributeName: UserID
         AttributeType: S
+      - AttributeName: CreatedAt
+        AttributeType: S
     BillingMode: PAY_PER_REQUEST
     KeySchema:
       - AttributeName: ID
@@ -16,6 +18,8 @@ SubjectTable:
         KeySchema:
           - AttributeName: UserID
             KeyType: HASH
+          - AttributeName: CreatedAt
+            KeyType: RANGE
         Projection:
           ProjectionType: ALL
     StreamSpecification:

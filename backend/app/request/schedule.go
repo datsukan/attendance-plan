@@ -29,6 +29,10 @@ type PostScheduleRequest struct {
 	Order    int    `json:"order"`
 }
 
+type PostBulkScheduleRequest struct {
+	Schedules []PostScheduleRequest `json:"schedules"`
+}
+
 // PutScheduleRequest はスケジュール更新のリクエストを表す構造体です。
 type PutScheduleRequest struct {
 	ScheduleID string `json:"id"`
@@ -145,6 +149,30 @@ func ValidateInputScheduleRequest(name, startsAt, endsAt, color, sType string) e
 // ValidatePostScheduleRequest は PostScheduleRequest のバリデーションを行います。
 func ValidatePostScheduleRequest(req *PostScheduleRequest) error {
 	return ValidateInputScheduleRequest(req.Name, req.StartsAt, req.EndsAt, req.Color, req.Type)
+}
+
+// ToPostBulkScheduleRequest は APIGatewayProxyRequest から PostBulkScheduleRequest に変換します。
+func ToPostBulkScheduleRequest(r events.APIGatewayProxyRequest) (*PostBulkScheduleRequest, error) {
+	var req PostBulkScheduleRequest
+	if err := json.Unmarshal([]byte(r.Body), &req); err != nil {
+		return nil, err
+	}
+
+	return &req, nil
+}
+
+// ValidatePostBulkScheduleRequest は PostBulkScheduleRequest のバリデーションを行います。
+func ValidatePostBulkScheduleRequest(req *PostBulkScheduleRequest) error {
+	if len(req.Schedules) == 0 {
+		return fmt.Errorf("スケジュールを指定してください")
+	}
+
+	for i, schedule := range req.Schedules {
+		if err := ValidateInputScheduleRequest(schedule.Name, schedule.StartsAt, schedule.EndsAt, schedule.Color, schedule.Type); err != nil {
+			return fmt.Errorf("%s: %d番目", err.Error(), i+1)
+		}
+	}
+	return nil
 }
 
 // ToPutScheduleRequest は APIGatewayProxyRequest から PutScheduleRequest に変換します。

@@ -11,8 +11,8 @@ type Props = {
 
 export const SelectChip = ({ label, color, onSelect, onRemove }: Props) => {
   return (
-    <button
-      className={`flex max-w-full items-center gap-1 rounded-full border pl-2 hover:bg-gray-100 active:bg-gray-200 ${
+    <div
+      className={`flex max-w-full cursor-pointer items-center gap-1 rounded-full border pl-2 hover:bg-gray-100 active:bg-gray-200 ${
         onRemove ? 'pr-1.5' : 'pr-2'
       }`}
       onClick={onSelect}
@@ -30,6 +30,6 @@ export const SelectChip = ({ label, color, onSelect, onRemove }: Props) => {
           <XMarkIcon className="size-3.5" />
         </button>
       )}
-    </button>
+    </div>
   );
 };

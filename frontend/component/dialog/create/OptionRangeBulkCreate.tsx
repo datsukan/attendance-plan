@@ -7,7 +7,7 @@ type Props = {
   setTo: (to: number) => void;
 };
 
-export const OptionCustomScheduleBulkCreate = ({ checked, setChecked, from, setFrom, to, setTo }: Props) => {
+export const OptionRangeBulkCreate = ({ checked, setChecked, from, setFrom, to, setTo }: Props) => {
   return (
     <div className="flex items-center gap-2">
       <input
@@ -18,6 +18,7 @@ export const OptionCustomScheduleBulkCreate = ({ checked, setChecked, from, setF
         onChange={() => setChecked(!checked)}
       />
       <label htmlFor="option-custom-schedule-bulk-create" className={`cursor-pointer text-sm ${checked ? '' : 'text-gray-400'}`}>
+        第
         <input
           type="number"
           min={1}
@@ -27,7 +28,7 @@ export const OptionCustomScheduleBulkCreate = ({ checked, setChecked, from, setF
           onChange={(e) => setFrom(Number(e.target.value))}
           disabled={!checked}
         />
-        回 から
+        回 から 第
         <input
           min={from}
           max={99}

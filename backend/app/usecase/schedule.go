@@ -173,10 +173,101 @@ func (i *ScheduleInteractor) CreateSchedule(input port.CreateScheduleInputData) 
 	}
 
 	o := &port.CreateScheduleOutputData{
-		Schedule: s,
+		Schedule: port.BaseScheduleData{
+			ID:        s.ID,
+			UserID:    s.UserID,
+			Name:      s.Name,
+			StartsAt:  s.StartsAt.Format(time.DateTime),
+			EndsAt:    s.EndsAt.Format(time.DateTime),
+			Color:     s.Color,
+			Type:      s.Type.String(),
+			Order:     s.Order.Int(),
+			CreatedAt: s.CreatedAt.Format(time.DateTime),
+			UpdatedAt: s.UpdatedAt.Format(time.DateTime),
+		},
 	}
 	r := port.NewSuccessResult(http.StatusCreated)
 	i.OutputPort.SetResponseCreateSchedule(o, r)
+}
+
+// CreateBulkSchedule はスケジュールを一括作成します。
+func (i *ScheduleInteractor) CreateBulkSchedule(input port.CreateBulkScheduleInputData) {
+	responseSchedules := make([]port.BaseScheduleData, 0, len(input.Schedules))
+
+	for _, s := range input.Schedules {
+		startsAt, err := time.Parse(time.DateTime, s.StartsAt)
+		if err != nil {
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, s.Name+"の開始日"))
+			i.OutputPort.SetResponseCreateBulkSchedule(nil, r)
+			return
+		}
+
+		endsAt, err := time.Parse(time.DateTime, s.EndsAt)
+		if err != nil {
+			i.Logger.Warn(err.Error())
+			r := port.NewErrorResult(http.StatusBadRequest, fmt.Sprintf(MsgFormatInvalid, s.Name+"の終了日"))
+			i.OutputPort.SetResponseCreateBulkSchedule(nil, r)
+			return
+		}
+
+		sType := model.ToScheduleType(s.Type)
+
+		order := model.Order(s.Order)
+		if order.Empty() {
+			someStartsAtSchedules, err := i.ScheduleRepository.ReadByUserIDStartsAt(s.UserID, startsAt)
+			if err != nil {
+				i.Logger.Error(err.Error())
+				r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
+				i.OutputPort.SetResponseCreateBulkSchedule(nil, r)
+				return
+			}
+
+			filteredSchedules := model.ScheduleList(someStartsAtSchedules).FilterByType(sType)
+			order = filteredSchedules.NextOrder()
+		}
+
+		s := model.Schedule{
+			ID:        id.NewID(),
+			UserID:    s.UserID,
+			Name:      s.Name,
+			StartsAt:  startsAt,
+			EndsAt:    endsAt,
+			Color:     s.Color,
+			Type:      sType,
+			Order:     order,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		i.Logger.With("schedule_id", s.ID)
+
+		if err := i.ScheduleRepository.Create(&s); err != nil {
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
+			i.OutputPort.SetResponseCreateBulkSchedule(nil, r)
+			return
+		}
+
+		o := port.BaseScheduleData{
+			ID:        s.ID,
+			UserID:    s.UserID,
+			Name:      s.Name,
+			StartsAt:  s.StartsAt.Format(time.DateTime),
+			EndsAt:    s.EndsAt.Format(time.DateTime),
+			Color:     s.Color,
+			Type:      s.Type.String(),
+			Order:     s.Order.Int(),
+			CreatedAt: s.CreatedAt.Format(time.DateTime),
+			UpdatedAt: s.UpdatedAt.Format(time.DateTime),
+		}
+
+		responseSchedules = append(responseSchedules, o)
+	}
+
+	o := &port.CreateBulkScheduleOutputData{Schedules: responseSchedules}
+	r := port.NewSuccessResult(http.StatusCreated)
+	i.OutputPort.SetResponseCreateBulkSchedule(o, r)
 }
 
 // UpdateSchedule はスケジュールを更新します。

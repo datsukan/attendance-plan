@@ -208,6 +208,43 @@ func TestCreateSchedule(t *testing.T) {
 	})
 }
 
+func TestCreateBulkSchedule(t *testing.T) {
+	t.Run("スケジュールを一括作成する", func(t *testing.T) {
+		assert := assert.New(t)
+
+		l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		r := &stubScheduleRepository{}
+		p := &stubScheduleOutputPort{}
+		i := NewScheduleInteractor(l, r, p)
+
+		input := port.CreateBulkScheduleInputData{
+			Schedules: []port.CreateScheduleData{
+				{
+					Name:     "test-name-1",
+					StartsAt: "2021-01-01 00:00:00",
+					EndsAt:   "2021-01-01 00:00:00",
+					Color:    "white",
+					Type:     model.ScheduleTypeMaster.String(),
+					Order:    1,
+				},
+				{
+					Name:     "test-name-2",
+					StartsAt: "2021-01-01 00:00:00",
+					EndsAt:   "2021-01-01 00:00:00",
+					Color:    "white",
+					Type:     model.ScheduleTypeCustom.String(),
+					Order:    1,
+				},
+			},
+		}
+		i.CreateBulkSchedule(input)
+
+		assert.Equal(http.StatusCreated, p.Result.StatusCode)
+		assert.Empty(p.Result.ErrorMessage)
+		assert.False(p.Result.HasError)
+	})
+}
+
 func TestUpdateSchedule(t *testing.T) {
 	t.Run("スケジュールを更新する", func(t *testing.T) {
 		assert := assert.New(t)

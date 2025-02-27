@@ -1,9 +1,5 @@
 package port
 
-import (
-	"github.com/datsukan/attendance-plan/backend/app/model"
-)
-
 // BaseScheduleData はスケジュールの基本データを表す構造体です。
 type BaseScheduleData struct {
 	ID        string
@@ -63,7 +59,17 @@ type CreateScheduleInputData struct {
 
 // CreateScheduleOutputData はスケジュール作成の出力データを表す構造体です。
 type CreateScheduleOutputData struct {
-	model.Schedule
+	Schedule BaseScheduleData
+}
+
+// CreateBulkScheduleInputData はスケジュール一括作成の入力データを表す構造体です。
+type CreateBulkScheduleInputData struct {
+	Schedules []CreateScheduleData
+}
+
+// CreateBulkScheduleOutputData はスケジュール一括作成の出力データを表す構造体です。
+type CreateBulkScheduleOutputData struct {
+	Schedules []BaseScheduleData
 }
 
 // UpdateScheduleData はスケジュール更新のスケジュールデータを表す構造体です。
@@ -112,6 +118,7 @@ type ScheduleInputPort interface {
 	GetScheduleList(input GetScheduleListInputData)
 	GetSchedule(input GetScheduleInputData)
 	CreateSchedule(input CreateScheduleInputData)
+	CreateBulkSchedule(input CreateBulkScheduleInputData)
 	UpdateSchedule(input UpdateScheduleInputData)
 	UpdateBulkSchedule(input UpdateBulkScheduleInputData)
 	DeleteSchedule(input DeleteScheduleInputData)
@@ -123,6 +130,7 @@ type ScheduleOutputPort interface {
 	SetResponseGetScheduleList(output *GetScheduleListOutputData, result Result)
 	SetResponseGetSchedule(output *GetScheduleOutputData, result Result)
 	SetResponseCreateSchedule(output *CreateScheduleOutputData, result Result)
+	SetResponseCreateBulkSchedule(output *CreateBulkScheduleOutputData, result Result)
 	SetResponseUpdateSchedule(output *UpdateScheduleOutputData, result Result)
 	SetResponseUpdateBulkSchedule(output *UpdateBulkScheduleOutputData, result Result)
 	SetResponseDeleteSchedule(output *DeleteScheduleOutputData, result Result)

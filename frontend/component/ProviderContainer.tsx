@@ -1,6 +1,6 @@
 'use client';
 
-import { StorageProvider } from '@/provider/StorageProvider';
+import { UserProvider } from '@/provider/UserProvider';
 import { SubjectProvider } from '@/provider/SubjectProvider';
 
 type Props = {
@@ -9,8 +9,8 @@ type Props = {
 
 export const ProviderContainer = ({ children }: Props) => {
   return (
-    <StorageProvider>
+    <UserProvider>
       <SubjectProvider>{children}</SubjectProvider>
-    </StorageProvider>
+    </UserProvider>
   );
 };

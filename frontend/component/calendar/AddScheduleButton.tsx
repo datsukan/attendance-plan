@@ -6,7 +6,7 @@ import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDi
 import { CreateSchedule } from '@/model/createSchedule';
 
 type Props = {
-  create: (createSchedule: CreateSchedule) => Promise<void>;
+  create: (createSchedule: CreateSchedule[]) => Promise<void>;
 };
 
 export const AddScheduleButton = ({ create }: Props) => {
