@@ -153,6 +153,7 @@ export const useSchedule = () => {
     }
 
     resultSchedules.updateSchedule(schedule);
+    setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
   };
 
   return {
