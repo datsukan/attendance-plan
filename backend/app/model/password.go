@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"unicode/utf8"
 )
 
 type Password string
@@ -29,7 +30,7 @@ var (
 
 func (p Password) Validate() error {
 	// パスワードの長さが規定の範囲以内である必要がある
-	if len(p) < PasswordMinLength || len(p) > PasswordMaxLength {
+	if utf8.RuneCountInString(p.String()) < PasswordMinLength || utf8.RuneCountInString(p.String()) > PasswordMaxLength {
 		return ErrPasswordLength
 	}
 

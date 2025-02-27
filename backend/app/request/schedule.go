@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/datsukan/attendance-plan/backend/app/model"
@@ -97,7 +98,7 @@ func ValidateInputScheduleRequest(name, startsAt, endsAt, color, sType string) e
 
 	// name が50文字より多い
 	const upperNameLength = 50
-	if len(name) > upperNameLength {
+	if utf8.RuneCountInString(name) > upperNameLength {
 		return fmt.Errorf("スケジュール名は%d文字以内で入力してください", upperNameLength)
 	}
 
