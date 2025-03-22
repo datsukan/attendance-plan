@@ -5,6 +5,8 @@ Function:
       DYNAMO_ENDPOINT: ""
       SERVICE_NAME: !Ref ServiceName
       BASE_URL: !Ref BaseUrl
+      SESSION_SECRET_KEY: !Ref SessionSecretKey
+      SESSION_TOKEN_LIFE_DAYS: !Ref SessionTokenLifeDays
       SES_REGION: "ap-northeast-1"
       SENDER_EMAIL: !Ref SenderEmail
       SENDER_NAME: !Ref SenderName

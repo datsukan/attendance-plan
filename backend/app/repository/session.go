@@ -20,19 +20,19 @@ type SessionRepository interface {
 // SessionRepositoryImpl はセッションの repository の実装を表す構造体です。
 type SessionRepositoryImpl struct {
 	SecretKey     string
-	TokenLifeTime int
+	TokenLifeDays int
 }
 
 // NewSessionRepository は SessionRepository を生成します。
-func NewSessionRepository(secretKey string, tokenLifeTime int) SessionRepository {
-	return &SessionRepositoryImpl{SecretKey: secretKey, TokenLifeTime: tokenLifeTime}
+func NewSessionRepository(secretKey string, tokenLifeDays int) SessionRepository {
+	return &SessionRepositoryImpl{SecretKey: secretKey, TokenLifeDays: tokenLifeDays}
 }
 
 // GenerateToken はセッショントークンを生成します。
 func (r *SessionRepositoryImpl) GenerateToken(value string) (string, error) {
 	claims := jwt.MapClaims{
 		TokenKeyValue: value,
-		TokenKeyExp:   time.Now().Add(time.Hour * time.Duration(r.TokenLifeTime)).Unix(),
+		TokenKeyExp:   time.Now().Add(time.Hour * 24 * time.Duration(r.TokenLifeDays)).Unix(),
 	}
 	jt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := jt.SignedString([]byte(r.SecretKey))

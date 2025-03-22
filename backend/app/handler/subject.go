@@ -21,7 +21,7 @@ func GetSubjectList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResp
 	logger.Info("start get subject list")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -77,7 +77,7 @@ func PostSubject(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	logger.Info("start post subject")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -137,7 +137,7 @@ func DeleteSubject(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	logger.Info("start delete subject")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {

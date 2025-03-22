@@ -34,7 +34,7 @@ func SignIn(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, er
 	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	up := presenter.NewUserPresenter()
 	interactor := usecase.NewUserInteractor(logger, ur, sr, nil, up)
 
@@ -72,7 +72,7 @@ func SignUp(ctx context.Context, r events.APIGatewayProxyRequest) (events.APIGat
 	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 
 	mc, err := infrastructure.NewMailClient(ctx, config.SESRegion)
 	if err != nil {
@@ -118,7 +118,7 @@ func PasswordReset(ctx context.Context, r events.APIGatewayProxyRequest) (events
 	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 
 	mc, err := infrastructure.NewMailClient(ctx, config.SESRegion)
 	if err != nil {
@@ -164,7 +164,7 @@ func PasswordSet(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	config := infrastructure.GetConfig()
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	up := presenter.NewUserPresenter()
 	interactor := usecase.NewUserInteractor(logger, ur, sr, nil, up)
 
@@ -189,7 +189,7 @@ func GetUser(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, e
 	logger.Info("start get user")
 
 	config := infrastructure.GetConfig()
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(sr)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -236,7 +236,7 @@ func PutUser(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, e
 	logger.Info("start update user")
 
 	config := infrastructure.GetConfig()
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(sr)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -291,7 +291,7 @@ func DeleteUser(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	logger.Info("start delete user")
 
 	config := infrastructure.GetConfig()
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(sr)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -338,7 +338,7 @@ func ResetEmail(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse
 	logger.Info("start reset email")
 
 	config := infrastructure.GetConfig()
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(sr)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -396,7 +396,7 @@ func SetEmail(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, 
 	logger.Info("start set email")
 
 	config := infrastructure.GetConfig()
-	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	sr := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(sr)
 	userID, err := am.Auth(r)
 	if err != nil {

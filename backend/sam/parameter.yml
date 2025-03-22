@@ -4,6 +4,10 @@ ServiceName:
   Type: String
 BaseUrl:
   Type: String
+SessionSecretKey:
+  Type: String
+SessionTokenLifeDays:
+  Type: String
 SenderEmail:
   Type: String
 SenderName:

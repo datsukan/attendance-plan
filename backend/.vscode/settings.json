@@ -11,5 +11,6 @@
     "prd": {
       "base_url": "https://api-attendance-plan.datsukan.dev"
     }
-  }
+  },
+  "makefile.configureOnOpen": false
 }

@@ -11,7 +11,7 @@ type Config struct {
 	ServiceName   string
 	BaseUrl       string
 	SecretKey     string
-	TokenLifeTime int
+	TokenLifeDays int
 	SESRegion     string
 	SenderEmail   string
 	SenderName    string
@@ -21,10 +21,10 @@ func init() {
 	serviceName := os.Getenv("SERVICE_NAME")
 	baseUrl := os.Getenv("BASE_URL")
 	secretKey := os.Getenv("SESSION_SECRET_KEY")
-	tokenLifeTimeStr := os.Getenv("SESSION_TOKEN_LIFE_TIME")
-	tokenLifeTime, err := strconv.Atoi(tokenLifeTimeStr)
+	tokenLifeDaysStr := os.Getenv("SESSION_TOKEN_LIFE_DAYS")
+	tokenLifeDays, err := strconv.Atoi(tokenLifeDaysStr)
 	if err != nil {
-		tokenLifeTime = 30
+		tokenLifeDays = 30
 	}
 
 	sesRegion := os.Getenv("SES_REGION")
@@ -35,7 +35,7 @@ func init() {
 		ServiceName:   serviceName,
 		BaseUrl:       baseUrl,
 		SecretKey:     secretKey,
-		TokenLifeTime: tokenLifeTime,
+		TokenLifeDays: tokenLifeDays,
 		SESRegion:     sesRegion,
 		SenderEmail:   senderEmail,
 		SenderName:    senderName,

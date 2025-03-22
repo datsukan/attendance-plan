@@ -21,7 +21,7 @@ func GetScheduleList(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	logger.Info("start get schedule list")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -79,7 +79,7 @@ func GetSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	logger.Info("start get schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -149,7 +149,7 @@ func PostSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 	logger.Info("start post schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -216,7 +216,7 @@ func PostBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 	logger.Info("start post bulk schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -286,7 +286,7 @@ func PutSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	logger.Info("start put schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -370,7 +370,7 @@ func PutBulkSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	logger.Info("start put bulk schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
@@ -456,7 +456,7 @@ func DeleteSchedule(r events.APIGatewayProxyRequest) (events.APIGatewayProxyResp
 	logger.Info("start delete schedule")
 
 	config := infrastructure.GetConfig()
-	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeTime)
+	ssRepo := repository.NewSessionRepository(config.SecretKey, config.TokenLifeDays)
 	am := middleware.NewAuthMiddleware(ssRepo)
 	userID, err := am.Auth(r)
 	if err != nil {
