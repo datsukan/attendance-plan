@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { saveAuthUser, loadAuthUser, removeAuthUser } from '@/storage/user';
 import type { AuthUser } from '@/storage/user';
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export const UserProvider = ({ children }: Props) => {
+  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export const UserProvider = ({ children }: Props) => {
       } catch (e) {
         toast.error('ユーザー情報の取得に失敗しました');
         toast.error(String(e));
+        router.push('/signin');
         return;
       }
     })();
