@@ -101,6 +101,15 @@
     "@floating-ui/utils" "^0.2.8"
     tabbable "^6.0.0"
 
+"@floating-ui/react@^0.27.6":
+  version "0.27.6"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.27.6.tgz#f1636698dfd5e8c3d22d3323cf4e8e1405fbeb90"
+  integrity sha512-9GLOPbW8jTeboR2ar9uMMUDUZjpTLscUvOjNvRw2EgppgoLHLUh/P/OW9evULosnvDjhYf2Gwk/gMOP9KvXD2A==
+  dependencies:
+    "@floating-ui/react-dom" "^2.1.2"
+    "@floating-ui/utils" "^0.2.9"
+    tabbable "^6.0.0"
+
 "@floating-ui/utils@^0.2.8", "@floating-ui/utils@^0.2.9":
   version "0.2.9"
   resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.9.tgz"

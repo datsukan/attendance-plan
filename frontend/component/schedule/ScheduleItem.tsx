@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { format } from 'date-fns';
+import { useFloating, useDismiss, useInteractions, autoUpdate, offset, flip, shift, UseFloatingOptions } from '@floating-ui/react';
 
 import { Menu } from './Menu';
 import { InfoCard } from './InfoCard';
@@ -17,28 +18,31 @@ type Props = {
 
 export const ScheduleItem = ({ schedule }: Props) => {
   const { removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
-  const ref = useRef<HTMLDivElement>(null);
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
-  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const [infoCardPosition, setInfoCardPosition] = useState({ x: 0, y: 0 });
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isOpenInfoCard, setIsOpenInfoCard] = useState(false);
   const [isOpenRemoveConfirmDialog, setIsOpenRemoveConfirmDialog] = useState(false);
   const [isOpenEditDialog, setIsOpenEditDialog] = useState(false);
 
-  useEffect(() => {
-    documentClickHandler.current = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+  const floatOptions: UseFloatingOptions = {
+    middleware: [offset(10), flip(), shift()],
+    whileElementsMounted: autoUpdate,
+    placement: 'bottom',
+    open: isOpenMenu || isOpenInfoCard,
+    onOpenChange: (open) => {
+      if (!open) {
         setIsOpenMenu(false);
         setIsOpenInfoCard(false);
-
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('click', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
         document.removeEventListener('contextmenu', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
       }
-    };
-  }, []);
+    },
+  };
+  const { refs, floatingStyles, context } = useFloating(floatOptions);
+  const dismiss = useDismiss(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
@@ -65,8 +69,6 @@ export const ScheduleItem = ({ schedule }: Props) => {
       return;
     }
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    setMenuPosition({ x: event.clientX - rect.left, y: event.clientY - rect.top });
     setIsOpenMenu(true);
     setIsOpenInfoCard(false);
 
@@ -84,8 +86,6 @@ export const ScheduleItem = ({ schedule }: Props) => {
       return;
     }
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    setInfoCardPosition({ x: event.clientX - rect.left, y: event.clientY - rect.top });
     setIsOpenInfoCard(true);
     setIsOpenMenu(false);
 
@@ -99,12 +99,13 @@ export const ScheduleItem = ({ schedule }: Props) => {
         className={`flex h-6 items-center rounded px-2 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
         onContextMenu={onRightClick}
         onClick={onLeftClick}
-        ref={ref}
+        ref={refs.setReference}
+        {...getReferenceProps()}
       >
         <span className="truncate text-xs">{generateLabel()}</span>
       </div>
       {isOpenMenu && (
-        <div className="absolute z-10 min-w-max" style={{ top: menuPosition.y, left: menuPosition.x }}>
+        <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="z-10 min-w-max">
           <Menu
             onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
             openRemoveConfirmDialog={() => setIsOpenRemoveConfirmDialog(true)}
@@ -113,8 +114,13 @@ export const ScheduleItem = ({ schedule }: Props) => {
         </div>
       )}
       {isOpenInfoCard && (
-        <div className="absolute z-10 min-w-max" style={{ top: infoCardPosition.y, left: infoCardPosition.x }}>
-          <InfoCard schedule={schedule} />
+        <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="z-10 min-w-max">
+          <InfoCard
+            schedule={schedule}
+            onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
+            openRemoveConfirmDialog={() => setIsOpenRemoveConfirmDialog(true)}
+            openEditDialog={() => setIsOpenEditDialog(true)}
+          />
         </div>
       )}
       <RemoveConfirmDialog

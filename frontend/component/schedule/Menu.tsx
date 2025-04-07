@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 import { getColorClassName, getColorKeys } from '@/component/calendar/color-module';
@@ -12,12 +10,12 @@ type Props = {
 
 export const Menu = ({ onSelectColor, openRemoveConfirmDialog, openEditDialog }: Props) => {
   return (
-    <div className="rounded-lg shadow-lg bg-white overflow-hidden">
-      <button className="flex gap-2 items-center px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={() => openEditDialog()}>
+    <div className="overflow-hidden rounded-lg bg-white shadow-lg">
+      <button className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={() => openEditDialog()}>
         <PencilIcon className="size-5 text-gray-600" />
         <span>編集</span>
       </button>
-      <button className="flex gap-2 items-center px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={openRemoveConfirmDialog}>
+      <button className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={openRemoveConfirmDialog}>
         <TrashIcon className="size-5 text-gray-600" />
         <span>削除</span>
       </button>
