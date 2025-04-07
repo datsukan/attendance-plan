@@ -96,13 +96,13 @@ export const ScheduleItem = ({ schedule }: Props) => {
   return (
     <div className="relative">
       <div
-        className={`flex h-6 items-center rounded px-2 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
+        className={`flex items-center rounded px-1.5 py-1 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
         onContextMenu={onRightClick}
         onClick={onLeftClick}
         ref={refs.setReference}
         {...getReferenceProps()}
       >
-        <span className="truncate text-xs">{generateLabel()}</span>
+        <span className="line-clamp-2 text-[0.6rem] md:line-clamp-1 md:text-xs">{generateLabel()}</span>
       </div>
       {isOpenMenu && (
         <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="z-10 min-w-max">
