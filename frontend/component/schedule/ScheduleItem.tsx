@@ -11,6 +11,7 @@ import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { getColorClassName } from '@/component/calendar/color-module';
 import type { Type } from '@/type';
 import { useSchedule } from '@/provider/ScheduleProvider';
+import { usePopover } from '@/provider/PopoverProvider';
 
 type Props = {
   schedule: Type.Schedule;
@@ -18,6 +19,7 @@ type Props = {
 
 export const ScheduleItem = ({ schedule }: Props) => {
   const { removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
+  const { openPopover, closePopover } = usePopover();
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
@@ -34,6 +36,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
       if (!open) {
         setIsOpenMenu(false);
         setIsOpenInfoCard(false);
+        closePopover();
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('click', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
         document.removeEventListener('contextmenu', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
@@ -48,6 +51,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
     if (event.key === 'Escape') {
       setIsOpenMenu(false);
       setIsOpenInfoCard(false);
+      closePopover();
     }
   };
 
@@ -66,11 +70,13 @@ export const ScheduleItem = ({ schedule }: Props) => {
     if (isOpenMenu) {
       setIsOpenMenu(false);
       setIsOpenInfoCard(false);
+      closePopover();
       return;
     }
 
     setIsOpenMenu(true);
     setIsOpenInfoCard(false);
+    openPopover();
 
     document.addEventListener('click', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
     document.addEventListener('contextmenu', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
@@ -83,11 +89,13 @@ export const ScheduleItem = ({ schedule }: Props) => {
     if (isOpenInfoCard) {
       setIsOpenInfoCard(false);
       setIsOpenMenu(false);
+      closePopover();
       return;
     }
 
     setIsOpenInfoCard(true);
     setIsOpenMenu(false);
+    openPopover();
 
     document.addEventListener('click', documentClickHandler.current as (this: Document, ev: MouseEvent) => any);
     document.addEventListener('keydown', handleKeyDown);

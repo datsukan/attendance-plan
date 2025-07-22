@@ -16,6 +16,7 @@ import {
 } from '@/component/schedule/schedule-module';
 import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
 import { useSchedule } from '@/provider/ScheduleProvider';
+import { usePopover } from '@/provider/PopoverProvider';
 
 type Props = {
   type: Type.ScheduleType;
@@ -26,6 +27,7 @@ type Props = {
 
 export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeSchedule }: Props) => {
   const { addSchedule } = useSchedule();
+  const { isOpenPopover } = usePopover();
   const [isOpenCreateDialog, setIsOpenCreateDialog] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
   const { dateToKey } = useDateKey();
@@ -36,6 +38,10 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
   }
 
   const openCreateDialog = async (date: Date) => {
+    if (isOpenPopover) {
+      return;
+    }
+
     setCreateDate(date);
     setIsOpenCreateDialog(true);
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import { PopoverProvider } from '@/provider/PopoverProvider';
 import { UserProvider } from '@/provider/UserProvider';
 import { SubjectProvider } from '@/provider/SubjectProvider';
 
@@ -9,8 +10,10 @@ type Props = {
 
 export const ProviderContainer = ({ children }: Props) => {
   return (
-    <UserProvider>
-      <SubjectProvider>{children}</SubjectProvider>
-    </UserProvider>
+    <PopoverProvider>
+      <UserProvider>
+        <SubjectProvider>{children}</SubjectProvider>
+      </UserProvider>
+    </PopoverProvider>
   );
 };
