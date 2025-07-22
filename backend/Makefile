@@ -1,17 +1,17 @@
 .PHONY: test
 test:
-	docker-compose up -d
+	docker compose up -d
 	go run ./migrate/. up
 	go clean -testcache
 	ENV=test DYNAMO_ENDPOINT=http://localhost:8000 go test -v ./app/...
 
 .PHONY: docker-up
 docker-up:
-	docker-compose up -d
+	docker compose up -d
 
 .PHONY: docker-down
 docker-down:
-	docker-compose down
+	docker compose down
 
 .PHONY: migrate-up
 migrate-up:
