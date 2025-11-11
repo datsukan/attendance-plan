@@ -42,8 +42,8 @@ func TestSubject_ReadByUserID(t *testing.T) {
 			UserID:    "test-user-a",
 			Name:      fmt.Sprintf("test-name-%d", i),
 			Color:     fmt.Sprintf("test-color-%d", i),
-			CreatedAt: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-			UpdatedAt: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedAt: time.Date(2021, 1, 1, 0, i, 0, 0, time.UTC),
+			UpdatedAt: time.Date(2021, 1, 1, 0, i, 0, 0, time.UTC),
 		}
 		subjects = append(subjects, s)
 	}
@@ -111,10 +111,10 @@ func TestSubject_Create(t *testing.T) {
 		err = repo.Create(subject)
 		require.NoError(err)
 
-		var s *model.Subject
-		err = table.Get("ID", "test-id").One(s)
+		var s model.Subject
+		err = table.Get("ID", "test-id").One(&s)
 		require.NoError(err)
-		assert.Equal(subject, s)
+		assert.Equal(*subject, s)
 	})
 }
 

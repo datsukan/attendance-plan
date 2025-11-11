@@ -27,7 +27,7 @@ func NewSubjectRepository(db dynamo.DB) SubjectRepository {
 
 // ReadByUserID は指定されたユーザー ID の科目を取得します。
 func (r *SubjectRepositoryImpl) ReadByUserID(userID string) ([]model.Subject, error) {
-	var subjects []model.Subject
+	subjects := []model.Subject{}
 	err := r.Table.Get("UserID", userID).Index("UserID-index").Order(dynamo.Ascending).All(&subjects)
 	if err != nil {
 		return nil, err

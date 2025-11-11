@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 const (

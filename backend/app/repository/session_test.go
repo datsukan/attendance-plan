@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,8 +23,8 @@ func TestGenerateToken(t *testing.T) {
 func TestIsValidToken(t *testing.T) {
 	genToken := func(secretKey string, exp int64, userID string) string {
 		claims := jwt.MapClaims{
-			"user_id": userID,
-			"exp":     exp,
+			TokenKeyValue: userID,
+			TokenKeyExp:   exp,
 		}
 		jt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		token, _ := jt.SignedString([]byte(secretKey))

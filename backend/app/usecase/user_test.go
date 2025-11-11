@@ -254,7 +254,7 @@ func TestResetEmail(t *testing.T) {
 
 		input := port.ResetEmailInputData{
 			UserID: "test-id",
-			Email:  "test-email@example.com",
+			Email:  "test-reset-email@example.com",
 		}
 		i.ResetEmail(input)
 

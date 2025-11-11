@@ -12,5 +12,5 @@
 yarn dev
 ```
 
-起動したら[http://localhost:3000](http://localhost:3000)で開ける。
+起動したら[http://localhost:8080](http://localhost:8080)で開ける。
 ホットリロードが有効になっている。
