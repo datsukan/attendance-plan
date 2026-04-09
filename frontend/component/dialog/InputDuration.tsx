@@ -1,5 +1,4 @@
 import { InputDate } from '@/component/dialog/InputDate';
-import { useEffect } from 'react';
 
 type Props = {
   from: Date;
@@ -9,25 +8,23 @@ type Props = {
 };
 
 export const InputDuration = ({ from, to, onChangeFrom, onChangeTo }: Props) => {
-  useEffect(() => {
+  const handleFromBlur = () => {
     if (from > to) {
       onChangeTo(from);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from]);
+  };
 
-  useEffect(() => {
+  const handleToBlur = () => {
     if (to < from) {
       onChangeFrom(to);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [to]);
+  };
 
   return (
-    <div className="w-full flex gap-2 items-center">
-      <InputDate value={from} onChange={onChangeFrom} />
+    <div className="flex w-full items-center gap-2">
+      <InputDate value={from} onChange={onChangeFrom} onBlur={handleFromBlur} />
       <span>-</span>
-      <InputDate value={to} onChange={onChangeTo} />
+      <InputDate value={to} onChange={onChangeTo} onBlur={handleToBlur} />
     </div>
   );
 };

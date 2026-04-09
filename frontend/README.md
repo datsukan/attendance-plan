@@ -9,7 +9,7 @@
 以下のコマンドで開発用のローカルサーバーが起動する。
 
 ```sh
-yarn dev
+pnpm dev
 ```
 
 起動したら[http://localhost:8080](http://localhost:8080)で開ける。
