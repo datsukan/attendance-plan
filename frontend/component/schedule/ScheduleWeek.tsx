@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useDroppable, DragOverlay } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 
 import { ScheduleWeekItem } from '@/component/schedule/ScheduleWeekItem';
-import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 import { Type } from '@/type';
 import { useDateKey } from '@/component/useDateKey';
@@ -17,6 +16,7 @@ import {
 import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { usePopover } from '@/provider/PopoverProvider';
+import { useSelection } from '@/provider/SelectionContext';
 
 type Props = {
   type: Type.ScheduleType;
@@ -28,6 +28,7 @@ type Props = {
 export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeSchedule }: Props) => {
   const { addSchedule } = useSchedule();
   const { isOpenPopover } = usePopover();
+  const { clearSelection } = useSelection();
   const [isOpenCreateDialog, setIsOpenCreateDialog] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
   const { dateToKey } = useDateKey();
@@ -38,6 +39,7 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
   }
 
   const openCreateDialog = async (date: Date) => {
+    clearSelection();
     if (isOpenPopover) {
       return;
     }
@@ -89,11 +91,6 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
           );
         })}
       </div>
-      {activeSchedule && (
-        <DragOverlay>
-          <ScheduleItem schedule={activeSchedule} />
-        </DragOverlay>
-      )}
     </div>
   );
 };

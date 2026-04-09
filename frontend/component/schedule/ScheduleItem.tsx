@@ -12,6 +12,7 @@ import { getColorClassName } from '@/component/calendar/color-module';
 import type { Type } from '@/type';
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { usePopover } from '@/provider/PopoverProvider';
+import { useSelection } from '@/provider/SelectionContext';
 
 type Props = {
   schedule: Type.Schedule;
@@ -20,6 +21,7 @@ type Props = {
 export const ScheduleItem = ({ schedule }: Props) => {
   const { removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
   const { openPopover, closePopover } = usePopover();
+  const { toggleSelect, rangeSelect, clearSelection } = useSelection();
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
@@ -85,6 +87,19 @@ export const ScheduleItem = ({ schedule }: Props) => {
 
   const onLeftClick = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
+
+    if (event.ctrlKey || event.metaKey) {
+      toggleSelect(schedule.id);
+      return;
+    }
+
+    if (event.shiftKey) {
+      rangeSelect(schedule.id);
+      return;
+    }
+
+    // 通常クリック: 選択を解除して InfoCard を開く
+    clearSelection();
 
     if (isOpenInfoCard) {
       setIsOpenInfoCard(false);

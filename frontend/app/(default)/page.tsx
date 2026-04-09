@@ -4,6 +4,7 @@ import { Calender } from '@/component/calendar/Calendar';
 
 import { useAuth } from '@/hook/useAuth';
 import { ScheduleProvider } from '@/provider/ScheduleProvider';
+import { SelectionProvider } from '@/provider/SelectionContext';
 
 export default function Home() {
   const [loadedAuth, isAuth] = useAuth();
@@ -13,8 +14,10 @@ export default function Home() {
   }
 
   return (
-    <ScheduleProvider>
-      <Calender />
-    </ScheduleProvider>
+    <SelectionProvider>
+      <ScheduleProvider>
+        <Calender />
+      </ScheduleProvider>
+    </SelectionProvider>
   );
 }
