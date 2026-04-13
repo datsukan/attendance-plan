@@ -2,6 +2,7 @@
 
 import { useEffect, ReactNode } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { markDialogClosed } from './dialog-close-guard';
 
 type Props = {
   title: string;
@@ -33,6 +34,7 @@ export const BaseDialog = ({ children, title, isOpen, onClose, disabled = false 
   const close = () => {
     if (disabled) return;
 
+    markDialogClosed();
     onClose();
   };
 
