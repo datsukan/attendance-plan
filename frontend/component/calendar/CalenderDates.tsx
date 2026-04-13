@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { differenceInDays, addDays, getTime, isSameDay, format } from 'date-fns';
-import { DndContext, DragOverlay, pointerWithin, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove } from '@dnd-kit/sortable';
 import toast from 'react-hot-toast';
 
 import { CalendarDateItem } from './CalendarDateItem';
@@ -33,10 +33,7 @@ export const CalenderDates = ({ weeks }: Props) => {
   const [bulkDragOrigins, setBulkDragOrigins] = useState<Map<string, Date>>(new Map());
   const [queueUpdateSortSchedules, setQueueUpdateSortSchedules] = useState<Type.Schedule[][]>([]);
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
   // 範囲選択・同日チェック用にスケジュール一覧を日付順で管理する

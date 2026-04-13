@@ -85,20 +85,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
     document.addEventListener('keydown', handleKeyDown);
   };
 
-  const onLeftClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault();
-
-    if (event.ctrlKey || event.metaKey) {
-      toggleSelect(schedule.id);
-      return;
-    }
-
-    if (event.shiftKey) {
-      rangeSelect(schedule.id);
-      return;
-    }
-
-    // 通常クリック: 選択を解除して InfoCard を開く
+  const openInfoCard = () => {
     clearSelection();
 
     if (isOpenInfoCard) {
@@ -116,14 +103,38 @@ export const ScheduleItem = ({ schedule }: Props) => {
     document.addEventListener('keydown', handleKeyDown);
   };
 
+  const onLeftClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+
+    if (event.ctrlKey || event.metaKey) {
+      toggleSelect(schedule.id);
+      return;
+    }
+
+    if (event.shiftKey) {
+      rangeSelect(schedule.id);
+      return;
+    }
+
+    // 通常クリック: 選択を解除して InfoCard を開く
+    openInfoCard();
+  };
+
+  const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openInfoCard();
+    }
+  };
+
   return (
     <div className="relative">
       <div
         className={`flex touch-none items-center rounded px-1.5 py-1 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
         onContextMenu={onRightClick}
-        onClick={onLeftClick}
+        role="button"
         ref={refs.setReference}
-        {...getReferenceProps()}
+        {...getReferenceProps({ onClick: onLeftClick, onKeyDown, tabIndex: 0 })}
       >
         <span className="line-clamp-2 text-[0.6rem] md:line-clamp-1 md:text-xs">{generateLabel()}</span>
       </div>

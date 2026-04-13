@@ -27,6 +27,7 @@ export const ScheduleWeekItem = ({ schedule, isActive }: Props) => {
       style={style}
       {...attributes}
       {...listeners}
+      tabIndex={-1}
       className={[isActive ? 'opacity-50' : '', selected ? 'rounded ring-2 ring-blue-500 ring-offset-1' : ''].filter(Boolean).join(' ')}
     >
       <ScheduleItem schedule={schedule} />

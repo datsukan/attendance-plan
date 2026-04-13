@@ -21,7 +21,11 @@ export const SelectColor = ({ isSmall = false, disabled = false, value, onChange
       <MenuItems transition anchor="bottom" className="grid grid-cols-2 gap-2 rounded border bg-white p-3 shadow-lg">
         {getColorKeys().map((key) => (
           <MenuItem key={key}>
-            <button className={`size-6 rounded-full ${getColorClassName(key)}`} onClick={() => onChange(key)}></button>
+            <button
+              className={`size-6 rounded-full focus:outline-none data-[focus]:ring-2 data-[focus]:ring-blue-500 data-[focus]:ring-offset-1 ${getColorClassName(key)}`}
+              aria-label={key}
+              onClick={() => onChange(key)}
+            ></button>
           </MenuItem>
         ))}
       </MenuItems>

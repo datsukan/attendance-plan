@@ -42,7 +42,8 @@ export const InfoCard = ({ schedule, onSelectColor, openRemoveConfirmDialog, ope
           {getColorKeys().map((color) => (
             <button
               key={color}
-              className={`mx-auto size-6 rounded-full ${getColorClassName(color)}`}
+              className={`mx-auto size-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${getColorClassName(color)}`}
+              aria-label={color}
               onClick={() => onSelectColor(color)}
             />
           ))}
