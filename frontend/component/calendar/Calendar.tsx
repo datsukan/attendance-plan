@@ -4,6 +4,7 @@ import { useMemo, useRef, useEffect, useState } from 'react';
 
 import { Header } from './Header';
 import { CalenderDates } from './CalenderDates';
+import { SelectionModeBar } from './SelectionModeBar';
 import { BulkRemoveConfirmDialog } from '@/component/dialog/remove/BulkRemoveConfirmDialog';
 
 import { usePagePosition } from './usePagePosition';
@@ -21,7 +22,7 @@ export const Calender = () => {
   const { weeks, monthCount, addMonthCount } = useDates(targetDate);
   const { initPagePosition, execWhenPageBottom } = usePagePosition();
   const { addSchedule, masterSchedules, customSchedules, removeBulkSchedules } = useSchedule();
-  const { selectedIds, clearSelection } = useSelection();
+  const { selectedIds, clearSelection, isSelectionMode } = useSelection();
 
   const [isOpenBulkRemoveDialog, setIsOpenBulkRemoveDialog] = useState(false);
   const [bulkRemoveSchedules, setBulkRemoveSchedules] = useState<Type.Schedule[]>([]);
@@ -36,26 +37,28 @@ export const Calender = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthCount]);
 
+  const triggerBulkDelete = () => {
+    if (selectedIds.size === 0 || isOpenBulkRemoveDialog) return;
+    const allSchedules = [
+      ...masterSchedules.flatMap((d) => d.schedules),
+      ...customSchedules.flatMap((d) => d.schedules),
+    ];
+    const targets = allSchedules.filter((s) => selectedIds.has(s.id));
+    if (targets.length === 0) return;
+    setBulkRemoveSchedules(targets);
+    setIsOpenBulkRemoveDialog(true);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
-      if (selectedIds.size === 0) return;
-      if (isOpenBulkRemoveDialog) return;
-
-      const allSchedules = [
-        ...masterSchedules.flatMap((d) => d.schedules),
-        ...customSchedules.flatMap((d) => d.schedules),
-      ];
-      const targets = allSchedules.filter((s) => selectedIds.has(s.id));
-      if (targets.length === 0) return;
-
       e.preventDefault();
-      setBulkRemoveSchedules(targets);
-      setIsOpenBulkRemoveDialog(true);
+      triggerBulkDelete();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIds, masterSchedules, customSchedules, isOpenBulkRemoveDialog]);
 
   const closeBulkRemoveDialog = () => {
@@ -93,6 +96,7 @@ export const Calender = () => {
       />
       <div className="sticky top-0 z-10 bg-white">
         <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
+        {isSelectionMode && <SelectionModeBar onDelete={triggerBulkDelete} />}
       </div>
       <CalenderDates weeks={weeks} />
     </div>

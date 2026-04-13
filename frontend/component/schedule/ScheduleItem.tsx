@@ -10,6 +10,7 @@ import { EditScheduleDialog } from '@/component/dialog/edit/EditScheduleDialog';
 
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { getColorClassName } from '@/component/calendar/color-module';
+import { useScheduleInteraction } from '@/component/schedule/useScheduleInteraction';
 import type { Type } from '@/type';
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { usePopover } from '@/provider/PopoverProvider';
@@ -22,7 +23,7 @@ type Props = {
 export const ScheduleItem = ({ schedule }: Props) => {
   const { removeSchedule, removeBulkSchedules, masterSchedules, customSchedules, saveSchedule, changeScheduleColor } = useSchedule();
   const { openPopover, closePopover } = usePopover();
-  const { selectedIds, toggleSelect, rangeSelect, clearSelection } = useSelection();
+  const { selectedIds, toggleSelect, isSelectionMode, clearSelection } = useSelection();
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
@@ -121,26 +122,16 @@ export const ScheduleItem = ({ schedule }: Props) => {
     document.addEventListener('keydown', handleKeyDown);
   };
 
-  const onLeftClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault();
-
-    if (event.ctrlKey || event.metaKey) {
-      toggleSelect(schedule.id);
-      return;
-    }
-
-    if (event.shiftKey) {
-      rangeSelect(schedule.id);
-      return;
-    }
-
-    // 通常クリック: 選択を解除して InfoCard を開く
-    openInfoCard();
-  };
+  // openInfoCard の定義後に呼び出す（前方参照を避けるため）
+  const interactionHandlers = useScheduleInteraction(schedule.id, openInfoCard);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
+      if (isSelectionMode) {
+        toggleSelect(schedule.id);
+        return;
+      }
       openInfoCard();
     }
   };
@@ -152,7 +143,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
         onContextMenu={onRightClick}
         role="button"
         ref={refs.setReference}
-        {...getReferenceProps({ onClick: onLeftClick, onKeyDown, tabIndex: 0 })}
+        {...getReferenceProps({ ...interactionHandlers, onKeyDown, tabIndex: 0 })}
       >
         <span className="line-clamp-2 text-[0.6rem] md:line-clamp-1 md:text-xs">{generateLabel()}</span>
       </div>

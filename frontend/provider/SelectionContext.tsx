@@ -11,6 +11,9 @@ type SelectionContextType = {
   clearSelection: () => void;
   isSelected: (id: string) => boolean;
   setAllSchedules: (schedules: ScheduleRef[]) => void;
+  isSelectionMode: boolean;
+  enterSelectionMode: (firstId: string) => void;
+  exitSelectionMode: () => void;
 };
 
 const SelectionContext = createContext<SelectionContextType | null>(null);
@@ -20,6 +23,7 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
   const [anchorId, setAnchorId] = useState<string | null>(null);
   const [selectionDate, setSelectionDate] = useState<string | null>(null);
   const [allSchedules, setAllSchedules] = useState<ScheduleRef[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const getDate = (id: string) => allSchedules.find((s) => s.id === id)?.date ?? null;
 
@@ -35,17 +39,23 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+
+    setSelectedIds(next);
     setAnchorId(id);
     if (!selectionDate) setSelectionDate(date);
+
+    // 選択モード中に最後の1件を解除したら自動的に選択モードを終了する
+    if (next.size === 0 && isSelectionMode) {
+      setIsSelectionMode(false);
+      setAnchorId(null);
+      setSelectionDate(null);
+    }
   };
 
   const rangeSelect = (id: string) => {
@@ -90,12 +100,26 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
     setSelectedIds(new Set());
     setAnchorId(null);
     setSelectionDate(null);
+    setIsSelectionMode(false);
   };
 
   const isSelected = (id: string) => selectedIds.has(id);
 
+  const enterSelectionMode = (firstId: string) => {
+    const date = getDate(firstId);
+    if (!date) return;
+    setIsSelectionMode(true);
+    setSelectedIds(new Set([firstId]));
+    setAnchorId(firstId);
+    setSelectionDate(date);
+  };
+
+  const exitSelectionMode = () => {
+    clearSelection();
+  };
+
   return (
-    <SelectionContext.Provider value={{ selectedIds, toggleSelect, rangeSelect, clearSelection, isSelected, setAllSchedules }}>
+    <SelectionContext.Provider value={{ selectedIds, toggleSelect, rangeSelect, clearSelection, isSelected, setAllSchedules, isSelectionMode, enterSelectionMode, exitSelectionMode }}>
       {children}
     </SelectionContext.Provider>
   );
