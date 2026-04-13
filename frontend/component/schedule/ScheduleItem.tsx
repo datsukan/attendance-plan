@@ -139,7 +139,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
   return (
     <div className="relative">
       <div
-        className={`flex touch-none items-center rounded px-1.5 py-1 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
+        className={`flex touch-none select-none items-center rounded px-1.5 py-1 hover:cursor-pointer ${getColorClassName(schedule.color)}`}
         onContextMenu={onRightClick}
         role="button"
         ref={refs.setReference}
