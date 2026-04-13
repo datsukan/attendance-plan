@@ -23,7 +23,7 @@ type Props = {
 export const ScheduleItem = ({ schedule }: Props) => {
   const { removeSchedule, removeBulkSchedules, masterSchedules, customSchedules, saveSchedule, changeScheduleColor } = useSchedule();
   const { openPopover, closePopover } = usePopover();
-  const { selectedIds, toggleSelect, isSelectionMode, clearSelection } = useSelection();
+  const { selectedIds, toggleSelect, isSelectionMode, clearSelection, enterSelectionMode } = useSelection();
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
@@ -153,6 +153,11 @@ export const ScheduleItem = ({ schedule }: Props) => {
             onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
             openRemoveConfirmDialog={openRemoveDialog}
             openEditDialog={() => setIsOpenEditDialog(true)}
+            onEnterSelectionMode={() => {
+              enterSelectionMode(schedule.id);
+              setIsOpenMenu(false);
+              closePopover();
+            }}
           />
         </div>
       )}
@@ -163,6 +168,11 @@ export const ScheduleItem = ({ schedule }: Props) => {
             onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
             openRemoveConfirmDialog={openRemoveDialog}
             openEditDialog={() => setIsOpenEditDialog(true)}
+            onEnterSelectionMode={() => {
+              enterSelectionMode(schedule.id);
+              setIsOpenInfoCard(false);
+              closePopover();
+            }}
           />
         </div>
       )}

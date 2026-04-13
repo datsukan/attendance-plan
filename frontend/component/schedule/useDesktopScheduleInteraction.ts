@@ -5,7 +5,7 @@ type Handlers = {
 };
 
 export const useDesktopScheduleInteraction = (scheduleId: string, onOpen: () => void): Handlers => {
-  const { toggleSelect, rangeSelect } = useSelection();
+  const { toggleSelect, rangeSelect, isSelectionMode } = useSelection();
 
   const onClick = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -17,6 +17,11 @@ export const useDesktopScheduleInteraction = (scheduleId: string, onOpen: () => 
 
     if (e.shiftKey) {
       rangeSelect(scheduleId);
+      return;
+    }
+
+    if (isSelectionMode) {
+      toggleSelect(scheduleId);
       return;
     }
 

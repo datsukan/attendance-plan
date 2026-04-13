@@ -96,7 +96,7 @@ export const Calender = () => {
       />
       <div className="sticky top-0 z-10 bg-white">
         <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
-        {isSelectionMode && <SelectionModeBar onDelete={triggerBulkDelete} />}
+        {(isSelectionMode || selectedIds.size > 0) && <SelectionModeBar onDelete={triggerBulkDelete} />}
       </div>
       <CalenderDates weeks={weeks} />
     </div>

@@ -1,6 +1,6 @@
 import { format, isEqual } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 import { Type } from '@/type';
 import { getColorClassName, getColorKeys } from '@/component/calendar/color-module';
@@ -11,9 +11,10 @@ type Props = {
   onSelectColor: (color: string) => void;
   openRemoveConfirmDialog: () => void;
   openEditDialog: () => void;
+  onEnterSelectionMode: () => void;
 };
 
-export const InfoCard = ({ schedule, onSelectColor, openRemoveConfirmDialog, openEditDialog }: Props) => {
+export const InfoCard = ({ schedule, onSelectColor, openRemoveConfirmDialog, openEditDialog, onEnterSelectionMode }: Props) => {
   return (
     <div className="divide-y overflow-hidden rounded-lg bg-white shadow-lg">
       <div className="space-y-2 p-3">
@@ -31,6 +32,10 @@ export const InfoCard = ({ schedule, onSelectColor, openRemoveConfirmDialog, ope
         <button className="flex w-full items-center gap-2 px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={() => openEditDialog()}>
           <PencilIcon className="size-5 text-gray-600" />
           <span>編集</span>
+        </button>
+        <button className="flex w-full items-center gap-2 px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={onEnterSelectionMode}>
+          <CheckCircleIcon className="size-5 text-gray-600" />
+          <span>選択</span>
         </button>
         <button className="flex w-full items-center gap-2 px-4 py-2 hover:bg-gray-100 active:bg-gray-200" onClick={openRemoveConfirmDialog}>
           <TrashIcon className="size-5 text-gray-600" />
