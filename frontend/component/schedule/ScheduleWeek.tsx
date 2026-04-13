@@ -14,7 +14,7 @@ import {
   toScheduleTypeName,
 } from '@/component/schedule/schedule-module';
 import { CreateScheduleDialog } from '@/component/dialog/create/CreateScheduleDialog';
-import { isDialogRecentlyClosed } from '@/component/dialog/dialog-close-guard';
+import { isDialogRecentlyClosed, isPopoverRecentlyClosed } from '@/component/dialog/close-guard';
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { usePopover } from '@/provider/PopoverProvider';
 import { useSelection } from '@/provider/SelectionContext';
@@ -41,7 +41,7 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
 
   const openCreateDialog = async (date: Date) => {
     clearSelection();
-    if (isOpenPopover || isDialogRecentlyClosed()) {
+    if (isOpenPopover || isDialogRecentlyClosed() || isPopoverRecentlyClosed()) {
       return;
     }
 

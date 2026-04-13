@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
+import { markPopoverClosed } from '@/component/dialog/close-guard';
 
 type PopoverContextType = {
   isOpenPopover: boolean;
@@ -33,6 +34,7 @@ export const PopoverProvider = ({ children }: Props) => {
   };
 
   const close = async () => {
+    markPopoverClosed();
     await new Promise((resolve) => setTimeout(resolve, 100));
     setIsOpen(false);
   };

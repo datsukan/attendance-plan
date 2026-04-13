@@ -2,7 +2,7 @@
 
 import { useEffect, ReactNode } from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { markDialogClosed } from './dialog-close-guard';
+import { markDialogClosed } from './close-guard';
 
 type Props = {
   title: string;
