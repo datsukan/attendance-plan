@@ -15,6 +15,7 @@ type ScheduleContextType = {
   setSchedulesByType: (type: Type.ScheduleType, schedules: Type.ScheduleDateItem[]) => void;
   addSchedule: (scheduleRequest: Model.CreateSchedule[]) => Promise<void>;
   removeSchedule: (id: string, type: Type.ScheduleType) => Promise<void>;
+  removeBulkSchedules: (schedules: Type.Schedule[]) => Promise<void>;
   saveSchedule: (scheduleRequest: Model.EditSchedule) => Promise<void>;
   changeScheduleColor: (id: string, type: Type.ScheduleType, color: string) => Promise<void>;
 };
@@ -46,6 +47,7 @@ export const ScheduleProvider = ({ children }: Props) => {
     setSchedulesByType,
     addSchedule,
     removeSchedule,
+    removeBulkSchedules,
     saveSchedule,
     changeScheduleColor,
   } = useBaseSchedule();
@@ -60,6 +62,7 @@ export const ScheduleProvider = ({ children }: Props) => {
         setSchedulesByType,
         addSchedule,
         removeSchedule,
+        removeBulkSchedules,
         saveSchedule,
         changeScheduleColor,
       }}

@@ -5,6 +5,7 @@ import { useFloating, useDismiss, useInteractions, autoUpdate, offset, flip, shi
 import { Menu } from './Menu';
 import { InfoCard } from './InfoCard';
 import { RemoveConfirmDialog } from '@/component/dialog/remove/RemoveConfirmDialog';
+import { BulkRemoveConfirmDialog } from '@/component/dialog/remove/BulkRemoveConfirmDialog';
 import { EditScheduleDialog } from '@/component/dialog/edit/EditScheduleDialog';
 
 import { hasDateLabel } from '@/component/schedule/schedule-module';
@@ -19,15 +20,32 @@ type Props = {
 };
 
 export const ScheduleItem = ({ schedule }: Props) => {
-  const { removeSchedule, saveSchedule, changeScheduleColor } = useSchedule();
+  const { removeSchedule, removeBulkSchedules, masterSchedules, customSchedules, saveSchedule, changeScheduleColor } = useSchedule();
   const { openPopover, closePopover } = usePopover();
-  const { toggleSelect, rangeSelect, clearSelection } = useSelection();
+  const { selectedIds, toggleSelect, rangeSelect, clearSelection } = useSelection();
   const documentClickHandler = useRef<(this: Document, ev: MouseEvent) => void>();
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isOpenInfoCard, setIsOpenInfoCard] = useState(false);
   const [isOpenRemoveConfirmDialog, setIsOpenRemoveConfirmDialog] = useState(false);
+  const [isOpenBulkRemoveConfirmDialog, setIsOpenBulkRemoveConfirmDialog] = useState(false);
   const [isOpenEditDialog, setIsOpenEditDialog] = useState(false);
+
+  const isBulkTarget = selectedIds.has(schedule.id) && selectedIds.size > 1;
+
+  const allSchedules = [
+    ...masterSchedules.flatMap((d) => d.schedules),
+    ...customSchedules.flatMap((d) => d.schedules),
+  ];
+  const bulkRemoveTargets = isBulkTarget ? allSchedules.filter((s) => selectedIds.has(s.id)) : [];
+
+  const openRemoveDialog = () => {
+    if (isBulkTarget) {
+      setIsOpenBulkRemoveConfirmDialog(true);
+    } else {
+      setIsOpenRemoveConfirmDialog(true);
+    }
+  };
 
   const floatOptions: UseFloatingOptions = {
     middleware: [offset(10), flip(), shift()],
@@ -142,7 +160,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
         <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="z-10 min-w-max">
           <Menu
             onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
-            openRemoveConfirmDialog={() => setIsOpenRemoveConfirmDialog(true)}
+            openRemoveConfirmDialog={openRemoveDialog}
             openEditDialog={() => setIsOpenEditDialog(true)}
           />
         </div>
@@ -152,7 +170,7 @@ export const ScheduleItem = ({ schedule }: Props) => {
           <InfoCard
             schedule={schedule}
             onSelectColor={(color) => changeScheduleColor(schedule.id, schedule.type, color)}
-            openRemoveConfirmDialog={() => setIsOpenRemoveConfirmDialog(true)}
+            openRemoveConfirmDialog={openRemoveDialog}
             openEditDialog={() => setIsOpenEditDialog(true)}
           />
         </div>
@@ -162,6 +180,12 @@ export const ScheduleItem = ({ schedule }: Props) => {
         isOpen={isOpenRemoveConfirmDialog}
         close={() => setIsOpenRemoveConfirmDialog(false)}
         remove={() => removeSchedule(schedule.id, schedule.type)}
+      />
+      <BulkRemoveConfirmDialog
+        schedules={bulkRemoveTargets}
+        isOpen={isOpenBulkRemoveConfirmDialog}
+        close={() => setIsOpenBulkRemoveConfirmDialog(false)}
+        remove={async () => { await removeBulkSchedules(bulkRemoveTargets); clearSelection(); }}
       />
       <EditScheduleDialog schedule={schedule} isOpen={isOpenEditDialog} close={() => setIsOpenEditDialog(false)} submit={saveSchedule} />
     </div>

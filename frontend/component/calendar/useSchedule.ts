@@ -90,6 +90,30 @@ export const useSchedule = () => {
     setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
   };
 
+  const removeBulkSchedules = async (schedules: Type.Schedule[]): Promise<void> => {
+    try {
+      await Promise.all(schedules.map((s) => deleteSchedule(s.id)));
+    } catch (e) {
+      toast.error(String(e));
+      return;
+    }
+
+    const masterIds = schedules.filter((s) => s.type === ScheduleTypeMaster).map((s) => s.id);
+    const customIds = schedules.filter((s) => s.type !== ScheduleTypeMaster).map((s) => s.id);
+
+    if (masterIds.length > 0) {
+      const result = new Model.ScheduleDateItemList(masterSchedules);
+      masterIds.forEach((id) => result.removeSchedule(id));
+      setMasterSchedules(result.toTypeScheduleDateItems());
+    }
+
+    if (customIds.length > 0) {
+      const result = new Model.ScheduleDateItemList(customSchedules);
+      customIds.forEach((id) => result.removeSchedule(id));
+      setCustomSchedules(result.toTypeScheduleDateItems());
+    }
+  };
+
   const saveSchedule = async (scheduleRequest: Model.EditSchedule): Promise<void> => {
     const s: Type.Schedule = {
       id: scheduleRequest.getId(),
@@ -165,6 +189,7 @@ export const useSchedule = () => {
     setSchedulesByType,
     addSchedule,
     removeSchedule,
+    removeBulkSchedules,
     saveSchedule,
     changeScheduleColor,
   };
