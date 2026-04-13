@@ -142,11 +142,13 @@ export class ScheduleDateItemList {
   }
 
   public updateSchedule(schedule: Schedule): void {
+    const originalOrder = schedule.getOrder();
     this.removeSchedule(schedule.getId());
 
     const dateKey = ScheduleDateItem.toKey(schedule.getStartDate());
     const type = new ScheduleType(schedule.getType());
     this.addSchedule(dateKey, type, schedule);
+    schedule.setOrder(originalOrder);
   }
 
   public removeSchedule(id: string): void {

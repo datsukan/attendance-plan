@@ -32,7 +32,7 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
   const [isOpenCreateDialog, setIsOpenCreateDialog] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
   const { dateToKey } = useDateKey();
-  const schedules = scheduleDateItem.flatMap((item) => item.schedules);
+  const schedules = scheduleDateItem.flatMap((item) => item.schedules).sort((a, b) => a.order - b.order);
 
   if (!dates || dates.length === 0) {
     return;
