@@ -10,10 +10,12 @@ import { createBulkSchedules, CreateScheduleParam } from '@/backend-api/createBu
 import { updateSchedule } from '@/backend-api/updateSchedule';
 import { deleteSchedule } from '@/backend-api/deleteSchedule';
 import { Schedule } from '@/model/schedule';
+import { useUndo } from '@/provider/UndoProvider';
 
 export const useSchedule = () => {
   const [masterSchedules, setMasterSchedules] = useState<Type.ScheduleDateItem[]>([]);
   const [customSchedules, setCustomSchedules] = useState<Type.ScheduleDateItem[]>([]);
+  const { setUndoCommand } = useUndo();
 
   useEffect(() => {
     (async () => {
@@ -40,12 +42,25 @@ export const useSchedule = () => {
     setCustomSchedules(schedules);
   };
 
+  const setSchedulesByTypeFunctional = (
+    type: Type.ScheduleType,
+    updater: (prev: Type.ScheduleDateItem[]) => Type.ScheduleDateItem[]
+  ) => {
+    if (type === ScheduleTypeMaster) {
+      setMasterSchedules(updater);
+      return;
+    }
+
+    setCustomSchedules(updater);
+  };
+
   const addSchedule = async (reqSchedules: Model.CreateSchedule[]): Promise<void> => {
     if (reqSchedules.length === 0) {
       return;
     }
 
-    const targetSchedules = schedulesByType(reqSchedules[0].getType());
+    const scheduleType = reqSchedules[0].getType();
+    const targetSchedules = schedulesByType(scheduleType);
     const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
 
     let createBulkScheduleParams: CreateScheduleParam[] = [];
@@ -61,8 +76,9 @@ export const useSchedule = () => {
       createBulkScheduleParams.push(s);
     }
 
+    let resSchedules: Type.Schedule[];
     try {
-      const resSchedules = await createBulkSchedules(createBulkScheduleParams);
+      resSchedules = await createBulkSchedules(createBulkScheduleParams);
       const dateKey = Model.ScheduleDateItem.toKey(createBulkScheduleParams[0].startDate);
       const type = new Model.ScheduleType(createBulkScheduleParams[0].type);
       for (const resSchedule of resSchedules) {
@@ -73,10 +89,28 @@ export const useSchedule = () => {
       return;
     }
 
-    setSchedulesByType(reqSchedules[0].getType(), resultSchedules.toTypeScheduleDateItems());
+    setSchedulesByType(scheduleType, resultSchedules.toTypeScheduleDateItems());
+
+    const createdIds = resSchedules.map((s) => s.id);
+    setUndoCommand({
+      label: `スケジュールを${resSchedules.length}件追加しました`,
+      execute: async () => {
+        await Promise.all(createdIds.map((id) => deleteSchedule(id)));
+        setSchedulesByTypeFunctional(scheduleType, (prev) => {
+          const list = new Model.ScheduleDateItemList(prev);
+          createdIds.forEach((id) => list.removeSchedule(id));
+          return list.toTypeScheduleDateItems();
+        });
+      },
+    });
   };
 
   const removeSchedule = async (id: string, type: Type.ScheduleType): Promise<void> => {
+    // Capture schedule data before deletion for undo
+    const capturedList = new Model.ScheduleDateItemList(schedulesByType(type));
+    const capturedModel = capturedList.getSchedule(id);
+    const capturedData: Type.Schedule | undefined = capturedModel?.toTypeSchedule();
+
     try {
       await deleteSchedule(id);
     } catch (e) {
@@ -88,9 +122,39 @@ export const useSchedule = () => {
     const resultSchedules = new Model.ScheduleDateItemList(targetSchedules);
     resultSchedules.removeSchedule(id);
     setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
+
+    if (!capturedData) {
+      return;
+    }
+
+    setUndoCommand({
+      label: `「${capturedData.name}」を削除しました`,
+      execute: async () => {
+        const recreated = await createBulkSchedules([
+          {
+            name: capturedData.name,
+            startDate: capturedData.startDate,
+            endDate: capturedData.endDate,
+            color: capturedData.color,
+            type: capturedData.type,
+          },
+        ]);
+        if (recreated.length === 0) return;
+        setSchedulesByTypeFunctional(type, (prev) => {
+          const list = new Model.ScheduleDateItemList(prev);
+          const dateKey = Model.ScheduleDateItem.toKey(recreated[0].startDate);
+          const schedType = new Model.ScheduleType(recreated[0].type);
+          list.addSchedule(dateKey, schedType, new Schedule(recreated[0]));
+          return list.toTypeScheduleDateItems();
+        });
+      },
+    });
   };
 
   const removeBulkSchedules = async (schedules: Type.Schedule[]): Promise<void> => {
+    // Snapshot before deletion for undo
+    const capturedSchedules = schedules.map((s) => ({ ...s }));
+
     try {
       await Promise.all(schedules.map((s) => deleteSchedule(s.id)));
     } catch (e) {
@@ -112,6 +176,52 @@ export const useSchedule = () => {
       customIds.forEach((id) => result.removeSchedule(id));
       setCustomSchedules(result.toTypeScheduleDateItems());
     }
+
+    const toParam = (s: Type.Schedule): CreateScheduleParam => ({
+      name: s.name,
+      startDate: s.startDate,
+      endDate: s.endDate,
+      color: s.color,
+      type: s.type,
+    });
+
+    setUndoCommand({
+      label: `スケジュールを${capturedSchedules.length}件削除しました`,
+      execute: async () => {
+        const masterToRecreate = capturedSchedules.filter((s) => s.type === ScheduleTypeMaster);
+        const customToRecreate = capturedSchedules.filter((s) => s.type !== ScheduleTypeMaster);
+
+        if (masterToRecreate.length > 0) {
+          const recreated = await createBulkSchedules(masterToRecreate.map(toParam));
+          setMasterSchedules((prev) => {
+            const list = new Model.ScheduleDateItemList(prev);
+            for (const s of recreated) {
+              list.addSchedule(
+                Model.ScheduleDateItem.toKey(s.startDate),
+                new Model.ScheduleType(s.type),
+                new Schedule(s)
+              );
+            }
+            return list.toTypeScheduleDateItems();
+          });
+        }
+
+        if (customToRecreate.length > 0) {
+          const recreated = await createBulkSchedules(customToRecreate.map(toParam));
+          setCustomSchedules((prev) => {
+            const list = new Model.ScheduleDateItemList(prev);
+            for (const s of recreated) {
+              list.addSchedule(
+                Model.ScheduleDateItem.toKey(s.startDate),
+                new Model.ScheduleType(s.type),
+                new Schedule(s)
+              );
+            }
+            return list.toTypeScheduleDateItems();
+          });
+        }
+      },
+    });
   };
 
   const saveSchedule = async (scheduleRequest: Model.EditSchedule): Promise<void> => {
@@ -125,6 +235,15 @@ export const useSchedule = () => {
       order: scheduleRequest.getOrder(),
     };
 
+    // Capture before state for undo (must be before API call)
+    const allSchedules = [...masterSchedules, ...customSchedules];
+    const beforeModel = new Model.ScheduleDateItemList(allSchedules).getSchedule(s.id);
+    const beforeData: Type.Schedule | undefined = beforeModel?.toTypeSchedule();
+
+    if (!beforeData) {
+      return;
+    }
+
     try {
       await updateSchedule(s);
     } catch (e) {
@@ -132,31 +251,57 @@ export const useSchedule = () => {
       return;
     }
 
-    const allSchedules = [...masterSchedules, ...customSchedules];
-    const beforeSchedule = new Model.ScheduleDateItemList(allSchedules).getSchedule(s.id);
-    if (!beforeSchedule) {
-      return;
-    }
-
-    if (beforeSchedule.getType() === s.type) {
+    if (beforeData.type === s.type) {
       const typeSchedules = schedulesByType(s.type);
       const typeResultSchedules = new Model.ScheduleDateItemList(typeSchedules);
       typeResultSchedules.updateSchedule(new Model.Schedule(s));
       setSchedulesByType(s.type, typeResultSchedules.toTypeScheduleDateItems());
-      return;
+    } else {
+      const beforeTypeSchedules = schedulesByType(beforeData.type);
+      const beforeTypeResultSchedules = new Model.ScheduleDateItemList(beforeTypeSchedules);
+      beforeTypeResultSchedules.removeSchedule(s.id);
+      setSchedulesByType(beforeData.type, beforeTypeResultSchedules.toTypeScheduleDateItems());
+
+      const afterTypeSchedules = schedulesByType(s.type);
+      const afterTypeResultSchedules = new Model.ScheduleDateItemList(afterTypeSchedules);
+      afterTypeResultSchedules.addSchedule(
+        Model.ScheduleDateItem.toKey(s.startDate),
+        new Model.ScheduleType(s.type),
+        new Model.Schedule(s)
+      );
+      setSchedulesByType(s.type, afterTypeResultSchedules.toTypeScheduleDateItems());
     }
 
-    const beforeTypeSchedules = schedulesByType(beforeSchedule.getType());
-    const beforeTypeResultSchedules = new Model.ScheduleDateItemList(beforeTypeSchedules);
-    beforeTypeResultSchedules.removeSchedule(s.id);
+    setUndoCommand({
+      label: `「${s.name}」を編集しました`,
+      execute: async () => {
+        await updateSchedule(beforeData);
 
-    setSchedulesByType(beforeSchedule.getType(), beforeTypeResultSchedules.toTypeScheduleDateItems());
-
-    const afterTypeSchedules = schedulesByType(s.type);
-    const afterTypeResultSchedules = new Model.ScheduleDateItemList(afterTypeSchedules);
-    afterTypeResultSchedules.addSchedule(Model.ScheduleDateItem.toKey(s.startDate), new Model.ScheduleType(s.type), new Model.Schedule(s));
-
-    setSchedulesByType(s.type, afterTypeResultSchedules.toTypeScheduleDateItems());
+        if (beforeData.type === s.type) {
+          setSchedulesByTypeFunctional(beforeData.type, (prev) => {
+            const list = new Model.ScheduleDateItemList(prev);
+            list.updateSchedule(new Model.Schedule(beforeData));
+            return list.toTypeScheduleDateItems();
+          });
+        } else {
+          // Revert type change: remove from after-type, restore to before-type
+          setSchedulesByTypeFunctional(s.type, (prev) => {
+            const list = new Model.ScheduleDateItemList(prev);
+            list.removeSchedule(beforeData.id);
+            return list.toTypeScheduleDateItems();
+          });
+          setSchedulesByTypeFunctional(beforeData.type, (prev) => {
+            const list = new Model.ScheduleDateItemList(prev);
+            list.addSchedule(
+              Model.ScheduleDateItem.toKey(beforeData.startDate),
+              new Model.ScheduleType(beforeData.type),
+              new Model.Schedule(beforeData)
+            );
+            return list.toTypeScheduleDateItems();
+          });
+        }
+      },
+    });
   };
 
   const changeScheduleColor = async (id: string, type: Type.ScheduleType, color: string): Promise<void> => {
@@ -166,6 +311,10 @@ export const useSchedule = () => {
     if (!schedule) {
       return;
     }
+
+    // Capture before color change for undo
+    const scheduleName = schedule.getName();
+    const scheduleBeforeChange = schedule.toTypeSchedule();
 
     schedule.setColor(color);
 
@@ -178,6 +327,21 @@ export const useSchedule = () => {
 
     resultSchedules.updateSchedule(schedule);
     setSchedulesByType(type, resultSchedules.toTypeScheduleDateItems());
+
+    setUndoCommand({
+      label: `「${scheduleName}」のカラーを変更しました`,
+      execute: async () => {
+        await updateSchedule(scheduleBeforeChange);
+        setSchedulesByTypeFunctional(type, (prev) => {
+          const list = new Model.ScheduleDateItemList(prev);
+          const s = list.getSchedule(id);
+          if (!s) return prev;
+          s.setColor(scheduleBeforeChange.color);
+          list.updateSchedule(s);
+          return list.toTypeScheduleDateItems();
+        });
+      },
+    });
   };
 
   return {

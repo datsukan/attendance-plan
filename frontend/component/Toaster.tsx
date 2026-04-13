@@ -5,8 +5,12 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export const Toaster = () => {
   return (
-    <ReactHotToaster position="bottom-right" toastOptions={{ duration: Infinity }}>
+    <ReactHotToaster position="bottom-right" toastOptions={{ error: { duration: Infinity } }}>
       {(t) => {
+        if (t.type === 'custom') {
+          return <>{t.message}</>;
+        }
+
         return (
           <ToastBar toast={t} style={{ maxWidth: 'fit-content' }}>
             {({ icon, message }) => (
