@@ -13,6 +13,7 @@ import { MasterScheduleTemplates } from './MasterScheduleTemplates';
 import { CustomScheduleSelects } from './CustomScheduleSelects';
 import { OptionRangeBulkCreate } from './OptionRangeBulkCreate';
 import { OptionUseTemplateBulkCreate } from './OptionUseTemplateBulkCreate';
+import { OptionUseTemplateBulkNoPrefixCreate } from './OptionUseTemplateBulkNoPrefixCreate';
 import { InputDuration } from '@/component/dialog/InputDuration';
 import { CreateButton } from './CreateButton';
 import { CancelButton } from '../CancelButton';
@@ -41,6 +42,7 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
   const [rangeBulkTo, setRangeBulkTo] = useState(8);
   const [hasUseTempBulk, setHasUseTempBulk] = useState(false);
   const [useTempBulkNumber, setUseTempBulkNumber] = useState(1);
+  const [hasUseTempBulkNoPrefix, setHasUseTempBulkNoPrefix] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -55,6 +57,7 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
     setRangeBulkTo(8);
     setHasUseTempBulk(false);
     setUseTempBulkNumber(1);
+    setHasUseTempBulkNoPrefix(false);
     setErrorMessage('');
   }, [defaultDate, defaultType, isOpen]);
 
@@ -128,8 +131,24 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
     return schedules;
   };
 
+  const genSchedulesByUseTempBulkNoPrefix = (): CreateSchedule[] => {
+    const schedules: CreateSchedule[] = [];
+    for (const subject of subjects) {
+      schedules.push(
+        new CreateSchedule(
+          subject.name,
+          startOfDay(startDate),
+          startOfDay(endDate),
+          subject.color,
+          scheduleType
+        )
+      );
+    }
+    return schedules;
+  };
+
   const validate = (): boolean => {
-    if (scheduleType === ScheduleTypeCustom && hasUseTempBulk) {
+    if (scheduleType === ScheduleTypeCustom && (hasUseTempBulk || hasUseTempBulkNoPrefix)) {
       return validateUseTempBulk();
     }
 
@@ -142,6 +161,8 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
         return genSchedulesByRangeBulk();
       } else if (hasUseTempBulk) {
         return genSchedulesByUseTempBulk();
+      } else if (hasUseTempBulkNoPrefix) {
+        return genSchedulesByUseTempBulkNoPrefix();
       }
     }
 
@@ -192,7 +213,13 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
               number={useTempBulkNumber}
               checked={hasUseTempBulk}
               setNumber={setUseTempBulkNumber}
-              setChecked={setHasUseTempBulk}
+              setChecked={(v) => { setHasUseTempBulk(v); if (v) setHasUseTempBulkNoPrefix(false); }}
+            />
+          )}
+          {!hasRangeBulk && (
+            <OptionUseTemplateBulkNoPrefixCreate
+              checked={hasUseTempBulkNoPrefix}
+              setChecked={(v) => { setHasUseTempBulkNoPrefix(v); if (v) setHasUseTempBulk(false); }}
             />
           )}
         </>
