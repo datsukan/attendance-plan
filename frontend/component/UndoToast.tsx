@@ -43,7 +43,11 @@ export const UndoToast = ({ toastId, label, onUndo, visible }: Props) => {
         disabled={isExecuting}
         className="ml-1 flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50"
       >
-        <ArrowUturnLeftIcon className="size-4" />
+        {isExecuting ? (
+          <span className="size-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        ) : (
+          <ArrowUturnLeftIcon className="size-4" />
+        )}
         取り消す
       </button>
       <button
