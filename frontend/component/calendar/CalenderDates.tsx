@@ -253,8 +253,18 @@ export const CalenderDates = ({ weeks }: Props) => {
 
     if (beforeIndex === -1 || afterIndex === -1) {
       // 日付/タイプ変更ドラッグ（handleDragOver で処理済み）
+      // 元の位置に戻った場合はトーストを出さない
       if (dragSnapshot.length > 0 && activeSchedule) {
-        registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
+        const snapshotItem = dragSnapshot.find((s) => s.id === active.id.toString());
+        const currentSchedule = allSchedules.getSchedule(active.id.toString());
+        if (
+          snapshotItem &&
+          currentSchedule &&
+          (!isSameDay(currentSchedule.getStartDate(), snapshotItem.startDate) ||
+            currentSchedule.getType() !== snapshotItem.type)
+        ) {
+          registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
+        }
       }
       setActiveSchedule(null);
       setDragSnapshot([]);
@@ -265,7 +275,8 @@ export const CalenderDates = ({ weeks }: Props) => {
     mSchedules.setSchedules(dateKey, type, newSchedules);
     setSchedulesByType(type.String(), mSchedules.toTypeScheduleDateItems());
 
-    if (dragSnapshot.length > 0 && activeSchedule) {
+    // 同じ位置に戻った場合はトーストを出さない
+    if (dragSnapshot.length > 0 && activeSchedule && beforeIndex !== afterIndex) {
       registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
     }
     setActiveSchedule(null);
@@ -347,7 +358,10 @@ export const CalenderDates = ({ weeks }: Props) => {
     setSchedulesByType('master', masterList.toTypeScheduleDateItems());
     setSchedulesByType('custom', customList.toTypeScheduleDateItems());
 
-    if (dragSnapshot.length > 0) {
+    // 元の位置に戻った場合はトーストを出さない
+    const primarySnapshot = dragSnapshot.find((s) => s.id === primaryId);
+    const hasActuallyMoved = dateDelta !== 0 || (primarySnapshot && targetType !== primarySnapshot.type);
+    if (dragSnapshot.length > 0 && hasActuallyMoved) {
       registerDragUndo(`${dragSnapshot.length}件のスケジュールを移動しました`, dragSnapshot);
     }
 
