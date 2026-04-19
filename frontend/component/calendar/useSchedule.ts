@@ -364,6 +364,7 @@ export const useSchedule = () => {
     setCustomSchedules,
     schedulesByType,
     setSchedulesByType,
+    setSchedulesByTypeFunctional,
     addSchedule,
     removeSchedule,
     removeBulkSchedules,

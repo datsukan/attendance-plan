@@ -14,6 +14,7 @@ import { Model } from '@/model';
 import { useDateKey } from '@/component/useDateKey';
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { useSelection } from '@/provider/SelectionContext';
+import { useUndo } from '@/provider/UndoProvider';
 
 import { updateBulkSchedules } from '@/backend-api/updateBulkSchedules';
 import { SessionExpiredError } from '@/backend-api/error';
@@ -26,12 +27,14 @@ type Props = {
 
 export const CalenderDates = ({ weeks }: Props) => {
   const { dateToKey } = useDateKey();
-  const { masterSchedules, customSchedules, schedulesByType, setSchedulesByType, removeSchedule, saveSchedule, changeScheduleColor } =
+  const { masterSchedules, customSchedules, schedulesByType, setSchedulesByType, setSchedulesByTypeFunctional, removeSchedule, saveSchedule, changeScheduleColor } =
     useSchedule();
   const { selectedIds, clearSelection, setAllSchedules } = useSelection();
+  const { setUndoCommand } = useUndo();
 
   const [activeSchedule, setActiveSchedule] = useState<Type.Schedule | null>(null);
   const [bulkDragOrigins, setBulkDragOrigins] = useState<Map<string, Date>>(new Map());
+  const [dragSnapshot, setDragSnapshot] = useState<Type.Schedule[]>([]);
   const [queueUpdateSortSchedules, setQueueUpdateSortSchedules] = useState<Type.Schedule[][]>([]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -65,15 +68,27 @@ export const CalenderDates = ({ weeks }: Props) => {
     if (selectedIds.has(id) && selectedIds.size > 1) {
       // バルクドラッグ: 全選択アイテムの元 startDate をスナップショット
       const origins = new Map<string, Date>();
+      const snapshotSchedules: Type.Schedule[] = [];
       for (const sid of selectedIds) {
         const s = mSchedules.getSchedule(sid);
-        if (s) origins.set(sid, new Date(s.getStartDate()));
+        if (s) {
+          origins.set(sid, new Date(s.getStartDate()));
+          snapshotSchedules.push(s.toTypeSchedule());
+        }
       }
       setBulkDragOrigins(origins);
+      setDragSnapshot(snapshotSchedules);
     } else {
       // 未選択アイテムをドラッグ → 選択を解除して単体ドラッグ
       clearSelection();
       setBulkDragOrigins(new Map());
+
+      // 単体ドラッグ: 移動元セルのスケジュール全体をスナップショット（並び替えにも対応）
+      const sourceDateKey = Model.ScheduleDateItem.toKey(schedule.getStartDate());
+      const sourceType = new Model.ScheduleType(schedule.getType());
+      const sourceDateItem = mSchedules.getDateItem(sourceDateKey, sourceType);
+      const cellSchedules = sourceDateItem ? sourceDateItem.toTypeSchedules() : [schedule.toTypeSchedule()];
+      setDragSnapshot(cellSchedules);
     }
   };
 
@@ -175,6 +190,7 @@ export const CalenderDates = ({ weeks }: Props) => {
     if (!over) {
       setActiveSchedule(null);
       setBulkDragOrigins(new Map());
+      setDragSnapshot([]);
       return;
     }
 
@@ -185,7 +201,22 @@ export const CalenderDates = ({ weeks }: Props) => {
     }
 
     if (active.id === over.id) {
+      // handleDragOver により既に別の日付/タイプに移動済みの可能性があるため変更有無を確認する
+      if (dragSnapshot.length > 0 && activeSchedule) {
+        const snapshotItem = dragSnapshot.find((s) => s.id === active.id.toString());
+        const allSchedules = new Model.ScheduleDateItemList([...masterSchedules, ...customSchedules]);
+        const currentSchedule = allSchedules.getSchedule(active.id.toString());
+        if (
+          snapshotItem &&
+          currentSchedule &&
+          (!isSameDay(currentSchedule.getStartDate(), snapshotItem.startDate) ||
+            currentSchedule.getType() !== snapshotItem.type)
+        ) {
+          registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
+        }
+      }
       setActiveSchedule(null);
+      setDragSnapshot([]);
       return;
     }
 
@@ -194,6 +225,7 @@ export const CalenderDates = ({ weeks }: Props) => {
 
     if (!beforeSchedule) {
       setActiveSchedule(null);
+      setDragSnapshot([]);
       return;
     }
 
@@ -204,6 +236,7 @@ export const CalenderDates = ({ weeks }: Props) => {
 
     if (!dateItem) {
       setActiveSchedule(null);
+      setDragSnapshot([]);
       return;
     }
 
@@ -211,6 +244,7 @@ export const CalenderDates = ({ weeks }: Props) => {
 
     if (!beforeSchedules || beforeSchedules.length === 0) {
       setActiveSchedule(null);
+      setDragSnapshot([]);
       return;
     }
 
@@ -218,14 +252,24 @@ export const CalenderDates = ({ weeks }: Props) => {
     const afterIndex = beforeSchedules.findIndex((schedule) => schedule.getId() === over.id);
 
     if (beforeIndex === -1 || afterIndex === -1) {
+      // 日付/タイプ変更ドラッグ（handleDragOver で処理済み）
+      if (dragSnapshot.length > 0 && activeSchedule) {
+        registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
+      }
       setActiveSchedule(null);
+      setDragSnapshot([]);
       return;
     }
 
     const newSchedules = arrayMove(beforeSchedules, beforeIndex, afterIndex);
     mSchedules.setSchedules(dateKey, type, newSchedules);
     setSchedulesByType(type.String(), mSchedules.toTypeScheduleDateItems());
+
+    if (dragSnapshot.length > 0 && activeSchedule) {
+      registerDragUndo(`「${activeSchedule.name}」を移動しました`, dragSnapshot);
+    }
     setActiveSchedule(null);
+    setDragSnapshot([]);
 
     const newDateItem = mSchedules.getDateItem(dateKey, type);
     if (newDateItem) {
@@ -242,6 +286,7 @@ export const CalenderDates = ({ weeks }: Props) => {
     if (!primaryCurrent || !primaryOriginalStart) {
       setActiveSchedule(null);
       setBulkDragOrigins(new Map());
+      setDragSnapshot([]);
       clearSelection();
       return;
     }
@@ -302,9 +347,54 @@ export const CalenderDates = ({ weeks }: Props) => {
     setSchedulesByType('master', masterList.toTypeScheduleDateItems());
     setSchedulesByType('custom', customList.toTypeScheduleDateItems());
 
+    if (dragSnapshot.length > 0) {
+      registerDragUndo(`${dragSnapshot.length}件のスケジュールを移動しました`, dragSnapshot);
+    }
+
     setActiveSchedule(null);
     setBulkDragOrigins(new Map());
+    setDragSnapshot([]);
     clearSelection();
+  };
+
+  const registerDragUndo = (label: string, snapshot: Type.Schedule[]) => {
+    const sorted = [...snapshot].sort((a, b) => a.order - b.order);
+    const snapshotIds = new Set(snapshot.map((s) => s.id));
+    const masterOriginals = sorted.filter((s) => s.type === 'master');
+    const customOriginals = sorted.filter((s) => s.type !== 'master');
+
+    setUndoCommand({
+      label,
+      execute: async () => {
+        await updateBulkSchedules(sorted);
+
+        setSchedulesByTypeFunctional('master', (prev) => {
+          const list = new Model.ScheduleDateItemList(prev);
+          snapshotIds.forEach((id) => list.removeSchedule(id));
+          masterOriginals.forEach((s) => {
+            list.addSchedule(
+              Model.ScheduleDateItem.toKey(s.startDate),
+              new Model.ScheduleType(s.type),
+              new Model.Schedule(s)
+            );
+          });
+          return list.toTypeScheduleDateItems();
+        });
+
+        setSchedulesByTypeFunctional('custom', (prev) => {
+          const list = new Model.ScheduleDateItemList(prev);
+          snapshotIds.forEach((id) => list.removeSchedule(id));
+          customOriginals.forEach((s) => {
+            list.addSchedule(
+              Model.ScheduleDateItem.toKey(s.startDate),
+              new Model.ScheduleType(s.type),
+              new Model.Schedule(s)
+            );
+          });
+          return list.toTypeScheduleDateItems();
+        });
+      },
+    });
   };
 
   const updateSortSchedules = (targetSchedules: Type.Schedule[]) => {

@@ -13,6 +13,10 @@ type ScheduleContextType = {
   setCustomSchedules: (schedules: Type.ScheduleDateItem[]) => void;
   schedulesByType: (type: Type.ScheduleType) => Type.ScheduleDateItem[];
   setSchedulesByType: (type: Type.ScheduleType, schedules: Type.ScheduleDateItem[]) => void;
+  setSchedulesByTypeFunctional: (
+    type: Type.ScheduleType,
+    updater: (prev: Type.ScheduleDateItem[]) => Type.ScheduleDateItem[]
+  ) => void;
   addSchedule: (scheduleRequest: Model.CreateSchedule[]) => Promise<void>;
   removeSchedule: (id: string, type: Type.ScheduleType) => Promise<void>;
   removeBulkSchedules: (schedules: Type.Schedule[]) => Promise<void>;
@@ -45,6 +49,7 @@ export const ScheduleProvider = ({ children }: Props) => {
     setCustomSchedules,
     schedulesByType,
     setSchedulesByType,
+    setSchedulesByTypeFunctional,
     addSchedule,
     removeSchedule,
     removeBulkSchedules,
@@ -60,6 +65,7 @@ export const ScheduleProvider = ({ children }: Props) => {
         setCustomSchedules,
         schedulesByType,
         setSchedulesByType,
+        setSchedulesByTypeFunctional,
         addSchedule,
         removeSchedule,
         removeBulkSchedules,
