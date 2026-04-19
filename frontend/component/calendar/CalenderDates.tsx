@@ -16,6 +16,7 @@ import { useSchedule } from '@/provider/ScheduleProvider';
 import { useSelection } from '@/provider/SelectionContext';
 
 import { updateBulkSchedules } from '@/backend-api/updateBulkSchedules';
+import { SessionExpiredError } from '@/backend-api/error';
 import { getColorClassName } from '@/component/calendar/color-module';
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 
@@ -320,6 +321,7 @@ export const CalenderDates = ({ weeks }: Props) => {
       try {
         await updateBulkSchedules(tss);
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error(String(e));
         setQueueUpdateSortSchedules(newQueue);
         return;

@@ -9,6 +9,7 @@ import { fetchSchedules } from '@/backend-api/fetchSchedules';
 import { createBulkSchedules, CreateScheduleParam } from '@/backend-api/createBulkSchedules';
 import { updateSchedule } from '@/backend-api/updateSchedule';
 import { deleteSchedule } from '@/backend-api/deleteSchedule';
+import { SessionExpiredError } from '@/backend-api/error';
 import { Schedule } from '@/model/schedule';
 import { useUndo } from '@/provider/UndoProvider';
 
@@ -24,6 +25,7 @@ export const useSchedule = () => {
         setMasterSchedules(result.masterSchedules);
         setCustomSchedules(result.customSchedules);
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error(String(e));
       }
     })();
@@ -85,6 +87,7 @@ export const useSchedule = () => {
         resultSchedules.addSchedule(dateKey, type, new Schedule(resSchedule));
       }
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error(String(e));
       return;
     }
@@ -114,6 +117,7 @@ export const useSchedule = () => {
     try {
       await deleteSchedule(id);
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error(String(e));
       return;
     }
@@ -158,6 +162,7 @@ export const useSchedule = () => {
     try {
       await Promise.all(schedules.map((s) => deleteSchedule(s.id)));
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error(String(e));
       return;
     }
@@ -247,6 +252,7 @@ export const useSchedule = () => {
     try {
       await updateSchedule(s);
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error(String(e));
       return;
     }
@@ -321,6 +327,7 @@ export const useSchedule = () => {
     try {
       await updateSchedule(schedule.toTypeSchedule());
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error(String(e));
       return;
     }

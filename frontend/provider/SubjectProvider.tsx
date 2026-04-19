@@ -8,6 +8,7 @@ import { fetchSubjects } from '@/backend-api/fetchSubjects';
 import { createSubject } from '@/backend-api/createSubject';
 import { deleteSubject } from '@/backend-api/deleteSubject';
 import { loadAuthUser } from '@/storage/user';
+import { SessionExpiredError } from '@/backend-api/error';
 
 type SubjectContextType = {
   subjects: Type.Subject[];
@@ -45,6 +46,7 @@ export const SubjectProvider = ({ children }: Props) => {
         const subjects = await fetchSubjects();
         setSubjects(subjects);
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error('科目情報の取得に失敗しました');
         toast.error(String(e));
         return;
@@ -57,6 +59,7 @@ export const SubjectProvider = ({ children }: Props) => {
       const newSubject = await createSubject(name, color);
       setSubjects([...subjects, newSubject]);
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error('科目の追加に失敗しました');
       toast.error(String(e));
       return;
@@ -68,6 +71,7 @@ export const SubjectProvider = ({ children }: Props) => {
       await deleteSubject(id);
       setSubjects(subjects.filter((s) => s.id !== id));
     } catch (e) {
+      if (e instanceof SessionExpiredError) return;
       toast.error('科目の削除に失敗しました');
       toast.error(String(e));
       return;

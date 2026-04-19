@@ -10,6 +10,7 @@ import { Loading } from './Loading';
 import { setEmail } from '@/backend-api/setEmail';
 import { getUser } from '@/backend-api/getUser';
 import { useUser } from '@/provider/UserProvider';
+import { SessionExpiredError } from '@/backend-api/error';
 
 export const Content = () => {
   const searchParams = useSearchParams();
@@ -36,6 +37,7 @@ export const Content = () => {
         const newUserWithToken = { ...newUser, session_token: user.session_token };
         saveUser(newUserWithToken);
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error('メールアドレスの変更に失敗しました。');
         toast.error(String(e));
       }

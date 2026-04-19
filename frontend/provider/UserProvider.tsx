@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { saveAuthUser, loadAuthUser, removeAuthUser } from '@/storage/user';
 import type { AuthUser } from '@/storage/user';
 import { getUser } from '@/backend-api/getUser';
+import { SessionExpiredError, registerNavigate } from '@/backend-api/error';
 import toast from 'react-hot-toast';
 
 type UserContextType = {
@@ -36,6 +37,10 @@ export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
+    registerNavigate((path) => router.push(path));
+  }, [router]);
+
+  useEffect(() => {
     const au = loadAuthUser();
     if (!au) return;
 
@@ -52,6 +57,7 @@ export const UserProvider = ({ children }: Props) => {
         };
         setUser(nu);
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error('ユーザー情報の取得に失敗しました');
         toast.error(String(e));
         router.push('/signin');

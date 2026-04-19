@@ -4,6 +4,8 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { CheckCircleIcon, XMarkIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
+import { SessionExpiredError } from '@/backend-api/error';
+
 type Props = {
   toastId: string;
   label: string;
@@ -19,7 +21,9 @@ export const UndoToast = ({ toastId, label, onUndo, visible }: Props) => {
     try {
       await onUndo();
     } catch (e) {
-      toast.error(String(e));
+      if (!(e instanceof SessionExpiredError)) {
+        toast.error(String(e));
+      }
     } finally {
       toast.dismiss(toastId);
       setIsExecuting(false);

@@ -10,6 +10,7 @@ import { CancelButton } from '@/component/dialog/CancelButton';
 
 import { useUser } from '@/provider/UserProvider';
 import { deleteUser } from '@/backend-api/deleteUser';
+import { SessionExpiredError } from '@/backend-api/error';
 
 type Props = {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const DeleteConfirmDialog = ({ isOpen, close }: Props) => {
         router.push('/signin');
         toast.success('アカウントを削除しました');
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error(String(e));
       }
 

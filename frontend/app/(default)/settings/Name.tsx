@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import { updateUser } from '@/backend-api/updateUser';
 import { useUser } from '@/provider/UserProvider';
+import { SessionExpiredError } from '@/backend-api/error';
 
 export const Name = () => {
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ export const Name = () => {
         saveUser({ ...user, name: name.toString() });
         toast.success('表示名を保存しました');
       } catch (e) {
+        if (e instanceof SessionExpiredError) return;
         toast.error(String(e));
       }
 
