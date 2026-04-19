@@ -84,11 +84,10 @@ export const CalenderDates = ({ weeks }: Props) => {
       return;
     }
 
-    const beforeDate = active.data.current?.date;
     const afterDate = over.data.current?.date;
     const afterType: Type.ScheduleType | undefined = over.data.current?.type;
 
-    if (!beforeDate || !afterDate || Number.isNaN(getTime(afterDate)) || !afterType) {
+    if (!afterDate || Number.isNaN(getTime(afterDate)) || !afterType) {
       return;
     }
 
@@ -99,6 +98,10 @@ export const CalenderDates = ({ weeks }: Props) => {
       return;
     }
 
+    // active.data.current?.date は SortableContext を跨いで移動する際に
+    // アイテムの unmount/remount によって古い値のまま残ることがある。
+    // state から取得した startDate を使うことで常に最新の位置を参照する。
+    const beforeDate = beforeSchedule.getStartDate();
     const beforeType: Type.ScheduleType = beforeSchedule.getType();
 
     if (beforeType === afterType) {
@@ -153,7 +156,7 @@ export const CalenderDates = ({ weeks }: Props) => {
     setSchedulesByType(afterType, afterMSchedules.toTypeScheduleDateItems());
 
     const mBeforeType = new Model.ScheduleType(beforeType);
-    const beforeDateItem = beforeMSchedules.getDateItem(beforeDate, mBeforeType);
+    const beforeDateItem = beforeMSchedules.getDateItem(Model.ScheduleDateItem.toKey(beforeDate), mBeforeType);
     if (beforeDateItem) {
       const beforeNewSchedules = beforeDateItem.toTypeSchedules();
       updateSortSchedules(beforeNewSchedules);
