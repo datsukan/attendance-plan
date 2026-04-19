@@ -8,6 +8,7 @@ import type { AuthUser } from '@/storage/user';
 import { getUser } from '@/backend-api/getUser';
 import { SessionExpiredError, registerNavigate } from '@/backend-api/error';
 import toast from 'react-hot-toast';
+import { useLoadingBar } from '@/provider/LoadingProvider';
 
 type UserContextType = {
   user: AuthUser | null;
@@ -35,6 +36,7 @@ type Props = {
 export const UserProvider = ({ children }: Props) => {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const { startLoading, stopLoading } = useLoadingBar();
 
   useEffect(() => {
     registerNavigate((path) => router.push(path));
@@ -47,6 +49,7 @@ export const UserProvider = ({ children }: Props) => {
     setUser(au);
 
     (async () => {
+      startLoading();
       try {
         const u = await getUser();
         const nu = {
@@ -62,6 +65,8 @@ export const UserProvider = ({ children }: Props) => {
         toast.error(String(e));
         router.push('/signin');
         return;
+      } finally {
+        stopLoading();
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

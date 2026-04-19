@@ -12,14 +12,17 @@ import { deleteSchedule } from '@/backend-api/deleteSchedule';
 import { SessionExpiredError } from '@/backend-api/error';
 import { Schedule } from '@/model/schedule';
 import { useUndo } from '@/provider/UndoProvider';
+import { useLoadingBar } from '@/provider/LoadingProvider';
 
 export const useSchedule = () => {
   const [masterSchedules, setMasterSchedules] = useState<Type.ScheduleDateItem[]>([]);
   const [customSchedules, setCustomSchedules] = useState<Type.ScheduleDateItem[]>([]);
   const { setUndoCommand } = useUndo();
+  const { startLoading, stopLoading } = useLoadingBar();
 
   useEffect(() => {
     (async () => {
+      startLoading();
       try {
         const result = await fetchSchedules();
         setMasterSchedules(result.masterSchedules);
@@ -27,8 +30,11 @@ export const useSchedule = () => {
       } catch (e) {
         if (e instanceof SessionExpiredError) return;
         toast.error(String(e));
+      } finally {
+        stopLoading();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const schedulesByType = (type: Type.ScheduleType): Type.ScheduleDateItem[] => {

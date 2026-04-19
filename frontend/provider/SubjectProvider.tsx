@@ -9,6 +9,7 @@ import { createSubject } from '@/backend-api/createSubject';
 import { deleteSubject } from '@/backend-api/deleteSubject';
 import { loadAuthUser } from '@/storage/user';
 import { SessionExpiredError } from '@/backend-api/error';
+import { useLoadingBar } from '@/provider/LoadingProvider';
 
 type SubjectContextType = {
   subjects: Type.Subject[];
@@ -36,12 +37,14 @@ type Props = {
 
 export const SubjectProvider = ({ children }: Props) => {
   const [subjects, setSubjects] = useState<Type.Subject[]>([]);
+  const { startLoading, stopLoading } = useLoadingBar();
 
   useEffect(() => {
     const au = loadAuthUser();
     if (!au) return;
 
     (async () => {
+      startLoading();
       try {
         const subjects = await fetchSubjects();
         setSubjects(subjects);
@@ -50,8 +53,11 @@ export const SubjectProvider = ({ children }: Props) => {
         toast.error('科目情報の取得に失敗しました');
         toast.error(String(e));
         return;
+      } finally {
+        stopLoading();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addSubject = async (name: string, color: string) => {

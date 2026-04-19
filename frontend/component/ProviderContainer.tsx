@@ -3,6 +3,8 @@
 import { PopoverProvider } from '@/provider/PopoverProvider';
 import { UserProvider } from '@/provider/UserProvider';
 import { SubjectProvider } from '@/provider/SubjectProvider';
+import { LoadingProvider } from '@/provider/LoadingProvider';
+import { LoadingBar } from '@/component/LoadingBar';
 
 type Props = {
   children: React.ReactNode;
@@ -10,10 +12,13 @@ type Props = {
 
 export const ProviderContainer = ({ children }: Props) => {
   return (
-    <PopoverProvider>
-      <UserProvider>
-        <SubjectProvider>{children}</SubjectProvider>
-      </UserProvider>
-    </PopoverProvider>
+    <LoadingProvider>
+      <LoadingBar />
+      <PopoverProvider>
+        <UserProvider>
+          <SubjectProvider>{children}</SubjectProvider>
+        </UserProvider>
+      </PopoverProvider>
+    </LoadingProvider>
   );
 };

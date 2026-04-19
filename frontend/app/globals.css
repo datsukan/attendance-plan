@@ -6,6 +6,19 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .animate-loading-bar {
+    animation: loading-progress 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes loading-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 *:focus {
