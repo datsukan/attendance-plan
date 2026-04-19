@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+
 import { YearMonthLabel } from './YearMonthLabel';
 import { AddScheduleButton } from './AddScheduleButton';
 import { MoveMonthNav } from './MoveMonthNav';
@@ -22,7 +25,16 @@ export const Header = ({ year, month, prev, next, reset, create }: Props) => {
           <YearMonthLabel year={year} month={month} />
           <AddScheduleButton create={create} />
         </div>
-        <MoveMonthNav prev={prev} next={next} reset={reset} />
+        <div className="flex items-center gap-3">
+          <Link
+            href="/guide"
+            className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          >
+            <QuestionMarkCircleIcon className="size-4" />
+            <span className="mb-0.5">機能・使い方</span>
+          </Link>
+          <MoveMonthNav prev={prev} next={next} reset={reset} />
+        </div>
       </div>
       <DayOfWeeks />
     </>
