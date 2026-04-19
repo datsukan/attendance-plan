@@ -17,7 +17,7 @@ export const SelectionModeBar = ({ onDelete }: Props) => {
       <div>
         <span className="font-medium text-blue-700">{count}件選択中</span>
         <p className="mt-0.5 text-xs text-blue-400">
-          {isTouchPrimary ? 'タップで追加/解除' : 'Ctrl+クリック で追加選択 / Shift+クリック で範囲選択'}
+          {isTouchPrimary ? '長押しで選択モード開始 / タップで追加・解除' : 'Ctrl+クリック で追加選択 / Shift+クリック で範囲選択'}
         </p>
       </div>
       <div className="flex gap-2">
