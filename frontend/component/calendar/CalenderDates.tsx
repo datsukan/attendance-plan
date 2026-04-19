@@ -272,6 +272,7 @@ export const CalenderDates = ({ weeks }: Props) => {
     }
 
     const newSchedules = arrayMove(beforeSchedules, beforeIndex, afterIndex);
+    newSchedules.forEach((schedule, i) => schedule.setOrder(i + 1));
     mSchedules.setSchedules(dateKey, type, newSchedules);
     setSchedulesByType(type.String(), mSchedules.toTypeScheduleDateItems());
 
