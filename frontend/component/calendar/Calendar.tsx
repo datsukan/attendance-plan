@@ -51,6 +51,13 @@ export const Calender = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isSelectionMode || selectedIds.size > 0) {
+          e.preventDefault();
+          clearSelection();
+        }
+        return;
+      }
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
       e.preventDefault();
       triggerBulkDelete();
@@ -59,7 +66,7 @@ export const Calender = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIds, masterSchedules, customSchedules, isOpenBulkRemoveDialog]);
+  }, [selectedIds, isSelectionMode, masterSchedules, customSchedules, isOpenBulkRemoveDialog]);
 
   const closeBulkRemoveDialog = () => {
     setIsOpenBulkRemoveDialog(false);
