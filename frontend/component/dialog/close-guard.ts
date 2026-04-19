@@ -10,7 +10,7 @@ export const isDialogRecentlyClosed = () => {
 };
 
 let lastPopoverCloseTime = 0;
-const POPOVER_GUARD_MS = 600;
+const POPOVER_GUARD_MS = 100;
 
 export const markPopoverClosed = () => {
   lastPopoverCloseTime = Date.now();
