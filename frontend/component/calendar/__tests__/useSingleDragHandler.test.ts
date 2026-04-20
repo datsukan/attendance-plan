@@ -257,5 +257,32 @@ describe('useSingleDragHandler', () => {
 
       expect(store.reorderCell).toHaveBeenCalledWith('2024-04-01', 'master', 0, 1);
     });
+
+    // 回帰テスト: ScheduleWeekItem の useSortable は type を data に含まないため、
+    // ScheduleWeekItem にドロップした場合 targetDate / targetType が null になる。
+    // この状態でも同セル内並び替えが正しく動作することを確認する。
+    it('targetDate/targetType が null でも同セル内の並び替えで reorderCell を呼ぶ', async () => {
+      const s1 = makeSchedule({ id: 's1', startDate: d('2024-04-01'), type: 'master', order: 1 });
+      const s2 = makeSchedule({ id: 's2', startDate: d('2024-04-01'), type: 'master', order: 2 });
+      const snapshot = [s1, s2];
+
+      const store = makeStore((id) => (id === 's1' ? s1 : s2));
+      store.getCell.mockReturnValue([s1, s2]);
+
+      const dragState = makeDragState({ snapshot, activeSchedule: s1 });
+
+      const { result } = renderHook(() => useSingleDragHandler(store as any, dragState as any));
+      await act(async () => {
+        await result.current.onDragEnd({
+          activeId: 's1',
+          overId: 's2',
+          targetDate: null,   // ScheduleWeekItem にドロップした場合は null
+          targetType: null,   // ScheduleWeekItem にドロップした場合は null
+        });
+      });
+
+      expect(store.reorderCell).toHaveBeenCalledWith('2024-04-01', 'master', 0, 1);
+      expect(mockUpdateBulkSchedules).toHaveBeenCalled();
+    });
   });
 });

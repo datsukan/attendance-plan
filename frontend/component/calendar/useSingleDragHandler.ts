@@ -71,8 +71,8 @@ export const useSingleDragHandler = (
   // ─── dragEnd ───────────────────────────────────────────────────────────────
 
   const onDragEnd = useCallback(
-    async ({ activeId, overId, targetDate, targetType }: DragEndPayload) => {
-      const { snapshot, activeSchedule } = dragState;
+    async ({ activeId, overId }: DragEndPayload) => {
+      const { snapshot } = dragState;
 
       // drop 先なし → キャンセル扱い（UI はスナップショットで復元）
       if (!overId) {
@@ -88,7 +88,7 @@ export const useSingleDragHandler = (
       if (!current || !snapshotItem) return;
 
       // 同セル内での並び替え
-      if (activeId !== overId && targetDate && targetType) {
+      if (activeId !== overId) {
         const dateKey = Model.ScheduleDateItem.toKey(current.startDate);
         const cell = store.getCell(dateKey, current.type);
         const fromIndex = cell.findIndex((s) => s.id === activeId);
