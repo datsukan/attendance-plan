@@ -14,7 +14,7 @@ type Props = {
   weeks: Date[][];
 };
 
-export const CalenderDates = ({ weeks }: Props) => {
+export const CalendarDates = ({ weeks }: Props) => {
   const { dateToKey } = useDateKey();
   const {
     sensors,

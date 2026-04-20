@@ -141,6 +141,12 @@ export const useScheduleStore = () => {
       if (!dateItem) return;
 
       const schedules = dateItem.getSchedules();
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= schedules.length ||
+        toIndex >= schedules.length
+      ) return;
       const reordered = arrayMove(schedules, fromIndex, toIndex);
       reordered.forEach((s, i) => s.setOrder(i + 1));
       list.setSchedules(dateKey, mType, reordered);

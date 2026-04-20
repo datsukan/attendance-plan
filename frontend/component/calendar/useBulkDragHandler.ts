@@ -45,7 +45,7 @@ export const useBulkDragHandler = (
       for (const id of selectedIds) {
         const s = store.findById(id);
         if (s) {
-          origins.set(id, new Date(s.startDate));
+          origins.set(id, s.startDate);
           fullSnapshot.push(s);
         }
       }
@@ -103,11 +103,13 @@ export const useBulkDragHandler = (
       );
 
       // 状態を一括反映
-      const moves = movedItems.map((s) => ({
-        schedule: store.findById(s.id) ?? s,
-        newStartDate: s.startDate,
-        newType: s.type,
-      }));
+      const moves = movedItems
+        .map((s) => {
+          const current = store.findById(s.id);
+          if (!current) return null;
+          return { schedule: current, newStartDate: s.startDate, newType: s.type };
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null);
       store.applyMoves(moves);
 
       clearSelection();

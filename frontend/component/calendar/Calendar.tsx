@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 
 import { Header } from './Header';
-import { CalenderDates } from './CalenderDates';
+import { CalendarDates } from './CalendarDates';
 import { SelectionModeBar } from './SelectionModeBar';
 import { BulkRemoveConfirmDialog } from '@/component/dialog/remove/BulkRemoveConfirmDialog';
 
@@ -105,7 +105,7 @@ export const Calender = () => {
         <Header year={targetYear} month={targetMonth} prev={prev} next={next} reset={reset} create={addSchedule} />
         {(isSelectionMode || selectedIds.size > 0) && <SelectionModeBar onDelete={triggerBulkDelete} />}
       </div>
-      <CalenderDates weeks={weeks} />
+      <CalendarDates weeks={weeks} />
     </div>
   );
 };

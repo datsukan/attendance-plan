@@ -44,22 +44,22 @@ export function buildBulkMoves(
   currentPrimaryStart: Date
 ): Type.Schedule[] {
   const primaryOrigin = origins.get(primaryId);
-  const dateDelta = primaryOrigin
-    ? differenceInDays(currentPrimaryStart, primaryOrigin)
-    : 0;
+  if (!primaryOrigin) return [];
+
+  const dateDelta = differenceInDays(currentPrimaryStart, primaryOrigin);
 
   return schedules
     .filter((s) => origins.has(s.id))
     .map((s) => {
-      const newStart =
-        s.id === primaryId
-          ? currentPrimaryStart
-          : addDays(origins.get(s.id)!, dateDelta);
+      const origin = origins.get(s.id);
+      if (!origin) return null;
+      const newStart = s.id === primaryId ? currentPrimaryStart : addDays(origin, dateDelta);
       return {
         ...shiftSchedule(s, newStart),
         type: targetType,
       };
-    });
+    })
+    .filter((s): s is Type.Schedule => s !== null);
 }
 
 /**
