@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { isBefore, isEqual } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
+
+import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 import { ScheduleWeekItem } from '@/component/schedule/ScheduleWeekItem';
 
@@ -80,15 +83,24 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
       <div className="pointer-events-none col-start-1 row-start-1 mb-6 grid h-fit grid-flow-col grid-cols-7 gap-y-1">
         {dates.map((date, index) => {
           const displaySchedules = schedules.filter((schedule) => isDisplaySchedule(schedule, date) && isShowItem(index, schedule, date));
+          // SortableContext には「この日が startDate のスケジュール」のみ渡す。
+          // 週跨ぎ継続表示（startDate < date）を含めると同一 ID が複数の
+          // SortableContext に登録されて dnd-kit が壊れる。
+          const sortableIds = displaySchedules.filter((s) => isEqual(s.startDate, date)).map((s) => s.id);
           return (
-            <SortableContext items={displaySchedules} key={`${type}-${dateToKey(date)}`}>
+            <SortableContext items={sortableIds} key={`${type}-${dateToKey(date)}`}>
               {displaySchedules.map((schedule) => {
                 const colStartClassName = getColStartClassName(index);
                 const colEndClassName = getColEndClassName(index, schedule, dates);
-
+                const isContinuation = isBefore(schedule.startDate, date);
                 return (
                   <div key={schedule.id} className={`pointer-events-auto mr-2 ${colStartClassName} ${colEndClassName}`}>
-                    <ScheduleWeekItem schedule={schedule} isActive={activeSchedule !== null && activeSchedule.id === schedule.id} />
+                    {isContinuation ? (
+                      // 週跨ぎ継続: 視覚表示は維持するが useSortable 二重登録を防ぐ
+                      <ScheduleItem schedule={schedule} />
+                    ) : (
+                      <ScheduleWeekItem schedule={schedule} isActive={activeSchedule !== null && activeSchedule.id === schedule.id} />
+                    )}
                   </div>
                 );
               })}
@@ -109,7 +121,7 @@ type DroppableProps = {
 const Droppable = ({ id, date, type }: DroppableProps) => {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
-    data: { date, type },
+    data: { date, type, isDroppableBackground: true },
   });
 
   return (

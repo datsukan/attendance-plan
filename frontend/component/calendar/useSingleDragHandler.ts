@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { getTime } from 'date-fns';
+import { getTime, isSameDay } from 'date-fns';
 
 import { Type } from '@/type';
 import { Model } from '@/model';
@@ -22,8 +22,6 @@ type DragOverPayload = {
 type DragEndPayload = {
   activeId: string;
   overId: string | null;
-  targetDate: Date | null;
-  targetType: Type.ScheduleType | null;
 };
 
 /**
@@ -63,6 +61,12 @@ export const useSingleDragHandler = (
       const schedule = store.findById(activeId);
       if (!schedule) return;
 
+      // 同セル内ソート（同日・同タイプ）の場合は何もしない。
+      // SortableContext が CSS transform で視覚的な並び替えを担当するため、
+      // ここで applyMove するとバウンディングボックスがずれて dragEnd の
+      // 衝突判定が狂う。
+      if (isSameDay(targetDate, schedule.startDate) && targetType === schedule.type) return;
+
       store.applyMove({ schedule, newStartDate: targetDate, newType: targetType });
     },
     [store]
@@ -95,10 +99,9 @@ export const useSingleDragHandler = (
         const toIndex = cell.findIndex((s) => s.id === overId);
 
         if (fromIndex !== -1 && toIndex !== -1) {
-          store.reorderCell(dateKey, current.type, fromIndex, toIndex);
-
-          // 並び替え後の最新セルを API へ
-          const reorderedCell = store.getCell(dateKey, current.type);
+          // reorderCell は setState 後の新順序を直接返す（stale state 回避）
+          const reorderedCell = store.reorderCell(dateKey, current.type, fromIndex, toIndex);
+          if (!reorderedCell) return;
           await persistAndUndo(
             `「${snapshotItem.name}」を移動しました`,
             snapshot,

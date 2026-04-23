@@ -132,13 +132,13 @@ export const useScheduleStore = () => {
       type: Type.ScheduleType,
       fromIndex: number,
       toIndex: number
-    ): void => {
+    ): Type.Schedule[] | null => {
       const list = new Model.ScheduleDateItemList(
         type === 'master' ? [...masterSchedules] : [...customSchedules]
       );
       const mType = new Model.ScheduleType(type);
       const dateItem = list.getDateItem(dateKey, mType);
-      if (!dateItem) return;
+      if (!dateItem) return null;
 
       const schedules = dateItem.getSchedules();
       if (
@@ -146,11 +146,14 @@ export const useScheduleStore = () => {
         toIndex < 0 ||
         fromIndex >= schedules.length ||
         toIndex >= schedules.length
-      ) return;
+      ) return null;
+
       const reordered = arrayMove(schedules, fromIndex, toIndex);
       reordered.forEach((s, i) => s.setOrder(i + 1));
       list.setSchedules(dateKey, mType, reordered);
       setSchedulesByType(type, list.toTypeScheduleDateItems());
+      // setState は非同期のため、並び替え後データを呼び出し元へ直接返す
+      return reordered.map((s) => s.toTypeSchedule());
     },
     [masterSchedules, customSchedules, setSchedulesByType]
   );

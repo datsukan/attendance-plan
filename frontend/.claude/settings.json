@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test *)",
+      "Bash(node_modules/.bin/vitest --version)",
+      "Bash(timedatectl)",
+      "Read(//etc/**)"
+    ]
+  }
+}

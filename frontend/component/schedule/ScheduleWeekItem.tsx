@@ -13,7 +13,7 @@ type Props = {
 
 export const ScheduleWeekItem = ({ schedule, isActive }: Props) => {
   const { isSelected } = useSelection();
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: schedule.id, data: { date: schedule.startDate } });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: schedule.id, data: { date: schedule.startDate, type: schedule.type } });
   const style = {
     transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,

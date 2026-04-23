@@ -175,8 +175,6 @@ describe('useSingleDragHandler', () => {
         await result.current.onDragEnd({
           activeId: 's1',
           overId: null,
-          targetDate: null,
-          targetType: null,
         });
       });
 
@@ -196,8 +194,6 @@ describe('useSingleDragHandler', () => {
         await result.current.onDragEnd({
           activeId: 's1',
           overId: 's1', // 同じ ID = 位置変化なし扱い
-          targetDate: d('2024-04-01'),
-          targetType: 'master',
         });
       });
 
@@ -224,8 +220,6 @@ describe('useSingleDragHandler', () => {
         await result.current.onDragEnd({
           activeId: 's1',
           overId: 's1',
-          targetDate: d('2024-04-05'),
-          targetType: 'master',
         });
       });
 
@@ -250,8 +244,6 @@ describe('useSingleDragHandler', () => {
         await result.current.onDragEnd({
           activeId: 's1',
           overId: 's2',
-          targetDate: d('2024-04-01'),
-          targetType: 'master',
         });
       });
 
@@ -268,6 +260,7 @@ describe('useSingleDragHandler', () => {
 
       const store = makeStore((id) => (id === 's1' ? s1 : s2));
       store.getCell.mockReturnValue([s1, s2]);
+      store.reorderCell.mockReturnValue([s2, s1]);
 
       const dragState = makeDragState({ snapshot, activeSchedule: s1 });
 
@@ -276,8 +269,6 @@ describe('useSingleDragHandler', () => {
         await result.current.onDragEnd({
           activeId: 's1',
           overId: 's2',
-          targetDate: null,   // ScheduleWeekItem にドロップした場合は null
-          targetType: null,   // ScheduleWeekItem にドロップした場合は null
         });
       });
 

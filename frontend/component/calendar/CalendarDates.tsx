@@ -1,4 +1,4 @@
-import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, type CollisionDetection } from '@dnd-kit/core';
 import { format } from 'date-fns';
 
 import { CalendarDateItem } from './CalendarDateItem';
@@ -9,6 +9,21 @@ import { useDateKey } from '@/component/useDateKey';
 import { getColorClassName } from '@/component/calendar/color-module';
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { useDragHandlers } from './useDragHandlers';
+
+// Sortable schedule items take priority over Droppable background cells.
+// pointerWithin sorts by center distance; range-date schedules spanning multiple
+// columns lose to the single-column Droppable because their center is further away.
+// This wrapper checks schedule items first, then falls back to backgrounds.
+const scheduleFirstCollision: CollisionDetection = (args) => {
+  const scheduleHits = pointerWithin({
+    ...args,
+    droppableContainers: args.droppableContainers.filter(
+      (c) => !c.data?.current?.isDroppableBackground
+    ),
+  });
+  if (scheduleHits.length > 0) return scheduleHits;
+  return pointerWithin(args);
+};
 
 type Props = {
   weeks: Date[][];
@@ -39,7 +54,7 @@ export const CalendarDates = ({ weeks }: Props) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
-      collisionDetection={pointerWithin}
+      collisionDetection={scheduleFirstCollision}
       sensors={sensors}
     >
       <div className="border-b border-r">

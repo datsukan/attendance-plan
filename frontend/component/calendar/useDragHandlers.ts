@@ -95,14 +95,9 @@ export const useDragHandlers = () => {
     if (phase === 'bulk') {
       await bulk.onDragEnd(active.id.toString());
     } else {
-      const targetDate: Date | null = over?.data.current?.date ?? null;
-      const targetType: Type.ScheduleType | null = over?.data.current?.type ?? null;
-
       await single.onDragEnd({
         activeId: active.id.toString(),
         overId: over?.id.toString() ?? null,
-        targetDate,
-        targetType,
       });
     }
   };

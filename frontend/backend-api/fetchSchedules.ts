@@ -63,15 +63,17 @@ const toResultSchedules = (schedules: ResScheduleDateItemList): Type.ScheduleDat
     result.push({
       date: s.date,
       type: s.type as 'master' | 'custom',
-      schedules: s.schedules.map((ss) => ({
-        id: ss.id,
-        name: ss.name,
-        startDate: new Date(ss.starts_at),
-        endDate: new Date(ss.ends_at),
-        color: ss.color,
-        type: ss.type,
-        order: ss.order,
-      })),
+      schedules: s.schedules
+        .map((ss) => ({
+          id: ss.id,
+          name: ss.name,
+          startDate: new Date(ss.starts_at),
+          endDate: new Date(ss.ends_at),
+          color: ss.color,
+          type: ss.type,
+          order: ss.order,
+        }))
+        .sort((a, b) => a.order - b.order),
     });
   }
 
