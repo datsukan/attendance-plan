@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { isBefore, isEqual } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, type SortingStrategy } from '@dnd-kit/sortable';
-
-// CSS Grid のカラムスパンが異なるアイテム同士を CSS transform で入れ替えると
-// 幅の表示が崩れる。同セル内の並び替えは onDragOver でのライブ状態更新で処理するため、
-// SortableContext の transform ベースの変位アニメーションを無効化する。
-const noopSortingStrategy: SortingStrategy = () => null;
+import { SortableContext } from '@dnd-kit/sortable';
 
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
-
 import { ScheduleWeekItem } from '@/component/schedule/ScheduleWeekItem';
 
 import { Type } from '@/type';
@@ -26,6 +20,10 @@ import { isDialogRecentlyClosed, isPopoverRecentlyClosed } from '@/component/dia
 import { useSchedule } from '@/provider/ScheduleProvider';
 import { usePopover } from '@/provider/PopoverProvider';
 import { useSelection } from '@/provider/SelectionContext';
+
+// 同セル内の並び替えは onDragOver でのライブ状態更新で処理するため、
+// SortableContext の CSS transform ベースの変位アニメーションを無効化する。
+const noopSortingStrategy = () => null;
 
 type Props = {
   type: Type.ScheduleType;

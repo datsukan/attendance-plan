@@ -1,4 +1,4 @@
-import { isAfter, isBefore, isEqual, differenceInCalendarDays, format } from 'date-fns';
+import { isAfter, isBefore, isEqual, differenceInCalendarDays } from 'date-fns';
 
 import { Type } from '@/type';
 
@@ -26,56 +26,24 @@ export function isShowItem(index: number, schedule: Type.Schedule, date: Date): 
   return true;
 }
 
-export function getColStartClassName(index: number): string {
-  let className = '';
-  switch (index) {
-    case 0:
-      className = 'col-start-1';
-      break;
-    case 1:
-      className = 'col-start-2';
-      break;
-    case 2:
-      className = 'col-start-3';
-      break;
-    case 3:
-      className = 'col-start-4';
-      break;
-    case 4:
-      className = 'col-start-5';
-      break;
-    case 5:
-      className = 'col-start-6';
-      break;
-    default:
-      className = 'col-start-7';
-      break;
-  }
+const COL_STARTS = [
+  'col-start-1', 'col-start-2', 'col-start-3', 'col-start-4',
+  'col-start-5', 'col-start-6', 'col-start-7',
+];
 
-  return className;
+export function getColStartClassName(index: number): string {
+  return COL_STARTS[index] ?? 'col-start-7';
 }
 
-export function getColEndClassName(schedule: Type.Schedule, dates: Date[]): string {
-  // Both "schedule starts this week" and "cross-week continuation" cases reduce to
-  // the same formula: days from week start to schedule end + 1.
-  const range = differenceInCalendarDays(schedule.endDate, dates[0]) + 1;
+// 範囲 1〜6 は対応する col-end クラス、範囲外（週をまたぐ場合など）は col-end-8 を返す
+const COL_ENDS = [
+  'col-end-2', 'col-end-3', 'col-end-4', 'col-end-5', 'col-end-6', 'col-end-7',
+];
 
-  switch (range) {
-    case 1:
-      return 'col-end-2';
-    case 2:
-      return 'col-end-3';
-    case 3:
-      return 'col-end-4';
-    case 4:
-      return 'col-end-5';
-    case 5:
-      return 'col-end-6';
-    case 6:
-      return 'col-end-7';
-    default:
-      return 'col-end-8';
-  }
+export function getColEndClassName(schedule: Type.Schedule, dates: Date[]): string {
+  // 週の先頭から終了日までの日数 + 1 = 必要な列数
+  const range = differenceInCalendarDays(schedule.endDate, dates[0]) + 1;
+  return COL_ENDS[range - 1] ?? 'col-end-8';
 }
 
 export function hasDateLabel(schedule: Type.Schedule): boolean {
@@ -84,8 +52,7 @@ export function hasDateLabel(schedule: Type.Schedule): boolean {
 }
 
 export function getMasterScheduleTemplates(): { name: string; color: string }[] {
-  type template = { name: string; color: string };
-  const templates: template[] = [
+  return [
     { name: '履修登録', color: 'red' },
     { name: '第1回 授業配信', color: 'yellow' },
     { name: '第2回 授業配信', color: 'yellow' },
@@ -100,8 +67,6 @@ export function getMasterScheduleTemplates(): { name: string; color: string }[] 
     { name: '成績評価', color: 'blue' },
     { name: '成績発表', color: 'blue' },
   ];
-
-  return templates;
 }
 
 export function toScheduleTypeName(type: 'master' | 'custom'): string {
