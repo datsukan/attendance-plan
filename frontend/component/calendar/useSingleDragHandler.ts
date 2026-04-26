@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { getTime, isSameDay } from 'date-fns';
 
 import { Type } from '@/type';
@@ -15,6 +15,7 @@ import { useDragState } from './useDragState';
 
 type DragOverPayload = {
   activeId: string;
+  overId?: string;
   targetDate: Date;
   targetType: Type.ScheduleType;
 };
@@ -28,6 +29,8 @@ type DragEndPayload = {
  * 単体ドラッグの戦略フック。
  *
  * - dragOver：楽観的 UI 更新のみ（API 呼び出しなし）
+ *   - 同セル内：hoverId が変わるたびに store.reorderCell() でライブ並び替え
+ *   - セル跨ぎ：store.applyMove() で日付・タイプを楽観的に変更
  * - dragEnd ：位置変化を確認したうえで API を1回呼び、Undo を登録
  */
 export const useSingleDragHandler = (
@@ -37,10 +40,17 @@ export const useSingleDragHandler = (
   const { setUndoCommand } = useUndo();
   const { clearSelection } = useSelection();
 
+  // 同セル内ライブ並び替えの状態管理（ref なのでレンダーを引き起こさない）
+  const lastSameCellOverRef = useRef<string | null>(null);
+  const sameCellReorderedRef = useRef(false);
+
   // ─── dragStart ─────────────────────────────────────────────────────────────
 
   const onDragStart = useCallback(
     (activeId: string) => {
+      lastSameCellOverRef.current = null;
+      sameCellReorderedRef.current = false;
+
       const schedule = store.findById(activeId);
       if (!schedule) return;
 
@@ -55,18 +65,34 @@ export const useSingleDragHandler = (
   // ─── dragOver ──────────────────────────────────────────────────────────────
 
   const onDragOver = useCallback(
-    ({ activeId, targetDate, targetType }: DragOverPayload) => {
+    ({ activeId, overId, targetDate, targetType }: DragOverPayload) => {
       if (!targetDate || Number.isNaN(getTime(targetDate))) return;
 
       const schedule = store.findById(activeId);
       if (!schedule) return;
 
-      // 同セル内ソート（同日・同タイプ）の場合は何もしない。
-      // SortableContext が CSS transform で視覚的な並び替えを担当するため、
-      // ここで applyMove するとバウンディングボックスがずれて dragEnd の
-      // 衝突判定が狂う。
-      if (isSameDay(targetDate, schedule.startDate) && targetType === schedule.type) return;
+      if (isSameDay(targetDate, schedule.startDate) && targetType === schedule.type) {
+        // 同セル内：別スケジュール上にポインターが入ったときだけライブ並び替え。
+        // lastSameCellOverRef で連続イベントの重複実行を防ぐ。
+        if (overId && overId !== activeId && overId !== lastSameCellOverRef.current) {
+          const overSchedule = store.findById(overId);
+          if (overSchedule) {
+            const dateKey = Model.ScheduleDateItem.toKey(schedule.startDate);
+            const cell = store.getCell(dateKey, schedule.type);
+            const fromIndex = cell.findIndex((s) => s.id === activeId);
+            const toIndex = cell.findIndex((s) => s.id === overId);
+            if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+              store.reorderCell(dateKey, schedule.type, fromIndex, toIndex);
+              sameCellReorderedRef.current = true;
+            }
+          }
+          lastSameCellOverRef.current = overId;
+        }
+        return;
+      }
 
+      // セル跨ぎ移動：同セル追跡をリセットして楽観的移動を適用
+      lastSameCellOverRef.current = null;
       store.applyMove({ schedule, newStartDate: targetDate, newType: targetType });
     },
     [store]
@@ -77,6 +103,9 @@ export const useSingleDragHandler = (
   const onDragEnd = useCallback(
     async ({ activeId, overId }: DragEndPayload) => {
       const { snapshot } = dragState;
+      const didSameCellReorder = sameCellReorderedRef.current;
+      sameCellReorderedRef.current = false;
+      lastSameCellOverRef.current = null;
 
       // drop 先なし → キャンセル扱い（UI はスナップショットで復元）
       if (!overId) {
@@ -91,7 +120,19 @@ export const useSingleDragHandler = (
 
       if (!current || !snapshotItem) return;
 
-      // 同セル内での並び替え
+      // onDragOver でライブ並び替え済み → 現在のセル状態をそのまま永続化
+      if (didSameCellReorder) {
+        const dateKey = Model.ScheduleDateItem.toKey(current.startDate);
+        const cell = store.getCell(dateKey, current.type);
+        await persistAndUndo(
+          `「${snapshotItem.name}」を移動しました`,
+          snapshot,
+          cell
+        );
+        return;
+      }
+
+      // 同セル内フォールバック：onDragOver でライブ並び替えが行われなかった場合
       if (activeId !== overId) {
         const dateKey = Model.ScheduleDateItem.toKey(current.startDate);
         const cell = store.getCell(dateKey, current.type);
@@ -99,7 +140,6 @@ export const useSingleDragHandler = (
         const toIndex = cell.findIndex((s) => s.id === overId);
 
         if (fromIndex !== -1 && toIndex !== -1) {
-          // reorderCell は setState 後の新順序を直接返す（stale state 回避）
           const reorderedCell = store.reorderCell(dateKey, current.type, fromIndex, toIndex);
           if (!reorderedCell) return;
           await persistAndUndo(

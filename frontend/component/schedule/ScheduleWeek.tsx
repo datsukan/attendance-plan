@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { isBefore, isEqual } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
+import { SortableContext, type SortingStrategy } from '@dnd-kit/sortable';
+
+// CSS Grid のカラムスパンが異なるアイテム同士を CSS transform で入れ替えると
+// 幅の表示が崩れる。同セル内の並び替えは onDragOver でのライブ状態更新で処理するため、
+// SortableContext の transform ベースの変位アニメーションを無効化する。
+const noopSortingStrategy: SortingStrategy = () => null;
 
 import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
@@ -88,20 +93,24 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
           // SortableContext に登録されて dnd-kit が壊れる。
           const sortableIds = displaySchedules.filter((s) => isEqual(s.startDate, date)).map((s) => s.id);
           return (
-            <SortableContext items={sortableIds} key={`${type}-${dateToKey(date)}`}>
+            <SortableContext items={sortableIds} key={`${type}-${dateToKey(date)}`} strategy={noopSortingStrategy}>
               {displaySchedules.map((schedule) => {
                 const colStartClassName = getColStartClassName(index);
-                const colEndClassName = getColEndClassName(index, schedule, dates);
+                const colEndClassName = getColEndClassName(schedule, dates);
                 const isContinuation = isBefore(schedule.startDate, date);
-                return (
+                return isContinuation ? (
+                  // 週跨ぎ継続: 視覚表示は維持するが useSortable 二重登録を防ぐ
                   <div key={schedule.id} className={`pointer-events-auto mr-2 ${colStartClassName} ${colEndClassName}`}>
-                    {isContinuation ? (
-                      // 週跨ぎ継続: 視覚表示は維持するが useSortable 二重登録を防ぐ
-                      <ScheduleItem schedule={schedule} />
-                    ) : (
-                      <ScheduleWeekItem schedule={schedule} isActive={activeSchedule !== null && activeSchedule.id === schedule.id} />
-                    )}
+                    <ScheduleItem schedule={schedule} />
                   </div>
+                ) : (
+                  <ScheduleWeekItem
+                    key={schedule.id}
+                    schedule={schedule}
+                    isActive={activeSchedule !== null && activeSchedule.id === schedule.id}
+                    colStartClassName={colStartClassName}
+                    colEndClassName={colEndClassName}
+                  />
                 );
               })}
             </SortableContext>

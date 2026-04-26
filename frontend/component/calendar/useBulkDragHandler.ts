@@ -15,6 +15,7 @@ import { useDragState } from './useDragState';
 
 type DragOverPayload = {
   activeId: string;
+  overId?: string;
   targetDate: Date;
   targetType: Type.ScheduleType;
 };

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import type { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { getTime } from 'date-fns';
@@ -26,6 +26,7 @@ export const useDragHandlers = () => {
   const store = useScheduleStore();
   const dragState = useDragState();
   const { selectedIds, setAllSchedules } = useSelection();
+  const [activeDragWidth, setActiveDragWidth] = useState<number | null>(null);
 
   const single = useSingleDragHandler(store, dragState);
   const bulk = useBulkDragHandler(store, dragState);
@@ -53,6 +54,11 @@ export const useDragHandlers = () => {
     const activeId = event.active.id.toString();
     const isBulk = selectedIds.has(activeId) && selectedIds.size > 1;
 
+    // ドラッグ開始時点の要素の実際の幅を記録する。
+    // DragOverlay の幅をこの値に合わせることで、CSS Grid の列スパンに
+    // 対応した正確な幅を再現できる。
+    setActiveDragWidth(event.active.rect.current.initial?.width ?? null);
+
     if (isBulk) {
       bulk.onDragStart(activeId, selectedIds);
     } else {
@@ -71,6 +77,7 @@ export const useDragHandlers = () => {
 
     const payload = {
       activeId: active.id.toString(),
+      overId: over.id.toString(),
       targetDate,
       targetType,
     };
@@ -91,6 +98,7 @@ export const useDragHandlers = () => {
     // 捕捉しているため、この時点で reset() を呼んでも非同期処理に影響しない。
     const phase = dragState.phase;
     dragState.reset();
+    setActiveDragWidth(null);
 
     if (phase === 'bulk') {
       await bulk.onDragEnd(active.id.toString());
@@ -108,6 +116,7 @@ export const useDragHandlers = () => {
     handleDragOver,
     handleDragEnd,
     activeSchedule: dragState.activeSchedule,
+    activeDragWidth,
     bulkCount: dragState.bulkOrigins.size,
   };
 };

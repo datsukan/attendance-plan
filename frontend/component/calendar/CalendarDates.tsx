@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 
 import { CalendarDateItem } from './CalendarDateItem';
 import { ScheduleWeekContainer } from '@/component/schedule/ScheduleWeekContainer';
-import { ScheduleItem } from '@/component/schedule/ScheduleItem';
 
 import { useDateKey } from '@/component/useDateKey';
 import { getColorClassName } from '@/component/calendar/color-module';
@@ -37,6 +36,7 @@ export const CalendarDates = ({ weeks }: Props) => {
     handleDragOver,
     handleDragEnd,
     activeSchedule,
+    activeDragWidth,
     bulkCount,
   } = useDragHandlers();
 
@@ -79,7 +79,7 @@ export const CalendarDates = ({ weeks }: Props) => {
       </div>
       {activeSchedule && (
         <DragOverlay>
-          <div className="relative">
+          <div className="relative" style={activeDragWidth != null ? { width: activeDragWidth } : undefined}>
             <div className={`flex touch-none items-center rounded px-1.5 py-1 ${getColorClassName(activeSchedule.color)}`}>
               <span className="line-clamp-2 text-[0.6rem] md:line-clamp-1 md:text-xs">{generateDragLabel()}</span>
             </div>

@@ -55,42 +55,27 @@ export function getColStartClassName(index: number): string {
   return className;
 }
 
-export function getColEndClassName(index: number, schedule: Type.Schedule, dates: Date[]): string {
-  let range = 0;
-  if (isBefore(dates[0], schedule.startDate)) {
-    const sub = differenceInCalendarDays(schedule.endDate, schedule.startDate);
-    range = index + sub + 1;
-  } else {
-    const sub = differenceInCalendarDays(schedule.endDate, dates[0]);
-    range = sub + 1;
-  }
+export function getColEndClassName(schedule: Type.Schedule, dates: Date[]): string {
+  // Both "schedule starts this week" and "cross-week continuation" cases reduce to
+  // the same formula: days from week start to schedule end + 1.
+  const range = differenceInCalendarDays(schedule.endDate, dates[0]) + 1;
 
-  let className = '';
   switch (range) {
     case 1:
-      className = 'col-end-2';
-      break;
+      return 'col-end-2';
     case 2:
-      className = 'col-end-3';
-      break;
+      return 'col-end-3';
     case 3:
-      className = 'col-end-4';
-      break;
+      return 'col-end-4';
     case 4:
-      className = 'col-end-5';
-      break;
+      return 'col-end-5';
     case 5:
-      className = 'col-end-6';
-      break;
+      return 'col-end-6';
     case 6:
-      className = 'col-end-7';
-      break;
+      return 'col-end-7';
     default:
-      className = 'col-end-8';
-      break;
+      return 'col-end-8';
   }
-
-  return className;
 }
 
 export function hasDateLabel(schedule: Type.Schedule): boolean {

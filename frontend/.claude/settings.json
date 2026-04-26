@@ -4,7 +4,25 @@
       "Bash(npm test *)",
       "Bash(node_modules/.bin/vitest --version)",
       "Bash(timedatectl)",
-      "Read(//etc/**)"
+      "Read(//etc/**)",
+      "Bash(node_modules/.bin/vitest run *)",
+      "Bash(nvm list *)",
+      "Bash(/root/.nvm/versions/node/v20.11.1/bin/node /root/.nvm/versions/node/v20.11.1/bin/npx vitest run component/schedule/__tests__/schedule-module.test.ts component/calendar/__tests__/useSingleDragHandler.test.ts)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/.nvm/versions/node/v22.13.1/bin/npx --yes vitest run --reporter=verbose component/schedule/__tests__/schedule-module.test.ts component/calendar/__tests__/useSingleDragHandler.test.ts)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/workspace/tou/attendance-plan/frontend/node_modules/.pnpm/vitest@4.1.4_@types+node@20.19.26_@vitest+coverage-v8@4.1.4_jsdom@29.0.2_vite@8.0.9_@types+node@20.19.26_jiti@1.21.7_/node_modules/vitest/vitest.mjs run component/schedule/__tests__/schedule-module.test.ts component/calendar/__tests__/useSingleDragHandler.test.ts)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/workspace/tou/attendance-plan/frontend/node_modules/.pnpm/vitest@4.1.4_@types+node@20.19.26_@vitest+coverage-v8@4.1.4_jsdom@29.0.2_vite@8.0.9_@types+node@20.19.26_jiti@1.21.7_/node_modules/vitest/vitest.mjs run)",
+      "Read(//root/workspace/**)",
+      "Bash(ffmpeg -i \"/root/workspace/tou/attendance-plan/frontend/画面録画 2026-04-25 123356.mp4\" -vf \"fps=1\" -frames:v 8 /tmp/frame_%02d.png)",
+      "Read(//usr/bin/**)",
+      "Bash(apt-get install *)",
+      "Bash(ffmpeg -i \"/root/workspace/tou/attendance-plan/frontend/画面録画 2026-04-25 123356.mp4\" -vf \"fps=1\" -frames:v 10 /tmp/frame_%02d.png)",
+      "Read(//tmp/**)",
+      "Bash(ffmpeg -i \"/root/workspace/tou/attendance-plan/frontend/画面録画 2026-04-25 123356.mp4\" -vf \"fps=5\" /tmp/frames5fps_%03d.png)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/.nvm/versions/node/v22.13.1/lib/node_modules/vitest/vitest.mjs run)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node node_modules/.bin/vitest run)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node node_modules/vitest/vitest.mjs run)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/workspace/tou/attendance-plan/frontend/node_modules/.bin/tsc --noEmit)",
+      "Bash(/root/.nvm/versions/node/v22.13.1/bin/node node_modules/typescript/bin/tsc --noEmit)"
     ]
   }
 }
