@@ -1,4 +1,4 @@
-import { DndContext, DragOverlay, pointerWithin, type CollisionDetection } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, type CollisionDetection, type DropAnimation } from '@dnd-kit/core';
 import { format } from 'date-fns';
 
 import { CalendarDateItem } from './CalendarDateItem';
@@ -8,6 +8,11 @@ import { useDateKey } from '@/component/useDateKey';
 import { getColorClassName } from '@/component/calendar/color-module';
 import { hasDateLabel } from '@/component/schedule/schedule-module';
 import { useDragHandlers } from './useDragHandlers';
+
+const dropAnimation: DropAnimation = {
+  duration: 220,
+  easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+};
 
 // Sortable schedule items take priority over Droppable background cells.
 // pointerWithin sorts by center distance; range-date schedules spanning multiple
@@ -78,9 +83,12 @@ export const CalendarDates = ({ weeks }: Props) => {
         })}
       </div>
       {activeSchedule && (
-        <DragOverlay>
-          <div className="relative" style={activeDragWidth != null ? { width: activeDragWidth } : undefined}>
-            <div className={`flex touch-none items-center rounded px-1.5 py-1 ${getColorClassName(activeSchedule.color)}`}>
+        <DragOverlay dropAnimation={dropAnimation}>
+          <div
+            className="relative rotate-1 scale-105 cursor-grabbing"
+            style={activeDragWidth != null ? { width: activeDragWidth } : undefined}
+          >
+            <div className={`flex touch-none items-center rounded px-1.5 py-1 shadow-xl ring-1 ring-black/10 ${getColorClassName(activeSchedule.color)}`}>
               <span className="line-clamp-2 text-[0.6rem] md:line-clamp-1 md:text-xs">{generateDragLabel()}</span>
             </div>
             {bulkCount > 1 && (

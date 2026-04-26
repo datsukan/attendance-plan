@@ -39,7 +39,7 @@ export const ScheduleWeekItem = ({ schedule, isActive, colStartClassName, colEnd
         'pointer-events-auto mr-2',
         colStartClassName,
         colEndClassName,
-        isActive ? 'opacity-50' : '',
+        isActive ? 'opacity-30 transition-opacity duration-150' : '',
         selected ? 'rounded ring-2 ring-blue-500 ring-offset-1' : '',
       ]
         .filter(Boolean)

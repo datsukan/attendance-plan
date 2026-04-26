@@ -132,7 +132,7 @@ const Droppable = ({ id, date, type }: DroppableProps) => {
   });
 
   return (
-    <div ref={setNodeRef} className={isOver ? 'flex items-center justify-center bg-blue-200' : ''}>
+    <div ref={setNodeRef} className={`transition-colors duration-150 ${isOver ? 'flex items-center justify-center bg-blue-200' : ''}`}>
       {isOver && <span className="z-[9999] rounded-md bg-blue-600 px-3 py-1 text-sm text-blue-50">{toScheduleTypeName(type)}</span>}
     </div>
   );
