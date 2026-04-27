@@ -178,14 +178,14 @@ export default function GuidePage() {
             </div>
             <div className="flex flex-col justify-center gap-6 p-8">
               <div className="flex items-start gap-4">
-                <div className="flex h-8 w-10 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-xs font-bold text-yellow-700">学事</div>
+                <div className="flex h-8 w-10 shrink-0 items-center justify-center self-center rounded-full bg-yellow-100 text-xs font-bold text-yellow-700">学事</div>
                 <div>
                   <p className="font-semibold text-gray-800">上段：学事スケジュール</p>
                   <p className="mt-1 text-sm text-gray-500">授業配信日・試験日・成績発表日など、大学が定めるスケジュールを上段に固定表示します。</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="flex h-8 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">受講</div>
+                <div className="flex h-8 w-10 shrink-0 items-center justify-center self-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">受講</div>
                 <div>
                   <p className="font-semibold text-gray-800">下段：受講スケジュール</p>
                   <p className="mt-1 text-sm text-gray-500">自分が立てた受講計画を下段に固定表示します。学事との対比を見ながら、効率よく計画を組み立てられます。</p>
@@ -202,7 +202,7 @@ export default function GuidePage() {
         <div className="space-y-4">
           {steps.map((step, index) => (
             <div key={step.number} className="flex gap-5 rounded-xl border bg-white p-6 shadow-sm">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+              <div className="flex size-10 shrink-0 items-center justify-center self-center rounded-full bg-blue-600 text-sm font-bold text-white">
                 {index + 1}
               </div>
               <div className="space-y-1">
