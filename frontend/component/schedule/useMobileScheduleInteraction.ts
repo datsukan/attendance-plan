@@ -20,6 +20,7 @@ export const useMobileScheduleInteraction = (scheduleId: string, onOpen: () => v
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
   const didLongPressRef = useRef(false);
+  const didDragRef = useRef(false);
 
   const cancelTimer = () => {
     if (timerRef.current) {
@@ -34,6 +35,7 @@ export const useMobileScheduleInteraction = (scheduleId: string, onOpen: () => v
 
     startPosRef.current = { x: e.clientX, y: e.clientY };
     didLongPressRef.current = false;
+    didDragRef.current = false;
 
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
@@ -54,6 +56,7 @@ export const useMobileScheduleInteraction = (scheduleId: string, onOpen: () => v
     const dy = e.clientY - startPosRef.current.y;
     if (dx * dx + dy * dy >= MOVE_THRESHOLD_PX * MOVE_THRESHOLD_PX) {
       cancelTimer();
+      didDragRef.current = true;
     }
   };
 
@@ -68,9 +71,9 @@ export const useMobileScheduleInteraction = (scheduleId: string, onOpen: () => v
     startPosRef.current = null;
   };
 
-  // 長押し後に発火する contextmenu を抑止してメニューが開かないようにする
+  // 長押しまたはドラッグ後に発火する contextmenu を抑止してメニューが開かないようにする
   const onContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-    if (didLongPressRef.current) {
+    if (didLongPressRef.current || didDragRef.current) {
       e.preventDefault();
     }
   };
@@ -81,6 +84,12 @@ export const useMobileScheduleInteraction = (scheduleId: string, onOpen: () => v
     // 長押しで発火済みの場合は click イベントの処理をスキップ
     if (didLongPressRef.current) {
       didLongPressRef.current = false;
+      return;
+    }
+
+    // ドラッグ後にモバイルブラウザが発火する spurious click を無視する
+    if (didDragRef.current) {
+      didDragRef.current = false;
       return;
     }
 

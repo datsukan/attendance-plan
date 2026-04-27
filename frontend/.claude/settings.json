@@ -23,7 +23,8 @@
       "Bash(/root/.nvm/versions/node/v22.13.1/bin/node node_modules/vitest/vitest.mjs run)",
       "Bash(/root/.nvm/versions/node/v22.13.1/bin/node /root/workspace/tou/attendance-plan/frontend/node_modules/.bin/tsc --noEmit)",
       "Bash(/root/.nvm/versions/node/v22.13.1/bin/node node_modules/typescript/bin/tsc --noEmit)",
-      "Bash(grep -r \"dnd-kit\" /root/workspace/tou/attendance-plan/frontend --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.jsx\" --include=\"*.js\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")"
+      "Bash(grep -r \"dnd-kit\" /root/workspace/tou/attendance-plan/frontend --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.jsx\" --include=\"*.js\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")",
+      "Bash(grep -E '\\\\.\\(tsx|ts\\)$')"
     ]
   }
 }
