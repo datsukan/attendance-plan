@@ -51,6 +51,8 @@ export const useDragHandlers = () => {
   // ─── イベントハンドラ ──────────────────────────────────────────────────────
 
   const handleDragStart = (event: DragStartEvent) => {
+    navigator.vibrate?.(10);
+
     const activeId = event.active.id.toString();
     const isBulk = selectedIds.has(activeId) && selectedIds.size > 1;
 
