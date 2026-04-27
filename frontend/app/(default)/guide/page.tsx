@@ -126,6 +126,18 @@ export default function GuidePage() {
         </div>
       </section>
 
+      {/* Usage Example */}
+      <div className="overflow-hidden rounded-xl border shadow-sm">
+        <p className="border-b bg-gray-50 px-5 py-3 text-sm font-medium text-gray-600">使用例</p>
+        <Image
+          src="/usage-example.png"
+          width={1200}
+          height={800}
+          alt="カレンダーの使用例"
+          className="w-full"
+        />
+      </div>
+
       {/* Features Section */}
       <section>
         <h3 className="mb-8 text-center text-xl font-semibold">主な機能</h3>
@@ -140,6 +152,47 @@ export default function GuidePage() {
               <p className="text-sm text-gray-500">{feature.description}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Two-track Section */}
+      <section>
+        <h3 className="mb-3 text-center text-xl font-semibold">学事と受講を分けて表示</h3>
+        <p className="mb-8 text-center text-gray-500">
+          各日付には「学事」エリアと「受講」エリアが固定分離されており、2 種類のスケジュールを混在なく整理して確認できます。
+        </p>
+        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+          <div className="flex flex-col items-stretch divide-y sm:flex-row sm:divide-x sm:divide-y-0">
+            <div className="flex items-center justify-center bg-gray-50 p-8 sm:w-72">
+              <div className="w-56 overflow-hidden rounded-xl border-2 border-gray-300 text-sm shadow">
+                <div className="border-b bg-white px-3 py-1.5 text-right font-semibold text-gray-600">15</div>
+                <div className="space-y-1.5 border-b bg-yellow-50 p-2">
+                  <div className="rounded bg-red-500 px-2 py-0.5 text-xs font-medium text-white">履修登録</div>
+                  <div className="rounded bg-yellow-400 px-2 py-0.5 text-xs font-medium text-white">第3回 授業配信</div>
+                </div>
+                <div className="space-y-1.5 bg-white p-2">
+                  <div className="rounded border-2 border-orange-300 px-2 py-0.5 text-xs font-medium text-orange-600">第1回 数学基礎</div>
+                  <div className="rounded bg-blue-500 px-2 py-0.5 text-xs font-medium text-white">第2回 経営学演習</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center gap-6 p-8">
+              <div className="flex items-start gap-4">
+                <div className="flex h-8 w-10 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-xs font-bold text-yellow-700">学事</div>
+                <div>
+                  <p className="font-semibold text-gray-800">上段：学事スケジュール</p>
+                  <p className="mt-1 text-sm text-gray-500">授業配信日・試験日・成績発表日など、大学が定めるスケジュールを上段に固定表示します。</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-8 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">受講</div>
+                <div>
+                  <p className="font-semibold text-gray-800">下段：受講スケジュール</p>
+                  <p className="mt-1 text-sm text-gray-500">自分が立てた受講計画を下段に固定表示します。学事との対比を見ながら、効率よく計画を組み立てられます。</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
