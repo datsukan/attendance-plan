@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -14,7 +14,7 @@ type Props = {
   colEndClassName: string;
 };
 
-export const ScheduleWeekItem = ({ schedule, isActive, colStartClassName, colEndClassName }: Props) => {
+const ScheduleWeekItemInner = ({ schedule, isActive, colStartClassName, colEndClassName }: Props) => {
   const { isSelected } = useSelection();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: schedule.id,
@@ -49,3 +49,5 @@ export const ScheduleWeekItem = ({ schedule, isActive, colStartClassName, colEnd
     </div>
   );
 };
+
+export const ScheduleWeekItem = memo(ScheduleWeekItemInner);

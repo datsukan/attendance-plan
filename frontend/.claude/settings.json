@@ -27,7 +27,9 @@
       "Bash(grep -E '\\\\.\\(tsx|ts\\)$')",
       "Bash(npx eslint *)",
       "Bash(node_modules/.bin/eslint --fix \"app/\\(default\\)/guide/page.tsx\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(grep -r \"React.memo\\\\|useMemo\\\\|useCallback\" /root/workspace/tou/attendance-plan/frontend/component/calendar --include=\"*.tsx\" --include=\"*.ts\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")",
+      "Bash(node node_modules/.bin/next lint --file component/schedule/ScheduleWeekItem.tsx)"
     ]
   }
 }

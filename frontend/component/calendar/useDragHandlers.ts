@@ -36,7 +36,10 @@ export const useDragHandlers = () => {
   );
 
   // 範囲選択・同日チェック用にスケジュール一覧を SelectionContext へ同期
+  // ドラッグ中は dragOver のたびにスケジュール状態が変わるためスキップし、
+  // idle に戻ったタイミング（dragEnd 後）で一度だけ同期する。
   useEffect(() => {
+    if (dragState.phase !== 'idle') return;
     const allItems = [...masterSchedules, ...customSchedules];
     allItems.sort((a, b) => {
       if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -46,7 +49,7 @@ export const useDragHandlers = () => {
       [...item.schedules].sort((a, b) => a.order - b.order).map((s) => ({ id: s.id, date: item.date }))
     );
     setAllSchedules(refs);
-  }, [masterSchedules, customSchedules, setAllSchedules]);
+  }, [masterSchedules, customSchedules, setAllSchedules, dragState.phase]);
 
   // ─── イベントハンドラ ──────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { isBefore, isEqual } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
@@ -39,11 +39,15 @@ export const ScheduleWeek = ({ type, dates, schedules: scheduleDateItem, activeS
   const [isOpenCreateDialog, setIsOpenCreateDialog] = useState(false);
   const [createDate, setCreateDate] = useState<Date | null>(null);
   const { dateToKey } = useDateKey();
-  const schedules = scheduleDateItem.flatMap((item) => item.schedules).sort((a, b) => {
-    if (a.startDate < b.startDate) return -1;
-    if (a.startDate > b.startDate) return 1;
-    return a.order - b.order;
-  });
+  const schedules = useMemo(
+    () =>
+      scheduleDateItem.flatMap((item) => item.schedules).sort((a, b) => {
+        if (a.startDate < b.startDate) return -1;
+        if (a.startDate > b.startDate) return 1;
+        return a.order - b.order;
+      }),
+    [scheduleDateItem]
+  );
 
   if (!dates || dates.length === 0) {
     return;
@@ -125,7 +129,7 @@ type DroppableProps = {
   type: 'master' | 'custom';
 };
 
-const Droppable = ({ id, date, type }: DroppableProps) => {
+const DroppableInner = ({ id, date, type }: DroppableProps) => {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
     data: { date, type, isDroppableBackground: true },
@@ -137,3 +141,5 @@ const Droppable = ({ id, date, type }: DroppableProps) => {
     </div>
   );
 };
+
+const Droppable = memo(DroppableInner);

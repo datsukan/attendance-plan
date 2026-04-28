@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { format } from 'date-fns';
 import { useFloating, useDismiss, useInteractions, autoUpdate, offset, flip, shift, UseFloatingOptions } from '@floating-ui/react';
 
@@ -34,11 +34,17 @@ export const ScheduleItem = ({ schedule }: Props) => {
 
   const isBulkTarget = selectedIds.has(schedule.id) && selectedIds.size > 1;
 
-  const allSchedules = [
-    ...masterSchedules.flatMap((d) => d.schedules),
-    ...customSchedules.flatMap((d) => d.schedules),
-  ];
-  const bulkRemoveTargets = isBulkTarget ? allSchedules.filter((s) => selectedIds.has(s.id)) : [];
+  const allSchedules = useMemo(
+    () => [
+      ...masterSchedules.flatMap((d) => d.schedules),
+      ...customSchedules.flatMap((d) => d.schedules),
+    ],
+    [masterSchedules, customSchedules]
+  );
+  const bulkRemoveTargets = useMemo(
+    () => (isBulkTarget ? allSchedules.filter((s) => selectedIds.has(s.id)) : []),
+    [isBulkTarget, allSchedules, selectedIds]
+  );
 
   const openRemoveDialog = () => {
     if (isBulkTarget) {
