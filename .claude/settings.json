@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls -la)",
+      "Bash(go build *)",
+      "Bash(go test *)",
+      "Bash(npx tsc *)",
+      "Bash(git -C /root/workspace/tou/attendance-plan diff HEAD -- backend/sam/resource/table/ backend/sam/resource/api.yml backend/sam/parameter.yml backend/template.yml backend/sam/output.yml)"
+    ]
+  }
+}

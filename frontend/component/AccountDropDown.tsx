@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   UserCircleIcon,
   Cog6ToothIcon,
+  ChartBarIcon,
   ArrowRightStartOnRectangleIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/20/solid';
@@ -23,6 +24,9 @@ export const AccountDropDown = () => {
     removeUser();
     router.push('/signin');
   };
+
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? '').split(',').map((e) => e.trim()).filter(Boolean);
+  const isAdmin = adminEmails.includes(user.email);
 
   return (
     <Menu as="div" className="relative min-w-fit">
@@ -48,6 +52,14 @@ export const AccountDropDown = () => {
             <span className="mb-0.5">設定</span>
           </MenuItem>
         </Link>
+        {isAdmin && (
+          <Link href="/usage">
+            <MenuItem as="div" className="flex items-center gap-2 px-4 py-2 data-[focus]:bg-gray-100">
+              <ChartBarIcon className="size-4" />
+              <span className="mb-0.5">利用状況</span>
+            </MenuItem>
+          </Link>
+        )}
         <MenuItem as="button" className="flex w-full items-center gap-2 px-4 py-2 text-left data-[focus]:bg-gray-100" onClick={signout}>
           <ArrowRightStartOnRectangleIcon className="size-4" />
           <span className="mb-0.5">サインアウト</span>

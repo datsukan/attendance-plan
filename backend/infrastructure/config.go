@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 var config Config
@@ -15,6 +16,7 @@ type Config struct {
 	SESRegion     string
 	SenderEmail   string
 	SenderName    string
+	AdminEmails   []string
 }
 
 func init() {
@@ -31,6 +33,13 @@ func init() {
 	senderEmail := os.Getenv("SENDER_EMAIL")
 	senderName := os.Getenv("SENDER_NAME")
 
+	var adminEmails []string
+	for _, e := range strings.Split(os.Getenv("ADMIN_EMAILS"), ",") {
+		if e = strings.TrimSpace(e); e != "" {
+			adminEmails = append(adminEmails, e)
+		}
+	}
+
 	config = Config{
 		ServiceName:   serviceName,
 		BaseUrl:       baseUrl,
@@ -39,6 +48,7 @@ func init() {
 		SESRegion:     sesRegion,
 		SenderEmail:   senderEmail,
 		SenderName:    senderName,
+		AdminEmails:   adminEmails,
 	}
 }
 

@@ -13,6 +13,7 @@ const userTableName = "AttendancePlan_User"
 type UserRepository interface {
 	ReadByEmail(email string, enabledOnly bool) (*model.User, error)
 	Read(id string, enabledOnly bool) (*model.User, error)
+	ScanAll(enabledOnly bool) ([]model.User, error)
 	Create(user *model.User) error
 	Update(user *model.User) error
 	Delete(id string) error
@@ -67,6 +68,26 @@ func (r *UserRepositoryImpl) Read(id string, enabledOnly bool) (*model.User, err
 	}
 
 	return user, nil
+}
+
+// ScanAll は全ユーザーを取得します。
+func (r *UserRepositoryImpl) ScanAll(enabledOnly bool) ([]model.User, error) {
+	var users []model.User
+	if err := r.Table.Scan().All(&users); err != nil {
+		return nil, err
+	}
+
+	if !enabledOnly {
+		return users, nil
+	}
+
+	var enabled []model.User
+	for _, u := range users {
+		if u.Enabled {
+			enabled = append(enabled, u)
+		}
+	}
+	return enabled, nil
 }
 
 // Create はユーザーを保存します。

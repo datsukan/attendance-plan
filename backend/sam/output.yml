@@ -55,6 +55,9 @@ PostSubjectFunction:
 DeleteSubjectFunction:
   Description: "DeleteSubjectFunction Name"
   Value: !Ref DeleteSubjectFunction
+GetUserUsagesFunction:
+  Description: "GetUserUsagesFunction Name"
+  Value: !Ref GetUserUsagesFunction
 API:
   Description: "API Gateway endpoint URL for the API"
   Value: !Sub "https://${DomainName}"

@@ -20,6 +20,7 @@ export const useAuth = () => {
 
       switch (pathname) {
         case '/settings':
+        case '/usage':
           break;
         default:
           router.push('/');

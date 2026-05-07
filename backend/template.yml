@@ -27,6 +27,7 @@ Resources:
   - $resources: sam/resource/function/subject/get_list.yml
   - $resources: sam/resource/function/subject/post.yml
   - $resources: sam/resource/function/subject/delete.yml
+  - $resources: sam/resource/function/user_usage/get.yml
   - $resources: sam/resource/domain.yml
 Outputs:
   $outputs: sam/output.yml

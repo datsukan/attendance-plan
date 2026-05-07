@@ -16,3 +16,5 @@ DomainName:
   Type: String
 CertificateArn:
   Type: String
+AdminEmails:
+  Type: String

@@ -219,6 +219,21 @@ func (r *stubUserRepository) ExistsByEmail(email string, enabledOnly bool) (bool
 	return false, nil
 }
 
+func (r *stubUserRepository) ScanAll(enabledOnly bool) ([]model.User, error) {
+	ph, _ := bcrypt.GenerateFromPassword([]byte("test-password"), bcrypt.DefaultCost)
+	date := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	return []model.User{{
+		ID:        "test-id",
+		Email:     "test-email@example.com",
+		Name:      "test name",
+		Password:  string(ph),
+		Enabled:   true,
+		CreatedAt: date,
+		UpdatedAt: date,
+	}}, nil
+}
+
 type stubNotFoundUserRepository struct{}
 
 func (r *stubNotFoundUserRepository) ReadByEmail(email string, enabledOnly bool) (*model.User, error) {
@@ -247,6 +262,10 @@ func (r *stubNotFoundUserRepository) Exists(id string, enabledOnly bool) (bool, 
 
 func (r *stubNotFoundUserRepository) ExistsByEmail(email string, enabledOnly bool) (bool, error) {
 	return false, nil
+}
+
+func (r *stubNotFoundUserRepository) ScanAll(enabledOnly bool) ([]model.User, error) {
+	return []model.User{}, nil
 }
 
 type stubSessionRepository struct{}
