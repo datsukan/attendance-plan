@@ -31,9 +31,10 @@ func GetUserUsages(r events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	db := infrastructure.NewDB()
 	ur := repository.NewUserRepository(*db)
 	sbr := repository.NewSubjectRepository(*db)
+	scr := repository.NewScheduleRepository(*db)
 
 	up := presenter.NewUserUsagePresenter()
-	interactor := usecase.NewUserUsageInteractor(logger, ur, sbr, up)
+	interactor := usecase.NewUserUsageInteractor(logger, ur, sbr, scr, up)
 	interactor.GetUserUsageList(port.GetUserUsageListInputData{RequesterUserID: userID})
 
 	statusCode, body := up.GetResponse()

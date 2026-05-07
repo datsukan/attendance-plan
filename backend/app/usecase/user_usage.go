@@ -12,19 +12,21 @@ import (
 
 // UserUsageInteractor はユーザー利用状況ユースケースの実装を表す構造体です。
 type UserUsageInteractor struct {
-	Logger            *slog.Logger
-	UserRepository    repository.UserRepository
-	SubjectRepository repository.SubjectRepository
-	OutputPort        port.UserUsageOutputPort
+	Logger             *slog.Logger
+	UserRepository     repository.UserRepository
+	SubjectRepository  repository.SubjectRepository
+	ScheduleRepository repository.ScheduleRepository
+	OutputPort         port.UserUsageOutputPort
 }
 
 // NewUserUsageInteractor は UserUsageInteractor を生成します。
-func NewUserUsageInteractor(logger *slog.Logger, userRepository repository.UserRepository, subjectRepository repository.SubjectRepository, outputPort port.UserUsageOutputPort) port.UserUsageInputPort {
+func NewUserUsageInteractor(logger *slog.Logger, userRepository repository.UserRepository, subjectRepository repository.SubjectRepository, scheduleRepository repository.ScheduleRepository, outputPort port.UserUsageOutputPort) port.UserUsageInputPort {
 	return &UserUsageInteractor{
-		Logger:            logger,
-		UserRepository:    userRepository,
-		SubjectRepository: subjectRepository,
-		OutputPort:        outputPort,
+		Logger:             logger,
+		UserRepository:     userRepository,
+		SubjectRepository:  subjectRepository,
+		ScheduleRepository: scheduleRepository,
+		OutputPort:         outputPort,
 	}
 }
 
@@ -54,9 +56,19 @@ func (i *UserUsageInteractor) GetUserUsageList(inputData port.GetUserUsageListIn
 		return
 	}
 
+	jst := time.FixedZone("JST", 9*60*60)
+
 	outputUsers := make([]port.UserUsageData, 0, len(users))
 	for _, u := range users {
 		subjects, err := i.SubjectRepository.ReadByUserID(u.ID)
+		if err != nil {
+			i.Logger.Error(err.Error())
+			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
+			i.OutputPort.SetResponseGetUserUsageList(nil, r)
+			return
+		}
+
+		schedules, err := i.ScheduleRepository.ReadByUserID(u.ID)
 		if err != nil {
 			i.Logger.Error(err.Error())
 			r := port.NewErrorResult(http.StatusInternalServerError, MsgInternalServerError)
@@ -70,6 +82,11 @@ func (i *UserUsageInteractor) GetUserUsageList(inputData port.GetUserUsageListIn
 				lastUsedAt = s.UpdatedAt
 			}
 		}
+		for _, s := range schedules {
+			if s.UpdatedAt.After(lastUsedAt) {
+				lastUsedAt = s.UpdatedAt
+			}
+		}
 
 		outputSubjects := make([]port.UserUsageSubjectData, 0, len(subjects))
 		for _, s := range subjects {
@@ -77,8 +94,8 @@ func (i *UserUsageInteractor) GetUserUsageList(inputData port.GetUserUsageListIn
 				ID:        s.ID,
 				Name:      s.Name,
 				Color:     s.Color,
-				CreatedAt: s.CreatedAt.Format(time.DateTime),
-				UpdatedAt: s.UpdatedAt.Format(time.DateTime),
+				CreatedAt: s.CreatedAt.In(jst).Format(time.DateTime),
+				UpdatedAt: s.UpdatedAt.In(jst).Format(time.DateTime),
 			})
 		}
 
@@ -86,8 +103,8 @@ func (i *UserUsageInteractor) GetUserUsageList(inputData port.GetUserUsageListIn
 			ID:           u.ID,
 			Email:        u.Email,
 			Name:         u.Name,
-			RegisteredAt: u.CreatedAt.Format(time.DateTime),
-			LastUsedAt:   lastUsedAt.Format(time.DateTime),
+			RegisteredAt: u.CreatedAt.In(jst).Format(time.DateTime),
+			LastUsedAt:   lastUsedAt.In(jst).Format(time.DateTime),
 			Subjects:     outputSubjects,
 		})
 	}

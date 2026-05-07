@@ -26,12 +26,16 @@ GetUserUsagesFunction:
         USER_TABLE_ARN: !GetAtt UserTable.Arn
         SUBJECT_TABLE_NAME: !Ref SubjectTable
         SUBJECT_TABLE_ARN: !GetAtt SubjectTable.Arn
+        SCHEDULE_TABLE_NAME: !Ref ScheduleTable
+        SCHEDULE_TABLE_ARN: !GetAtt ScheduleTable.Arn
         ADMIN_EMAILS: !Ref AdminEmails
     Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref UserTable
       - DynamoDBCrudPolicy:
           TableName: !Ref SubjectTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ScheduleTable
 GetUserUsagesFunctionPermission:
   Type: AWS::Lambda::Permission
   Properties:

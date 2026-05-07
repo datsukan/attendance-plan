@@ -1,17 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
+import { useEffect, useState, useMemo } from 'react';
+import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
 
 import { useAuth } from '@/hook/useAuth';
 import { useUser } from '@/provider/UserProvider';
 import { fetchUserUsages, UserUsage } from '@/backend-api/fetchUserUsages';
+
+type SortKey = 'registered_at' | 'last_used_at' | 'subject_count';
+type SortOrder = 'asc' | 'desc';
 
 export default function Usage() {
   const [loadedAuth, isAuth] = useAuth();
   const { user } = useUser();
   const [usages, setUsages] = useState<UserUsage[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [sortKey, setSortKey] = useState<SortKey>('registered_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? '').split(',').map((e) => e.trim()).filter(Boolean);
   const isAdmin = user ? adminEmails.includes(user.email) : false;
@@ -28,6 +33,20 @@ export default function Usage() {
       }
     })();
   }, [isAuth, isAdmin]);
+
+  const sortedUsages = useMemo(() => {
+    return [...usages].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'registered_at') {
+        cmp = a.registered_at.localeCompare(b.registered_at);
+      } else if (sortKey === 'last_used_at') {
+        cmp = a.last_used_at.localeCompare(b.last_used_at);
+      } else {
+        cmp = a.subjects.length - b.subjects.length;
+      }
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+  }, [usages, sortKey, sortOrder]);
 
   if (!loadedAuth || !isAuth) return null;
 
@@ -51,6 +70,26 @@ export default function Usage() {
     });
   };
 
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortOrder('desc');
+    }
+  };
+
+  const SortIcon = ({ k }: { k: SortKey }) => {
+    if (sortKey !== k) {
+      return <ChevronUpIcon className="size-5 shrink-0 text-gray-300" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ChevronUpIcon className="size-5 shrink-0 text-gray-600" />
+    ) : (
+      <ChevronDownIcon className="size-5 shrink-0 text-gray-600" />
+    );
+  };
+
   return (
     <div className="p-6">
       <h2 className="mb-4 text-2xl font-semibold">利用状況</h2>
@@ -63,13 +102,34 @@ export default function Usage() {
               <th className="w-8 px-4 py-3" />
               <th className="px-4 py-3 text-left font-medium text-gray-600">名前</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600">メールアドレス</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">登録日時</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">最終利用日時</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-600">テンプレート科目数</th>
+              <th
+                className="cursor-pointer select-none px-4 py-3 text-left font-medium text-gray-600 hover:text-gray-900"
+                onClick={() => handleSort('registered_at')}
+              >
+                <span className="flex items-center gap-1">
+                  登録日時<SortIcon k="registered_at" />
+                </span>
+              </th>
+              <th
+                className="cursor-pointer select-none px-4 py-3 text-left font-medium text-gray-600 hover:text-gray-900"
+                onClick={() => handleSort('last_used_at')}
+              >
+                <span className="flex items-center gap-1">
+                  最終利用日時<SortIcon k="last_used_at" />
+                </span>
+              </th>
+              <th
+                className="cursor-pointer select-none px-4 py-3 text-right font-medium text-gray-600 hover:text-gray-900"
+                onClick={() => handleSort('subject_count')}
+              >
+                <span className="flex items-center justify-end gap-1">
+                  テンプレート科目数<SortIcon k="subject_count" />
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
-            {usages.map((u) => (
+            {sortedUsages.map((u) => (
               <>
                 <tr key={u.id} className="cursor-pointer hover:bg-gray-50" onClick={() => toggleExpand(u.id)}>
                   <td className="px-4 py-3 text-gray-400">
