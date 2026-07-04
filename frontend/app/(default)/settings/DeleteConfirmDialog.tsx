@@ -34,12 +34,13 @@ export const DeleteConfirmDialog = ({ isOpen, close }: Props) => {
         router.push('/signin');
         toast.success('アカウントを削除しました');
       } catch (e) {
-        if (e instanceof SessionExpiredError) return;
-        toast.error(String(e));
+        if (!(e instanceof SessionExpiredError)) {
+          toast.error(String(e));
+        }
+      } finally {
+        setLoading(false);
+        close();
       }
-
-      setLoading(false);
-      close();
     })();
   };
 
