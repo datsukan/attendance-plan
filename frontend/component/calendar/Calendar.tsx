@@ -25,6 +25,7 @@ export const Calender = () => {
   const { selectedIds, clearSelection, isSelectionMode } = useSelection();
 
   const [isOpenBulkRemoveDialog, setIsOpenBulkRemoveDialog] = useState(false);
+  const isOpenBulkRemoveDialogRef = useRef(false);
   const [bulkRemoveSchedules, setBulkRemoveSchedules] = useState<Type.Schedule[]>([]);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export const Calender = () => {
   }, [monthCount]);
 
   const triggerBulkDelete = () => {
-    if (selectedIds.size === 0 || isOpenBulkRemoveDialog) return;
+    if (selectedIds.size === 0 || isOpenBulkRemoveDialogRef.current) return;
     const allSchedules = [
       ...masterSchedules.flatMap((d) => d.schedules),
       ...customSchedules.flatMap((d) => d.schedules),
@@ -46,6 +47,7 @@ export const Calender = () => {
     const targets = allSchedules.filter((s) => selectedIds.has(s.id));
     if (targets.length === 0) return;
     setBulkRemoveSchedules(targets);
+    isOpenBulkRemoveDialogRef.current = true;
     setIsOpenBulkRemoveDialog(true);
   };
 
@@ -59,6 +61,15 @@ export const Calender = () => {
         return;
       }
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest('[role="dialog"], [role="menu"], [role="listbox"]')) return;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target.isContentEditable
+      ) return;
       e.preventDefault();
       triggerBulkDelete();
     };
@@ -66,9 +77,10 @@ export const Calender = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIds, isSelectionMode, masterSchedules, customSchedules, isOpenBulkRemoveDialog]);
+  }, [selectedIds, isSelectionMode, masterSchedules, customSchedules]);
 
   const closeBulkRemoveDialog = () => {
+    isOpenBulkRemoveDialogRef.current = false;
     setIsOpenBulkRemoveDialog(false);
     setBulkRemoveSchedules([]);
   };
