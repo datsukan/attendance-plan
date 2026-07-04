@@ -61,9 +61,12 @@ export const EditScheduleDialog = ({ schedule, isOpen, submit, close }: Props) =
     editSchedule.setType(scheduleType);
 
     setLoading(true);
-    await submit(editSchedule);
-    close();
-    setLoading(false);
+    try {
+      await submit(editSchedule);
+      close();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

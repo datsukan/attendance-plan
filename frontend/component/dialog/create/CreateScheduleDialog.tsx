@@ -180,9 +180,12 @@ export const CreateScheduleDialog = ({ defaultType, defaultDate, isOpen, close, 
     }
 
     setLoading(true);
-    await submit(schedules);
-    close();
-    setLoading(false);
+    try {
+      await submit(schedules);
+      close();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -25,8 +25,11 @@ export const CustomScheduleSelects = ({ onSelect }: Props) => {
 
   const add = async (name: string, color: string) => {
     setLoading(true);
-    await addSubject(name, color);
-    setLoading(false);
+    try {
+      await addSubject(name, color);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

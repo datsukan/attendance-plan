@@ -24,9 +24,12 @@ export const BulkRemoveConfirmDialog = ({ schedules, isOpen, close, remove }: Pr
 
   const removeSchedules = async () => {
     setLoading(true);
-    await remove();
-    close();
-    setLoading(false);
+    try {
+      await remove();
+      close();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

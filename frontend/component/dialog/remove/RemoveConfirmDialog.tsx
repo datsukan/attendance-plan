@@ -24,9 +24,12 @@ export const RemoveConfirmDialog = ({ schedule, isOpen, close, remove }: Props) 
 
   const removeSchedule = async () => {
     setLoading(true);
-    await remove();
-    close();
-    setLoading(false);
+    try {
+      await remove();
+      close();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
