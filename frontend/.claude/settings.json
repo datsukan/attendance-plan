@@ -29,7 +29,18 @@
       "Bash(node_modules/.bin/eslint --fix \"app/\\(default\\)/guide/page.tsx\")",
       "Bash(node -e ' *)",
       "Bash(grep -r \"React.memo\\\\|useMemo\\\\|useCallback\" /root/workspace/tou/attendance-plan/frontend/component/calendar --include=\"*.tsx\" --include=\"*.ts\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\")",
-      "Bash(node node_modules/.bin/next lint --file component/schedule/ScheduleWeekItem.tsx)"
+      "Bash(node node_modules/.bin/next lint --file component/schedule/ScheduleWeekItem.tsx)",
+      "Skill(code-review)",
+      "Skill(code-review:*)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(pnpm audit *)",
+      "Bash(pnpm info *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm list *)",
+      "Bash(git -C /root/workspace/tou/attendance-plan diff frontend/.claude/settings.json)"
     ]
   }
 }
